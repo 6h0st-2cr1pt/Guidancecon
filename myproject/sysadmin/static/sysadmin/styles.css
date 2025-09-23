@@ -1,0 +1,30 @@
+:root {
+  --green: #0d5b2a;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8 url('/media/ChamsuBackround.jpg') center/cover no-repeat fixed; }
+
+.background { position: fixed; inset: 0; background: rgba(13, 91, 42, 0.35); pointer-events: none; z-index: 0; }
+
+header { position: relative; z-index: 1; display:flex; align-items:center; gap:16px; padding:22px 24px; background:#fff; min-height: 88px; }
+header::before { content:""; position:absolute; top:0; left:0; right:0; height:8px; background: var(--green); }
+.logo-title { display:flex; align-items:center; gap:12px; }
+.logo { width: 56px; height: 56px; object-fit: contain; border-radius: 50%; background:#fff; }
+.title-text h1 { margin: 0; font-size: 18px; letter-spacing: 0.04em; }
+.title-text p { margin: 2px 0 0; font-size: 12px; color:#555; }
+
+main { position: relative; z-index: 1; display:flex; justify-content:flex-start; padding: 40px 16px; padding-left: 60px; }
+.login-card { width: 360px; background:#fff; padding: 24px; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+.login-card label { display:block; margin-top: 12px; margin-bottom: 6px; font-weight: 700; }
+.login-card input { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius: 8px; }
+.btn-login { width:100%; margin-top: 16px; padding:12px; border:none; border-radius:8px; background: var(--green); color:#fff; font-weight:700; cursor:pointer; }
+.btn-login:hover { background:#0a4a22; }
+.signup-text { text-align:center; margin-top: 12px; color:#4b5563; font-style: italic; }
+.italic-text { text-align:center; margin-top: 8px; color:#4b5563; font-style: italic; }
+.form-error { background:#fee2e2; border:1px solid #fecaca; color:#991b1b; padding:8px 12px; border-radius:8px; margin-bottom:12px; }
+
+.header-nav { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); display: flex; gap: 12px; }
+.header-nav a { padding: 8px 16px; background: var(--green); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s; }
+.header-nav a:hover { background: #0a4a22; }
+

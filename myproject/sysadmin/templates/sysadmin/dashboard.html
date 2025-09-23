@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sysadmin Dashboard</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'sysadmin/styles.css' %}">
+</head>
+<body>
+  <header>
+    <div class="logo-title">
+      <img src="{{ MEDIA_URL }}sysadmin/logo.png" alt="Logo" class="logo">
+      <div class="title-text">
+        <h1>CHMSU GUIDANCE CONNECT</h1>
+        <p><em>“Your mental wellness, our priority.”</em></p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="login-card">
+      <h2>Dashboard</h2>
+      <p>Welcome, {{ request.user.username }}.</p>
+      <p>This is a placeholder. We’ll build appointment management next.</p>
+    </div>
+  </main>
+</body>
+</html>
+
+
