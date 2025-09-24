@@ -6,8 +6,10 @@
   <title>CHMSU Guidance Connect</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'sysadmin/login.css' %}">
+  <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
+
 </head>
-<body>
+<body></body>
   <!-- Background -->
   <div class="background"></div>
 
@@ -17,25 +19,29 @@
       <img src="{{ MEDIA_URL }}CHMSUlogo.png" alt="School Logo" class="logo">
       <div class="title-text">
         <h1>CHMSU GUIDANCE CONNECT</h1>
-        <p><em>"Your mental wellness, our priority."</em></p>
+        <p>"Your mental wellness, our priority."</p>
       </div>
     </div>
   </header>
   <div class="header-nav">
-    <a href="#">About</a>
-    <a href="{% url 'sysadmin:login' %}">Login</a>
+    <a href="#" class="{% if request.path == '/' %}active{% endif %}">About</a>
+    <a href="{% url 'sysadmin:login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
   </div>
+
 
   <!-- Login Form -->
   <main>
     <div class="login-card">
+      <label class="admin-label">Administrator</label>
       {% if form.errors %}
         <div class="form-error">Invalid credentials. Please try again.</div>
       {% endif %}
       <form method="post" action="{% url 'sysadmin:login' %}">
         {% csrf_token %}
-        <label for="id_username">School Id</label>
-        <input type="text" id="id_username" name="username" placeholder="Enter School ID" required autofocus>
+
+        <label for="id_email">Email</label>
+        <input type="email" id="id_email" name="email" placeholder="Enter your Email" required autofocus>
+
 
         <label for="id_password">Password</label>
         <input type="password" id="id_password" name="password" placeholder="Enter Password" required>
