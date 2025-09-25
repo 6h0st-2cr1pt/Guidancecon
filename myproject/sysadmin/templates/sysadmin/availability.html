@@ -1,0 +1,40 @@
+{% extends 'sysadmin/base.html' %}
+{% block title %}Availability{% endblock %}
+{% block content %}
+  <h2 class="page-title">Availability</h2>
+  <section class="section">
+    <div class="section-header">March 07, 2025 (Friday)</div>
+    <div class="section-body times">
+      <div class="slot">
+        <span>8:00 AM - 9:00 AM</span>
+        <div>
+          <span class="badge">Available</span>
+          <input class="switch" type="checkbox" checked>
+        </div>
+      </div>
+      <div class="slot disabled">
+        <span>9:00 AM - 10:00 AM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+          <input class="switch" type="checkbox">
+        </div>
+      </div>
+      <div class="slot">
+        <span>10:00 AM - 11:00 AM</span>
+        <div>
+          <span class="badge">Available</span>
+          <input class="switch" type="checkbox" checked>
+        </div>
+      </div>
+      <div class="slot">
+        <span>11:00 AM - 12:00 AM</span>
+        <div>
+          <span class="badge">Available</span>
+          <input class="switch" type="checkbox" checked>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+

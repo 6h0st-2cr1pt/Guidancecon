@@ -1,30 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sysadmin Dashboard</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'sysadmin/styles.css' %}">
-</head>
-<body>
-  <header>
-    <div class="logo-title">
-      <img src="{{ MEDIA_URL }}sysadmin/logo.png" alt="Logo" class="logo">
-      <div class="title-text">
-        <h1>CHMSU GUIDANCE CONNECT</h1>
-        <p><em>“Your mental wellness, our priority.”</em></p>
+{% extends 'sysadmin/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <h2 class="page-title">Booked Counseling</h2>
+  <section class="section">
+    <div class="section-body">
+      <div class="appointment">
+        <div class="avatar-circle">🧑</div>
+        <div class="client">
+          <h4>Isabelle Faith J. Barcas</h4>
+          <p>CAS · BS PSYCHOLOGY 3B</p>
+        </div>
+        <div class="actions">
+          <span class="pill">Schedule: 9:00 - 10:00 AM · March 7, 2025</span>
+          <button class="btn btn-danger">Cancel</button>
+          <button class="btn btn-secondary">Reschedule</button>
+        </div>
       </div>
     </div>
-  </header>
-  <main>
-    <div class="login-card">
-      <h2>Dashboard</h2>
-      <p>Welcome, {{ request.user.username }}.</p>
-      <p>This is a placeholder. We’ll build appointment management next.</p>
+  </section>
+
+  <h2 class="page-title">Past Appointments</h2>
+  <section class="section">
+    <div class="section-body">
+      <div class="appointment past">
+        <div class="avatar-circle">🧑</div>
+        <div class="client">
+          <h4>Katrina J. Mogasa</h4>
+          <p>CAS · BS PSYCHOLOGY 3B</p>
+        </div>
+        <div class="actions">
+          <span class="pill">Done</span>
+          <span>Schedule: 9:00 - 10:00 AM · March 7, 2025</span>
+        </div>
+      </div>
     </div>
-  </main>
-</body>
-</html>
-
-
+  </section>
+{% endblock %}

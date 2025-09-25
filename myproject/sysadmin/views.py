@@ -8,3 +8,8 @@ def dashboard(request):
 
 def index(request):
     return redirect('sysadmin:login')
+
+
+@login_required
+def availability(request):
+    return render(request, 'sysadmin/availability.html')

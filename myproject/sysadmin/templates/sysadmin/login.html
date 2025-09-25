@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
 
 </head>
-<body></body>
+<body>
   <!-- Background -->
   <div class="background"></div>
 
@@ -40,14 +40,14 @@
         {% csrf_token %}
 
         <label for="id_email">Email</label>
-        <input type="email" id="id_email" name="email" placeholder="Enter your Email" required autofocus>
-
+        <input class="input-border" type="email" id="id_email" name="email" placeholder="Enter your Email" required autofocus>
 
         <label for="id_password">Password</label>
-        <input type="password" id="id_password" name="password" placeholder="Enter Password" required>
+        <input class="input-border" type="password" id="id_password" name="password" placeholder="Enter Password" required>
 
         {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
         <button type="submit" class="btn-login">Login</button>
+
       </form>
         <p class="italic-text">
         <a href="#">Login as Admin</a>
