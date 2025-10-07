@@ -88,6 +88,12 @@ DATABASES = {
 
 
 
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'sysadmin.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Keep the default backend as fallback
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

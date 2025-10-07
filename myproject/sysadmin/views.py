@@ -2,6 +2,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST
+from datetime import date, time, datetime, timedelta
+
+from .models import Timeslot
 
 @login_required
 def dashboard(request):
@@ -14,7 +19,50 @@ def index(request):
 
 @login_required
 def availability(request):
-    return render(request, 'sysadmin/availability.html')
+    # Accept a date parameter (YYYY-MM-DD) or default to today
+    date_str = request.GET.get('date')
+    try:
+        if date_str:
+            the_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        else:
+            the_date = date.today()
+    except Exception:
+        the_date = date.today()
+
+    # Create or fetch timeslots from 8:00 to 17:00 (5 PM) hourly
+    slots = []
+    start_hour = 8
+    end_hour = 17  # inclusive 5 PM start (so last slot is 17:00-18:00)
+    user = request.user
+
+    for h in range(start_hour, end_hour + 1):
+        slot_time = time(hour=h, minute=0)
+        ts, created = Timeslot.objects.get_or_create(user=user, date=the_date, start_time=slot_time, defaults={'available': False})
+        slots.append(ts)
+
+    context = {
+        'slots': slots,
+        'date': the_date,
+    }
+    return render(request, 'sysadmin/availability.html', context)
+
+
+@login_required
+@require_POST
+def toggle_availability(request):
+    # Expect JSON or form with date and hour
+    slot_id = request.POST.get('slot_id') or request.POST.get('id')
+    if not slot_id:
+        return HttpResponseBadRequest('Missing slot id')
+
+    try:
+        ts = Timeslot.objects.get(id=int(slot_id), user=request.user)
+    except Timeslot.DoesNotExist:
+        return HttpResponseBadRequest('Invalid slot')
+
+    ts.available = not ts.available
+    ts.save()
+    return JsonResponse({'id': ts.id, 'available': ts.available})
 
 
 def signup(request):
