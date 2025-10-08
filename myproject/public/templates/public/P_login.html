@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHMSU Guidance Connect</title>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/P_login.css' %}">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
 
 </head>
@@ -24,33 +24,37 @@
     </div>
   </header>
   <div class="header-nav">
-    <a href="#" class="{% if request.path == '/' %}active{% endif %}">About</a>
-    <a href="{% url 'sysadmin:login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
+    <a href="{% url 'public:home' %}" class="{% if request.path == '/' %}active{% endif %}">About</a>
+    <a href="{% url 'public:login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
   </div>
 
 
   <!-- Login Form -->
   <main>
     <div class="login-card">
-      <label class="admin-label">Administrator</label>
+      <label class="admin-label">Student</label>
       {% if form.errors %}
         <div class="form-error">Invalid credentials. Please try again.</div>
       {% endif %}
-      <form method="post" action="{% url 'sysadmin:login' %}">
+      <form method="post" action="{% url 'public:login' %}">
         {% csrf_token %}
 
-        <label for="id_username">Email</label>
-        <input class="input-border" type="email" id="id_username" name="username" placeholder="Enter your Email" required autofocus>
+  <label for="id_username">Student ID</label>
+  <input class="input-border" type="text" id="id_username" name="username" placeholder="Enter your Student ID" required autofocus>
 
         <label for="id_password">Password</label>
         <input class="input-border" type="password" id="id_password" name="password" placeholder="Enter Password" required>
 
-        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% else %}
+          <input type="hidden" name="next" value="{% url 'public:dashboard' %}">
+        {% endif %}
         <button type="submit" class="btn-login">Login</button>
 
       </form>
       <p class="signup-text">
-        Don’t have an account yet? <a href="{% url 'sysadmin:signup' %}">Sign up</a>
+  Don’t have an account yet? <a href="{% url 'public:signup' %}">Sign up</a>
       </p>
     </div>
   </main>

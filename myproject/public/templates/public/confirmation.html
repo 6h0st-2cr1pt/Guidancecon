@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmation - CHMSU Guidance Connect</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .header {
+      background-color: #1a5d3a;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .user-profile {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 8px 20px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 80px);
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-button {
+      background-color: #1a5d3a;
+      color: white;
+      border: none;
+      padding: 12px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: #145030;
+    }
+
+    .nav-button.active {
+      background-color: #0d3d20;
+    }
+
+    .nav-button.dropdown::after {
+      content: '▼';
+      margin-left: auto;
+      font-size: 10px;
+    }
+
+    .sidebar-section {
+      margin-top: 20px;
+    }
+
+    .sidebar-dropdown {
+      background-color: #2d2d2d;
+      color: white;
+      border: none;
+      padding: 12px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-dropdown::after {
+      content: '▼';
+      font-size: 10px;
+    }
+
+    .sidebar-item {
+      background-color: white;
+      border: 1px solid #ddd;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .main-content {
+      flex: 1;
+      background-color: #e8e8e8;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .appointment-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .counselor-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .counselor-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #d4d4d4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .counselor-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .counselor-info {
+      flex: 1;
+    }
+
+    .counselor-info h2 {
+      font-size: 32px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 8px;
+    }
+
+    .confirmation-badge {
+      background-color: #1a5d3a;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 5px;
+      display: inline-block;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .confirmation-message {
+      background-color: #f0f0f0;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+
+    .confirmation-message p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .confirmation-question {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .confirm-btn {
+      padding: 15px 50px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .confirm-btn.yes {
+      background-color: #b0b0b0;
+      color: white;
+    }
+
+    .confirm-btn.yes:hover {
+      background-color: #909090;
+    }
+
+    .confirm-btn.no {
+      background-color: #1a5d3a;
+      color: white;
+    }
+
+    .confirm-btn.no:hover {
+      background-color: #145030;
+    }
+
+    .time-availability {
+      background-color: #2d2d2d;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .time-availability h3 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .date-display {
+      background-color: #1a5d3a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .date-label {
+      font-weight: bold;
+    }
+
+    .date-value {
+      color: #ffd700;
+      font-style: italic;
+    }
+
+    .time-slots {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .time-slot {
+      background-color: #1a5d3a;
+      color: white;
+      border: none;
+      padding: 18px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .time-slot.selected {
+      background-color: #0d3d20;
+      border: 3px solid #ffd700;
+    }
+
+    .submit-button {
+      background-color: #1a5d3a;
+      color: white;
+      border: none;
+      padding: 18px 60px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+      margin: 0 auto;
+      transition: background-color 0.3s;
+    }
+
+    .submit-button:hover {
+      background-color: #145030;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
+
+    .icon-menu {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    .icon-calendar {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    .icon-bell {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm0-5v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    .icon-user {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    .icon-checkbox {
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gray"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>') no-repeat center;
+      background-size: contain;
+    }
+
+    /* Success Modal */
+    .success-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-modal.active {
+      display: flex;
+    }
+
+    .success-content {
+      background-color: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 500px;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background-color: #1a5d3a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-icon::after {
+      content: '✓';
+      color: white;
+      font-size: 50px;
+      font-weight: bold;
+    }
+
+    .success-content h2 {
+      color: #1a5d3a;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+
+    .success-content p {
+      color: #666;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .success-content .email-note {
+      font-style: italic;
+      color: #999;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .success-button {
+      background-color: #1a5d3a;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .success-button:hover {
+      background-color: #145030;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/CHMSUlogo-H5YdH8ghoKa3kFwILTwDuonp8ZbdhC.png" alt="CHMSU Logo">
+      </div>
+      <h1 class="header-title">CHMSU GUIDANCE CONNECT</h1>
+    </div>
+    <div class="user-profile">
+      <span class="icon icon-user"></span>
+      <span>MARIA JESSA</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <button class="nav-button dropdown">
+        <span class="icon icon-menu"></span>
+        Navigation Pane
+      </button>
+      <a href="appointment.html" style="text-decoration: none;">
+        <button class="nav-button active">
+          <span class="icon icon-calendar"></span>
+          Appointment
+        </button>
+      </a>
+      <button class="nav-button">
+        <span class="icon icon-bell"></span>
+        Notification
+      </button>
+
+      <div class="sidebar-section">
+        <button class="sidebar-dropdown">Program</button>
+        <select id="programSelect" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 15px;">
+          <option value="COED">-COED-</option>
+          <option value="CAS">-CAS-</option>
+          <option value="CICT">-CICT-</option>
+          <option value="COE">-COE-</option>
+        </select>
+
+        <button class="sidebar-dropdown">Counselors</button>
+        <div class="sidebar-item">
+          <span class="icon icon-checkbox"></span>
+          Julian C. Sian Jr.
+        </div>
+
+        <button class="sidebar-dropdown">My Appointments</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="appointment-container">
+        <div class="counselor-header">
+          <div class="counselor-avatar">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="25" r="15" fill="#8B7355"/>
+              <path d="M10 70C10 55 23 45 40 45C57 45 70 55 70 70" fill="#8B7355"/>
+            </svg>
+          </div>
+          <div class="counselor-info">
+            <h2>Julian C. Sian Jr. PhD, RGC, LPT</h2>
+            <div class="confirmation-badge">CONFIRMATION</div>
+          </div>
+        </div>
+
+        <div class="confirmation-message">
+          <p>You scheduled your counseling appointment to <strong>Dr. Julian C. Sian</strong> at <strong id="appointmentTime">9:00 to 10:00 AM</strong>.</p>
+          <p class="confirmation-question">Are you sure, you want to continue?</p>
+        </div>
+
+        <div class="confirmation-buttons">
+          <button class="confirm-btn yes" id="yesBtn">YES</button>
+          <button class="confirm-btn no" id="noBtn">NO</button>
+        </div>
+
+        <div class="time-availability">
+          <h3>Time Availability</h3>
+        </div>
+
+        <div class="date-display">
+          <span class="date-label">Date:</span>
+          <span class="date-value" id="selectedDate">March 7, 2025</span>
+        </div>
+
+        <div class="time-slots">
+          <button class="time-slot">8:00 AM - 9:00 AM</button>
+          <button class="time-slot">1:00 AM - 2:00 AM</button>
+          <button class="time-slot selected">9:00 AM - 10:00 AM</button>
+          <button class="time-slot">2:00 AM - 3:00 AM</button>
+          <button class="time-slot">10:00 AM - 11:00 AM</button>
+          <button class="time-slot">3:00 AM - 4:00 AM</button>
+          <button class="time-slot">11:00 AM - 12:00 AM</button>
+          <button class="time-slot">4:00 AM - 5:00 AM</button>
+        </div>
+
+        <button class="submit-button">Submit</button>
+      </div>
+    </main>
+  </div>
+
+   Success Modal 
+  <div class="success-modal" id="successModal">
+    <div class="success-content">
+      <div class="success-icon"></div>
+      <h2>Appointment Confirmed!</h2>
+      <p><strong>Counselor:</strong> Dr. Julian C. Sian Jr.</p>
+      <p><strong>Date:</strong> <span id="confirmDate">March 7, 2025</span></p>
+      <p><strong>Time:</strong> <span id="confirmTime">9:00 AM - 10:00 AM</span></p>
+      <p class="email-note">A confirmation email/text has been sent with your session information.</p>
+      <button class="success-button" id="closeSuccessBtn">OK</button>
+    </div>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const successModal = document.getElementById('successModal');
+    const closeSuccessBtn = document.getElementById('closeSuccessBtn');
+
+    // Get appointment details from URL parameters or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const appointmentTime = urlParams.get('time') || '9:00 AM - 10:00 AM';
+    const appointmentDate = urlParams.get('date') || 'March 7, 2025';
+
+    document.getElementById('appointmentTime').textContent = appointmentTime;
+    document.getElementById('selectedDate').textContent = appointmentDate;
+    document.getElementById('confirmDate').textContent = appointmentDate;
+    document.getElementById('confirmTime').textContent = appointmentTime;
+
+    yesBtn.addEventListener('click', () => {
+      successModal.classList.add('active');
+    });
+
+    noBtn.addEventListener('click', () => {
+      window.location.href = 'appointment.html';
+    });
+
+    closeSuccessBtn.addEventListener('click', () => {
+      successModal.classList.remove('active');
+      window.location.href = 'index.html';
+    });
+
+    // Close modal when clicking outside
+    successModal.addEventListener('click', (e) => {
+      if (e.target === successModal) {
+        successModal.classList.remove('active');
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

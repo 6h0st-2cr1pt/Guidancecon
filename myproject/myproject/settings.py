@@ -90,7 +90,8 @@ DATABASES = {
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
-    'sysadmin.backends.EmailBackend',
+    'public.backends.StudentIDBackend',  # Try student ID first for public login
+    'sysadmin.backends.EmailBackend',    # For admin email login
     'django.contrib.auth.backends.ModelBackend',  # Keep the default backend as fallback
 ]
 
@@ -130,9 +131,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-LOGIN_URL = '/sysadmin/login/'
-LOGIN_REDIRECT_URL = '/sysadmin/dashboard/'
-LOGOUT_REDIRECT_URL = '/sysadmin/login/'
+# Authentication settings
+LOGIN_URL = '/sysadmin/login/'  # Default login URL (for staff)
+LOGIN_REDIRECT_URL = '/sysadmin/dashboard/'  # Default redirect after login (for staff)
+LOGOUT_REDIRECT_URL = '/sysadmin/login/'  # Default redirect after logout (for staff)
+
+# Public app specific settings (these will be used by the LoginView in public app)
+PUBLIC_LOGIN_URL = '/login/'
+PUBLIC_LOGIN_REDIRECT_URL = '/dashboard/'  # Redirect to dashboard after public login
+PUBLIC_LOGOUT_REDIRECT_URL = '/login/'
 
 # Media files (uploaded assets like logos)
 MEDIA_URL = '/media/'

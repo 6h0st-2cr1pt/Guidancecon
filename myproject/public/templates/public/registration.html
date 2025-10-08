@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHMSU Guidance Connect</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/registration.css' %}">
+  <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
+  
+</head>
+<body>
+    <div class="background"></div>
+  <header>
+    <div class="logo-title">
+      <img src="{{ MEDIA_URL }}CHMSUlogo.png" alt="School Logo" class="logo">
+      <div class="title-text">
+        <h1>CHMSU GUIDANCE CONNECT</h1>
+        <p>"Your mental wellness, our priority."</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <h2>FILL OUT INFORMATION</h2>
+      <form method="post" action="{% url 'public:signup' %}">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fname">First Name</label>
+            <input type="text" id="fname" name="fname" required>
+          </div>
+          <div class="form-group">
+            <label for="lname">Last Name</label>
+            <input type="text" id="lname" name="lname" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="yearlevel">Year & Level</label>
+            <input type="text" id="yearlevel" name="yearlevel" required>
+          </div>
+          <div class="form-group">
+            <label for="studentid">Student ID No.</label>
+            <input type="text" id="studentid" name="studentid" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="course">Course</label>
+          <input type="text" id="course" name="course" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required value="{{ email|default:'' }}">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <a href="{% url 'public:login' %}" class="btn back">BACK</a>
+          <button type="submit" class="btn continue">CONTINUE</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>
