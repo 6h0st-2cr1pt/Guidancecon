@@ -1,75 +1,28 @@
 {% extends 'sysadmin/base.html' %}
+{% load static %}
 {% block title %}Availability{% endblock %}
 {% block content %}
   <h2 class="page-title">Availability</h2>
   <section class="section">
-    <div class="section-header">March 07, 2025 (Friday)</div>
+    <div class="section-header">{{ date }}</div>
     <div class="section-body times">
-      <div class="slot">
-        <span>8:00 AM - 9:00 AM</span>
+      {% for slot in slots %}
+      <div class="slot {% if not slot.available %}disabled{% endif %}" data-slot-id="{{ slot.id }}">
+        <span>{{ slot.label }}</span>
         <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
+          {% if slot.available %}
+            <span class="badge">Available</span>
+          {% else %}
+            <span class="badge red">Not Available</span>
+          {% endif %}
+          <input class="switch" type="checkbox" {% if slot.available %}checked{% endif %} data-slot-id="{{ slot.id }}">
         </div>
       </div>
-      <div class="slot disabled">
-        <span>9:00 AM - 10:00 AM</span>
-        <div>
-          <span class="badge red">Not Available</span>
-          <input class="switch" type="checkbox">
-        </div>
-      </div>
-      <div class="slot">
-        <span>10:00 AM - 11:00 AM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>11:00 AM - 12:00 AM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>12:00 AM - 01:00 PM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>01:00 AM - 02:00 PM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>02:00 AM - 03:00 PM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>03:00 AM - 04:00 PM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>
-      <div class="slot">
-        <span>04:00 AM - 05:00 PM</span>
-        <div>
-          <span class="badge">Available</span>
-          <input class="switch" type="checkbox" checked>
-        </div>
-      </div>          
+      {% endfor %}
     </div>
   </section>
+
+  <script src="{% static 'js/availability.js' %}"></script>
 {% endblock %}
 
 

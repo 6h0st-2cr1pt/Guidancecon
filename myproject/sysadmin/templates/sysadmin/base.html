@@ -17,6 +17,12 @@
     <div class="user-pill">
       <span class="avatar">👤</span>
       <span class="user-name">{{ request.user.is_authenticated|yesno:'Admin,Guest' }}</span>
+      {% if request.user.is_authenticated %}
+      <form method="post" action="{% url 'sysadmin:logout' %}" style="display:inline; margin-left:12px;">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background:#ef4444; color:#fff; padding:6px 10px; border-radius:8px; border:none; cursor:pointer;">Logout</button>
+      </form>
+      {% endif %}
     </div>
   </header>
 

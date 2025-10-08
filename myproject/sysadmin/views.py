@@ -38,7 +38,15 @@ def availability(request):
     for h in range(start_hour, end_hour + 1):
         slot_time = time(hour=h, minute=0)
         ts, created = Timeslot.objects.get_or_create(user=user, date=the_date, start_time=slot_time, defaults={'available': False})
-        slots.append(ts)
+        # build a human-friendly label for the slot (e.g. 08:00 AM - 09:00 AM)
+        start_dt = datetime.combine(the_date, slot_time)
+        end_dt = start_dt + timedelta(hours=1)
+        label = f"{start_dt.strftime('%I:%M %p')} - {end_dt.strftime('%I:%M %p')}"
+        slots.append({
+            'id': ts.id,
+            'label': label,
+            'available': ts.available,
+        })
 
     context = {
         'slots': slots,
