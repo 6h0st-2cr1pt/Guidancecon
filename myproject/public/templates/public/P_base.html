@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Home{% endblock %} • CHMSU Guidance Connect</title>
   <link rel="stylesheet" href="{% static 'css/P_base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/appointment.css' %}">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
 </head>
 <body>
@@ -17,6 +18,12 @@
     <div class="user-pill">
       <span class="avatar">👤</span>
       <span class="user-name">{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Guest{% endif %}</span>
+      {% if request.user.is_authenticated %}
+      <form method="post" action="{% url 'public:logout' %}" style="display:inline; margin-left:12px;">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background:#ef4444; color:#fff; padding:6px 10px; border-radius:8px; border:none; cursor:pointer;">Logout</button>
+      </form>
+      {% endif %}
     </div>
   </header>
 
@@ -26,8 +33,9 @@
         <div class="sidebar-title">MENU</div>
       </div>
       <nav class="menu">
-        <a class="menu-item" href="#">Appointments</a>
-        <a class="menu-item" href="#">Notifications</a>
+        <a class="menu-item" href="{% url 'public:appointments' %}">Appointments</a>
+        <a class="menu-item" href="{% url 'public:my_appointments' %}">My Appointments</a>
+        <a class="menu-item" href="{% url 'public:notifications' %}">Notifications</a>
       </nav>
     </aside>
 

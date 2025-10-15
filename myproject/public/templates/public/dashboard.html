@@ -1,11 +1,36 @@
 {% extends 'public/P_base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-  <div class="section">
-    <div class="section-header">Welcome</div>
-    <div class="section-body">
-      <h2>Hello, {{ request.user.first_name|default:request.user.username }}!</h2>
-      <p>Welcome to CHMSU Guidance Connect. Use the menu on the left to view your appointments and notifications.</p>
+  <div class="dashboard-container">
+    <h1 class="page-title">Dashboard</h1>
+    
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="card-icon">📅</div>
+        <div class="card-content">
+          <h3>Book Appointment</h3>
+          <p>Schedule a counseling session with our guidance counselors</p>
+          <a href="{% url 'public:appointments' %}" class="card-button">Book Now</a>
+        </div>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="card-icon">🔔</div>
+        <div class="card-content">
+          <h3>Notifications</h3>
+          <p>View your appointment updates and important messages</p>
+          <a href="{% url 'public:notifications' %}" class="card-button">View Notifications</a>
+        </div>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <div class="card-content">
+          <h3>My Appointments</h3>
+          <p>Manage your upcoming and past appointments</p>
+          <a href="{% url 'public:my_appointments' %}" class="card-button">View Appointments</a>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

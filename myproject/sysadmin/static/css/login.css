@@ -193,3 +193,61 @@ main {
   font-size: 30px;
   text-align: center;
 }
+
+/* New styles for counselor signup form */
+.form-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.form-section h3 {
+  margin: 0 0 20px 0;
+  color: var(--green);
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 2px solid var(--green);
+  padding-bottom: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+textarea.input-border {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+input[type="file"].input-border {
+  padding: 8px;
+  background: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .login-card {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+  
+  .form-section {
+    padding: 15px;
+  }
+}

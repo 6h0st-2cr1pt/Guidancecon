@@ -10,6 +10,30 @@ function getCSRFToken() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Date picker functionality
+  const datePicker = document.getElementById('date-picker');
+  if (datePicker) {
+    datePicker.addEventListener('change', function() {
+      const selectedDate = this.value;
+      if (selectedDate) {
+        window.location.href = `/sysadmin/availability/?date=${selectedDate}`;
+      }
+    });
+  }
+
+  // Make summary date cards clickable
+  const summaryCards = document.querySelectorAll('[data-date]');
+  summaryCards.forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function() {
+      const date = this.getAttribute('data-date');
+      if (date) {
+        window.location.href = `/sysadmin/availability/?date=${date}`;
+      }
+    });
+  });
+
+  // Toggle switch functionality
   document.querySelectorAll('.switch').forEach(function (input) {
     input.addEventListener('change', function (e) {
       const slotId = e.target.getAttribute('data-slot-id');

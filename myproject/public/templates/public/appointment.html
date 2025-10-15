@@ -1,0 +1,387 @@
+{% extends 'public/P_base.html' %}
+{% load static %}
+{% block title %}Book Appointment{% endblock %}
+{% block content %}
+<div class="appointment-container">
+  <h1 class="page-title">Book Appointment</h1>
+  
+  <!-- Selection Form -->
+  <div class="selection-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="counselor-select">Counselor:</label>
+                <select id="counselor-select" class="form-select" onchange="loadCounselorInfo()">
+                  <option value="">Select a Counselor</option>
+                  {% for counselor in counselors %}
+                  <option value="{{ counselor.id }}" data-name="{{ counselor.name }}">
+                    {{ counselor.name }}{% if counselor.title %} - {{ counselor.title }}{% endif %}
+                  </option>
+                  {% endfor %}
+                </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="program-select">Program:</label>
+        <select id="program-select" class="form-select">
+          <option value="">Select Program</option>
+          <option value="BSIT">BSIT - Bachelor of Science in Information Technology</option>
+          <option value="BSCS">BSCS - Bachelor of Science in Computer Science</option>
+          <option value="BSIS">BSIS - Bachelor of Science in Information Systems</option>
+          <option value="BSCE">BSCE - Bachelor of Science in Computer Engineering</option>
+          <option value="BSA">BSA - Bachelor of Science in Accountancy</option>
+          <option value="BSBA">BSBA - Bachelor of Science in Business Administration</option>
+          <option value="BSED">BSED - Bachelor of Science in Education</option>
+          <option value="AB">AB - Bachelor of Arts</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="date-select">Date:</label>
+        <input type="date" id="date-select" class="form-date" min="{{ today|date:'Y-m-d' }}" onchange="loadTimeSlots()">
+      </div>
+    </div>
+  </div>
+  
+  <!-- Counselor Information -->
+  <div class="counselor-info-section" id="counselor-info" style="display: none;">
+    <div class="counselor-header">
+      <div class="counselor-avatar">
+        <img id="counselor-profile-pic" src="" alt="Counselor Profile" style="display: none; width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
+        <div id="counselor-avatar-placeholder" class="avatar-placeholder">👤</div>
+      </div>
+      <div class="counselor-details">
+        <h2 id="counselor-name">Counselor Name</h2>
+        <p id="counselor-title" class="counselor-title">PhD, RGC, LPT</p>
+        <p id="counselor-description" class="counselor-description">Information about the counselor</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Time Availability Section -->
+  <div class="availability-section">
+    <div class="availability-header">
+      <h3>Time Availability</h3>
+      <div class="date-display">
+        <span>Date: <u id="selected-date-display">Select a date</u></span>
+      </div>
+    </div>
+    
+    <div class="section-body times" id="timeslots-container">
+      <div class="slot disabled" data-slot="8">
+        <span>8:00 AM - 9:00 AM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="9">
+        <span>9:00 AM - 10:00 AM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="10">
+        <span>10:00 AM - 11:00 AM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="11">
+        <span>11:00 AM - 12:00 PM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="13">
+        <span>1:00 PM - 2:00 PM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="14">
+        <span>2:00 PM - 3:00 PM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="15">
+        <span>3:00 PM - 4:00 PM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+      <div class="slot disabled" data-slot="16">
+        <span>4:00 PM - 5:00 PM</span>
+        <div>
+          <span class="badge red">Not Available</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="submit-section">
+      <button class="submit-btn" id="submit-btn" onclick="submitBooking()" disabled>Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Confirm Appointment</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="confirmation-details">
+        <div class="counselor-info-modal">
+          <div class="counselor-avatar-modal">
+            <div class="avatar-placeholder">👤</div>
+          </div>
+          <div class="counselor-details">
+            <h4 id="modal-counselor-name"></h4>
+            <p class="counselor-title-modal">PhD, RGC, LPT</p>
+          </div>
+        </div>
+        <div class="appointment-details">
+          <p><strong>Date:</strong> <span id="modal-date"></span></p>
+          <p><strong>Time:</strong> <span id="modal-time"></span></p>
+          <p><strong>Program:</strong> <span id="modal-program"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="confirm-btn" onclick="submitBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedCounselorId = null;
+let selectedCounselorName = '';
+let selectedDate = '';
+let selectedTimeslotId = null;
+
+function loadCounselorInfo() {
+  const counselorSelect = document.getElementById('counselor-select');
+  const selectedOption = counselorSelect.options[counselorSelect.selectedIndex];
+  
+  if (counselorSelect.value) {
+    selectedCounselorId = counselorSelect.value;
+    selectedCounselorName = selectedOption.dataset.name;
+    
+    // Show counselor info with basic information
+    document.getElementById('counselor-name').textContent = selectedCounselorName;
+    document.getElementById('counselor-title').textContent = 'Loading...';
+    document.getElementById('counselor-description').textContent = 'Loading counselor information...';
+    document.getElementById('counselor-info').style.display = 'block';
+    
+    // Load detailed counselor information
+    loadCounselorDetails();
+    
+    // Hide availability section until date is selected
+    document.getElementById('availability-section').style.display = 'block';
+  } else {
+    selectedCounselorId = null;
+    selectedCounselorName = '';
+    document.getElementById('counselor-info').style.display = 'none';
+    document.getElementById('availability-section').style.display = 'block';
+  }
+}
+
+function loadCounselorDetails() {
+  if (!selectedCounselorId) return;
+  
+  // Fetch counselor details from the first available date
+  const today = new Date().toISOString().split('T')[0];
+  fetch(`/counselor/${selectedCounselorId}/availability/?date=${today}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.counselor_info) {
+        const info = data.counselor_info;
+        
+        // Update counselor name
+        document.getElementById('counselor-name').textContent = info.name || 'Counselor';
+        
+        // Update title
+        document.getElementById('counselor-title').textContent = info.title || 'Guidance Counselor';
+        
+        // Update description
+        document.getElementById('counselor-description').textContent = info.bio || 'Professional guidance counselor ready to help you.';
+        
+        // Update profile picture
+        const profilePic = document.getElementById('counselor-profile-pic');
+        const avatarPlaceholder = document.getElementById('counselor-avatar-placeholder');
+        
+        if (info.profile_picture) {
+          profilePic.src = info.profile_picture;
+          profilePic.style.display = 'block';
+          avatarPlaceholder.style.display = 'none';
+        } else {
+          profilePic.style.display = 'none';
+          avatarPlaceholder.style.display = 'flex';
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error loading counselor details:', error);
+      // Keep the basic information if detailed loading fails
+    });
+}
+
+function loadTimeSlots() {
+  const dateSelect = document.getElementById('date-select');
+  selectedDate = dateSelect.value;
+  
+  if (!selectedDate) {
+    // Reset all slots to disabled state
+    resetTimeSlots();
+    document.getElementById('selected-date-display').textContent = 'Select a date';
+    return;
+  }
+  
+  if (!selectedCounselorId) {
+    alert('Please select a counselor first');
+    dateSelect.value = '';
+    return;
+  }
+  
+  // Update date display
+  const dateObj = new Date(selectedDate);
+  const formattedDate = dateObj.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  document.getElementById('selected-date-display').textContent = formattedDate;
+  
+  // Fetch available time slots
+  fetch(`/counselor/${selectedCounselorId}/availability/?date=${selectedDate}`)
+    .then(response => response.json())
+    .then(data => {
+      // Reset all slots first
+      resetTimeSlots();
+      
+      if (data.slots && data.slots.length > 0) {
+        // Update slots based on availability
+        data.slots.forEach(slot => {
+          const slotElement = document.querySelector(`[data-slot="${slot.hour}"]`);
+          
+          if (slotElement) {
+            if (slot.available) {
+              slotElement.classList.remove('disabled');
+              slotElement.classList.add('available');
+              slotElement.querySelector('.badge').textContent = 'Available';
+              slotElement.querySelector('.badge').classList.remove('red');
+              slotElement.addEventListener('click', function() {
+                selectTimeSlot(this);
+              });
+            } else {
+              slotElement.classList.add('disabled');
+              slotElement.classList.remove('available');
+              slotElement.querySelector('.badge').textContent = 'Not Available';
+              slotElement.querySelector('.badge').classList.add('red');
+              slotElement.removeEventListener('click', selectTimeSlot);
+            }
+          }
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error loading time slots');
+    });
+}
+
+function resetTimeSlots() {
+  const slots = document.querySelectorAll('.slot');
+  slots.forEach(slot => {
+    slot.classList.add('disabled');
+    slot.classList.remove('available', 'selected');
+    slot.querySelector('.badge').textContent = 'Not Available';
+    slot.querySelector('.badge').classList.add('red');
+    slot.removeEventListener('click', selectTimeSlot);
+  });
+  document.getElementById('submit-btn').disabled = true;
+  selectedTimeslotId = null;
+}
+
+function selectTimeSlot(slotElement) {
+  // Remove previous selection
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.classList.remove('selected');
+  });
+  
+  // Add selection to clicked slot
+  slotElement.classList.add('selected');
+  
+  // Extract time information
+  const timeText = slotElement.querySelector('span').textContent;
+  selectedTimeslotId = slotElement.dataset.slot;
+  
+  // Enable submit button
+  document.getElementById('submit-btn').disabled = false;
+}
+
+function submitBooking() {
+  const programSelect = document.getElementById('program-select');
+  const program = programSelect.value;
+  
+  if (!program) {
+    alert('Please select a program');
+    return;
+  }
+  
+  if (!selectedTimeslotId) {
+    alert('Please select a time slot');
+    return;
+  }
+  
+  if (!selectedCounselorId) {
+    alert('Please select a counselor');
+    return;
+  }
+  
+  if (!selectedDate) {
+    alert('Please select a date');
+    return;
+  }
+  
+  // Create form data
+  const formData = new FormData();
+  formData.append('timeslot_id', selectedTimeslotId);
+  formData.append('counselor_id', selectedCounselorId);
+  formData.append('program', program);
+  formData.append('selected_date', selectedDate);
+  
+  // Submit booking
+  fetch('{% url "public:book_appointment" %}', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      alert('Appointment booked successfully!');
+      window.location.href = '{% url "public:my_appointments" %}';
+    } else {
+      alert('Error booking appointment');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error booking appointment');
+  });
+}
+
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date-select').setAttribute('min', today);
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}

@@ -3,11 +3,21 @@
 {% block title %}Availability{% endblock %}
 {% block content %}
   <h2 class="page-title">Availability</h2>
+  
+  <!-- Date Picker -->
+  <div style="margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #2c5530;">
+    <label for="date-picker" style="font-weight: bold; margin-right: 10px; color: #2c5530;">Select Date:</label>
+    <input type="date" id="date-picker" value="{{ date_str }}" min="{% now 'Y-m-d' %}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-right: 15px;">
+    <small style="color: #6c757d; font-style: italic;">
+      💡 You can set different availability for each date. Select a date, toggle the time slots, then select another date to set its availability.
+    </small>
+  </div>
+  
   <section class="section">
     <div class="section-header">{{ date }}</div>
     <div class="section-body times">
       {% for slot in slots %}
-      <div class="slot {% if not slot.available %}disabled{% endif %}" data-slot-id="{{ slot.id }}">
+      <div class="slot {% if not slot.available %}disabled{% endif %}" data-slot-id="{{ slot.id }}" data-slot="{{ slot.hour }}">
         <span>{{ slot.label }}</span>
         <div>
           {% if slot.available %}
@@ -21,6 +31,30 @@
       {% endfor %}
     </div>
   </section>
+
+  <!-- Availability Summary -->
+  <div style="margin-top: 30px; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="color: #2c5530; margin-bottom: 15px;">📅 Availability Summary (Next 7 Days)</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+      {% for day in summary_dates %}
+      <div data-date="{{ day.date_str }}" style="border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s ease; {% if day.date == date %}background-color: #e3f2fd; border-color: #2c5530;{% endif %}" onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#2c5530';" onmouseout="this.style.backgroundColor='{% if day.date == date %}#e3f2fd{% else %}white{% endif %}'; this.style.borderColor='{% if day.date == date %}#2c5530{% else %}#dee2e6{% endif %}';">
+        <div style="font-weight: bold; color: #2c5530;">{{ day.date|date:"M d" }}</div>
+        <div style="font-size: 0.9em; color: #6c757d;">{{ day.date|date:"D" }}</div>
+        <div style="margin-top: 5px;">
+          <span style="color: {% if day.available_count > 0 %}#28a745{% else %}#dc3545{% endif %}; font-weight: bold;">
+            {{ day.available_count }}/{{ day.total_slots }} slots
+          </span>
+        </div>
+        {% if day.date == date %}
+        <div style="font-size: 0.8em; color: #2c5530; margin-top: 3px;">← Current</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top: 15px; font-size: 0.9em; color: #6c757d; text-align: center;">
+      Click on any date above to set its availability, or use the date picker above.
+    </div>
+  </div>
 
   <script src="{% static 'js/availability.js' %}"></script>
 {% endblock %}
