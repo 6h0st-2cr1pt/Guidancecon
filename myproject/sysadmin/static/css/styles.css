@@ -95,7 +95,25 @@ html, body {
   border: 2px solid var(--accent-yellow);
 }
 
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-yellow);
+}
+
 .counselor-avatar-default {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-default {
   width: 40px;
   height: 40px;
   border-radius: 50%;

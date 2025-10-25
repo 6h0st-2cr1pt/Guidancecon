@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Home{% endblock %} • CHMSU Guidance Connect</title>
-  <link rel="stylesheet" href="{% static 'css/P_base.css' %}?v=2.0">
+  <link rel="stylesheet" href="{% static 'css/P_base.css' %}?v=3.0">
   <link rel="stylesheet" href="{% static 'css/appointment.css' %}?v=3.0">
   {% block extra_css %}{% endblock %}
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
@@ -18,13 +18,19 @@
       <span class="brand-name">CHMSU GUIDANCE CONNECT</span>
     </div>
     <div class="user-pill">
-      <span class="avatar">👤</span>
-      <span class="user-name">{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Guest{% endif %}</span>
       {% if request.user.is_authenticated %}
-      <form method="post" action="{% url 'public:logout' %}" style="display:inline; margin-left:12px;">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn">Logout</button>
-      </form>
+        <img src="{% url 'public:profile_picture' request.user.id %}" alt="Profile" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="user-avatar-default" style="display: none;">
+          <span class="avatar-text">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
+        </div>
+        <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+        <form method="post" action="{% url 'public:logout' %}" style="display:inline; margin-left:12px;">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      {% else %}
+        <span class="avatar">👤</span>
+        <span class="user-name">Guest</span>
       {% endif %}
     </div>
   </header>

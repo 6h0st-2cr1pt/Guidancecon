@@ -339,6 +339,7 @@ def book_appointment(request):
 @login_required
 def my_appointments(request):
     """Display user's appointments (past and upcoming)"""
+    from django.db import connection
     now = timezone.now()
     today = now.date()
     
@@ -355,9 +356,20 @@ def my_appointments(request):
         timeslot__date__lt=today
     ).order_by('-timeslot__date', '-timeslot__start_time')
     
+    # Fetch counselor titles for all appointments
+    def add_counselor_info(appointments):
+        appointments_with_info = []
+        for appointment in appointments:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT title FROM auth_user WHERE id = %s", [appointment.counselor.id])
+                row = cursor.fetchone()
+                appointment.counselor_title = row[0] if row and row[0] else 'Guidance Counselor'
+            appointments_with_info.append(appointment)
+        return appointments_with_info
+    
     context = {
-        'upcoming_appointments': upcoming_appointments,
-        'past_appointments': past_appointments,
+        'upcoming_appointments': add_counselor_info(list(upcoming_appointments)),
+        'past_appointments': add_counselor_info(list(past_appointments)),
     }
     return render(request, 'public/my_appointments.html', context)
 
@@ -390,7 +402,88 @@ def cancel_appointment(request, appointment_id):
 @login_required
 def notifications(request):
     """Display notifications page"""
-    return render(request, 'public/notifications.html')
+    from django.db import connection
+    from datetime import timedelta
+    
+    # Get all appointments for the student
+    appointments = Appointment.objects.filter(student=request.user).order_by('-created_at')[:20]
+    
+    # Create notification-like data from appointments
+    notifications_list = []
+    for appointment in appointments:
+        # Fetch counselor info
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT title FROM auth_user WHERE id = %s", [appointment.counselor.id])
+            row = cursor.fetchone()
+            counselor_title = row[0] if row and row[0] else 'Guidance Counselor'
+        
+        counselor_name = appointment.counselor.get_full_name() or appointment.counselor.username
+        
+        # Create notification based on appointment status
+        if appointment.status == 'confirmed':
+            notifications_list.append({
+                'icon': '✅',
+                'title': 'Appointment Confirmed',
+                'message': f'Your appointment with {counselor_name} ({counselor_title}) has been confirmed for {appointment.timeslot.date.strftime("%B %d, %Y")} at {appointment.timeslot.start_time.strftime("%I:%M %p")}.',
+                'time_ago': get_time_ago(appointment.updated_at),
+                'is_unread': (timezone.now() - appointment.updated_at).days < 1,
+                'created_at': appointment.updated_at,
+            })
+        elif appointment.status == 'pending':
+            notifications_list.append({
+                'icon': '⏳',
+                'title': 'Appointment Pending',
+                'message': f'Your appointment request with {counselor_name} ({counselor_title}) for {appointment.timeslot.date.strftime("%B %d, %Y")} at {appointment.timeslot.start_time.strftime("%I:%M %p")} is awaiting confirmation.',
+                'time_ago': get_time_ago(appointment.created_at),
+                'is_unread': (timezone.now() - appointment.created_at).days < 1,
+                'created_at': appointment.created_at,
+            })
+        elif appointment.status == 'cancelled':
+            notifications_list.append({
+                'icon': '❌',
+                'title': 'Appointment Cancelled',
+                'message': f'Your appointment with {counselor_name} ({counselor_title}) scheduled for {appointment.timeslot.date.strftime("%B %d, %Y")} at {appointment.timeslot.start_time.strftime("%I:%M %p")} has been cancelled.',
+                'time_ago': get_time_ago(appointment.updated_at),
+                'is_unread': (timezone.now() - appointment.updated_at).days < 1,
+                'created_at': appointment.updated_at,
+            })
+        elif appointment.status == 'completed':
+            notifications_list.append({
+                'icon': '🎉',
+                'title': 'Appointment Completed',
+                'message': f'Your counseling session with {counselor_name} ({counselor_title}) has been completed. Thank you for using our services.',
+                'time_ago': get_time_ago(appointment.updated_at),
+                'is_unread': False,
+                'created_at': appointment.updated_at,
+            })
+    
+    context = {
+        'notifications': notifications_list,
+    }
+    return render(request, 'public/notifications.html', context)
+
+
+def get_time_ago(dt):
+    """Convert datetime to human-readable time ago format"""
+    now = timezone.now()
+    diff = now - dt
+    
+    if diff.days > 365:
+        years = diff.days // 365
+        return f"{years} year{'s' if years > 1 else ''} ago"
+    elif diff.days > 30:
+        months = diff.days // 30
+        return f"{months} month{'s' if months > 1 else ''} ago"
+    elif diff.days > 0:
+        return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+    elif diff.seconds > 3600:
+        hours = diff.seconds // 3600
+        return f"{hours} hour{'s' if hours > 1 else ''} ago"
+    elif diff.seconds > 60:
+        minutes = diff.seconds // 60
+        return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    else:
+        return "Just now"
 
 
 def profile_picture(request, user_id):

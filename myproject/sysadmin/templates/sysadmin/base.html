@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Admin{% endblock %} • CHMSU Guidance Connect</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=7.0">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=8.0">
   {% block extra_css %}{% endblock %}
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,13 +18,10 @@
     </div>
     <div class="user-pill">
       {% if request.user.is_authenticated %}
-        {% if request.user.profile_picture %}
-          <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="counselor-avatar">
-        {% else %}
-          <div class="counselor-avatar-default">
-            <span class="avatar-text">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
-          </div>
-        {% endif %}
+        <img src="{% url 'sysadmin:profile_picture' request.user.id %}" alt="Profile" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="user-avatar-default" style="display: none;">
+          <span class="avatar-text">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
+        </div>
         <div class="user-info">
           <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
           <span class="user-title">{{ request.user.title|default:"Counselor" }}</span>

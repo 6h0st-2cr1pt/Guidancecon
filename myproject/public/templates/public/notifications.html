@@ -3,7 +3,10 @@
 {% block title %}Notifications{% endblock %}
 {% block content %}
 <div class="notifications-container">
-  <h1 class="page-title">Notifications</h1>
+  <h1 class="page-title">
+    <img src="{% static 'icons/bell.png' %}" alt="Notifications" style="width: 30px; height: 30px;">
+    Notifications
+  </h1>
   
   <div class="notifications-section">
     <div class="section-header">
@@ -11,95 +14,63 @@
     </div>
     
     <div class="notifications-list">
-      <div class="notification-card">
-        <div class="notification-icon">
-          <span>📅</span>
+      {% if notifications %}
+        {% for notification in notifications %}
+        <div class="notification-card {% if notification.is_unread %}unread{% endif %}">
+          <div class="notification-icon">
+            <span>{{ notification.icon }}</span>
+          </div>
+          <div class="notification-content">
+            <h3>{{ notification.title }}</h3>
+            <p>{{ notification.message }}</p>
+            <span class="notification-time">{{ notification.time_ago }}</span>
+          </div>
+          <div class="notification-status">
+            <span class="status-dot {% if notification.is_unread %}unread{% else %}read{% endif %}"></span>
+          </div>
         </div>
-        <div class="notification-content">
-          <h3>Appointment Confirmed</h3>
-          <p>Your appointment with Dr. Julian C. Sian Jr. has been confirmed for March 7, 2025 at 9:00 AM.</p>
-          <span class="notification-time">2 hours ago</span>
+        {% endfor %}
+      {% else %}
+        <div class="no-notifications">
+          <div class="no-notifications-icon">
+            <img src="{% static 'icons/empty.gif' %}" alt="No Notifications" style="width: 80px; height: 80px;">
+          </div>
+          <h3>No Notifications</h3>
+          <p>You don't have any notifications yet.</p>
         </div>
-        <div class="notification-status">
-          <span class="status-dot unread"></span>
-        </div>
-      </div>
-      
-      <div class="notification-card">
-        <div class="notification-icon">
-          <span>🔔</span>
-        </div>
-        <div class="notification-content">
-          <h3>Appointment Reminder</h3>
-          <p>Don't forget! You have an appointment tomorrow at 2:00 PM with Dr. Maria Santos.</p>
-          <span class="notification-time">1 day ago</span>
-        </div>
-        <div class="notification-status">
-          <span class="status-dot read"></span>
-        </div>
-      </div>
-      
-      <div class="notification-card">
-        <div class="notification-icon">
-          <span>✅</span>
-        </div>
-        <div class="notification-content">
-          <h3>Appointment Completed</h3>
-          <p>Your counseling session with Dr. John Smith has been completed. Thank you for using our services.</p>
-          <span class="notification-time">3 days ago</span>
-        </div>
-        <div class="notification-status">
-          <span class="status-dot read"></span>
-        </div>
-      </div>
-      
-      <div class="notification-card">
-        <div class="notification-icon">
-          <span>📝</span>
-        </div>
-        <div class="notification-content">
-          <h3>New Counselor Available</h3>
-          <p>Dr. Sarah Johnson is now available for appointments. Book your session today!</p>
-          <span class="notification-time">1 week ago</span>
-        </div>
-        <div class="notification-status">
-          <span class="status-dot read"></span>
-        </div>
-      </div>
+      {% endif %}
     </div>
-  </div>
-  
-  <div class="notifications-actions">
-    <button class="mark-all-read-btn">Mark All as Read</button>
-    <button class="clear-notifications-btn">Clear All Notifications</button>
   </div>
 </div>
 
 <style>
 .notifications-container {
   padding: 20px;
-  background-color: #f8f9fa;
   min-height: 100vh;
 }
 
 .page-title {
-  color: #2c5530;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-dark);
   margin-bottom: 30px;
   font-size: 2rem;
   font-weight: bold;
 }
 
 .notifications-section {
-  background: white;
+  background: var(--white);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   overflow: hidden;
   margin-bottom: 30px;
 }
 
 .section-header {
-  background-color: #2c5530;
-  color: white;
+  background-color: var(--dark-green);
+  color: var(--white);
   padding: 15px 20px;
   font-weight: bold;
   font-size: 1.1rem;
@@ -109,6 +80,8 @@
 
 .notifications-list {
   padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .notification-card {
@@ -117,26 +90,28 @@
   padding: 20px;
   margin-bottom: 15px;
   border-radius: 8px;
-  background-color: #f8f9fa;
-  border-left: 4px solid #2c5530;
+  background-color: var(--white);
+  border: 2px solid var(--dark-green);
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: var(--shadow);
 }
 
 .notification-card:hover {
-  background-color: #e9ecef;
-  transform: translateX(5px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .notification-card.unread {
   background-color: #fff3cd;
-  border-left-color: #ffc107;
+  border-left: 4px solid #ffc107;
 }
 
 .notification-icon {
   margin-right: 15px;
-  font-size: 24px;
+  font-size: 28px;
   margin-top: 5px;
+  flex-shrink: 0;
 }
 
 .notification-content {
@@ -145,26 +120,28 @@
 
 .notification-content h3 {
   margin: 0 0 8px 0;
-  color: #2c5530;
+  color: var(--dark-green);
   font-size: 1.1rem;
   font-weight: bold;
 }
 
 .notification-content p {
   margin: 0 0 8px 0;
-  color: #6c757d;
-  line-height: 1.5;
+  color: var(--text-dark);
+  line-height: 1.6;
+  opacity: 0.9;
 }
 
 .notification-time {
   font-size: 0.8rem;
-  color: #adb5bd;
+  color: var(--medium-gray);
   font-style: italic;
 }
 
 .notification-status {
   margin-left: 15px;
   margin-top: 5px;
+  flex-shrink: 0;
 }
 
 .status-dot {
@@ -179,100 +156,58 @@
 }
 
 .status-dot.read {
-  background-color: #6c757d;
+  background-color: var(--medium-gray);
 }
 
-.notifications-actions {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
+.no-notifications {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--medium-gray);
 }
 
-.mark-all-read-btn,
-.clear-notifications-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.no-notifications-icon {
+  margin-bottom: 20px;
 }
 
-.mark-all-read-btn {
-  background-color: #2c5530;
-  color: white;
+.no-notifications h3 {
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
-.mark-all-read-btn:hover {
-  background-color: #1e3a21;
-}
-
-.clear-notifications-btn {
-  background-color: #6c757d;
-  color: white;
-}
-
-.clear-notifications-btn:hover {
-  background-color: #5a6268;
+.no-notifications p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {
   .notifications-container {
-    padding: 10px;
+    padding: 15px;
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
   }
   
   .notification-card {
     padding: 15px;
-  }
-  
-  .notifications-actions {
     flex-direction: column;
-    align-items: center;
+    gap: 10px;
   }
   
-  .mark-all-read-btn,
-  .clear-notifications-btn {
-    width: 100%;
-    max-width: 300px;
+  .notification-status {
+    margin-left: 0;
+    margin-top: 0;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  .notification-icon {
+    font-size: 24px;
   }
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Add click handlers for notification actions
-  document.querySelector('.mark-all-read-btn').addEventListener('click', function() {
-    document.querySelectorAll('.status-dot').forEach(dot => {
-      dot.classList.remove('unread');
-      dot.classList.add('read');
-    });
-    
-    document.querySelectorAll('.notification-card').forEach(card => {
-      card.classList.remove('unread');
-    });
-    
-    alert('All notifications marked as read');
-  });
-  
-  document.querySelector('.clear-notifications-btn').addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear all notifications?')) {
-      document.querySelector('.notifications-list').innerHTML = '<div class="no-notifications"><p>No notifications available</p></div>';
-      document.querySelector('.notifications-actions').style.display = 'none';
-    }
-  });
-  
-  // Add click handler for individual notifications
-  document.querySelectorAll('.notification-card').forEach(card => {
-    card.addEventListener('click', function() {
-      const statusDot = this.querySelector('.status-dot');
-      if (statusDot.classList.contains('unread')) {
-        statusDot.classList.remove('unread');
-        statusDot.classList.add('read');
-        this.classList.remove('unread');
-      }
-    });
-  });
-});
-</script>
 {% endblock %}
