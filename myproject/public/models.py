@@ -6,6 +6,7 @@ from django.conf import settings
 class UserProfile(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
 	student_id = models.CharField(max_length=50, unique=True)
+	college = models.CharField(max_length=255, blank=True)
 	course = models.CharField(max_length=255, blank=True)
 	year_level = models.CharField(max_length=50, blank=True)
 

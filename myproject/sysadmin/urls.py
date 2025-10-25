@@ -23,6 +23,8 @@ urlpatterns = [
     path('analytics/', views.analytics, name='analytics'),
     path('reports/', views.reports, name='reports'),
     path('reports/export-pdf/', views.export_report_pdf, name='export_report_pdf'),
+    path('profile-picture/<int:user_id>/', views.profile_picture, name='profile_picture'),
+    path('profile/', views.profile, name='profile'),
 ]
 
 

@@ -33,7 +33,7 @@ html, body {
 /* Professional utility class */
 .enterprise-card {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   box-shadow: var(--shadow);
 }
@@ -271,7 +271,7 @@ html, body {
 /* Sections */
 .section {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   margin-bottom: 24px;
   overflow: hidden;
@@ -301,7 +301,7 @@ html, body {
   border-radius: 6px;
   padding: 12px 16px;
   margin: 8px 0;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   transition: all 0.3s ease;
   font-size: 0.9rem;
 }
@@ -400,7 +400,7 @@ html, body {
   color: var(--text-dark);
   border-radius: 6px;
   padding: 12px 16px;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   transition: all 0.3s ease;
 }
 
@@ -489,7 +489,7 @@ html, body {
   flex-direction: column;
   gap: 16px;
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   box-shadow: var(--shadow);
 }
 
@@ -530,7 +530,7 @@ html, body {
   padding: 20px;
   border-radius: 8px;
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   box-shadow: var(--shadow);
 }
 
@@ -551,7 +551,7 @@ html, body {
 
 .summary-day {
   background: var(--light-gray);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 6px;
   padding: 16px;
   text-align: center;
@@ -620,6 +620,93 @@ html, body {
   color: var(--medium-gray);
   text-align: center;
   font-style: italic;
+}
+
+/* Animated Icons for Page Content */
+.animated-icon {
+  display: inline-block;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animated-icon-spin {
+  display: inline-block;
+  animation: iconWiggle 2s ease-in-out infinite;
+}
+
+@keyframes iconWiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+}
+
+.animated-icon-bounce {
+  display: inline-block;
+  animation: iconBounceContent 1.5s ease-in-out infinite;
+}
+
+@keyframes iconBounceContent {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.icon-img-content {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(28%) saturate(1654%) hue-rotate(114deg) brightness(94%) contrast(96%);
+  transition: all 0.3s ease;
+}
+
+.icon-img-content:hover {
+  transform: scale(1.2) rotate(10deg);
+  filter: brightness(0) saturate(100%) invert(71%) sepia(93%) saturate(423%) hue-rotate(1deg) brightness(103%) contrast(94%);
+}
+
+/* KPI Icon Animations */
+.kpi-icon {
+  animation: kpiIconPulse 3s ease-in-out infinite;
+}
+
+@keyframes kpiIconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Avatar Circle Animation */
+.avatar-circle {
+  animation: avatarPulse 2s ease-in-out infinite;
+}
+
+@keyframes avatarPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(240, 223, 16, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(240, 223, 16, 0);
+  }
 }
 
 /* Responsive Design */
@@ -696,7 +783,7 @@ html, body {
 
 .kpi-card {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 6px;
   padding: 16px;
   display: flex;
@@ -766,7 +853,7 @@ html, body {
 
 .chart-container {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 6px;
   overflow: hidden;
   box-shadow: var(--shadow);

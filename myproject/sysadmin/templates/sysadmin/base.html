@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Admin{% endblock %} • CHMSU Guidance Connect</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=5.0">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=7.0">
   {% block extra_css %}{% endblock %}
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -74,6 +74,10 @@
           {% if unread_count and unread_count > 0 %}
             <span class="notification-badge">{{ unread_count }}</span>
           {% endif %}
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'sysadmin:profile' %}">
+          <img src="{{ MEDIA_URL }}icons/user.png" alt="Profile" class="menu-icon-img">
+          <span class="menu-text">Manage Profile</span>
         </a>
       </nav>
     </aside>

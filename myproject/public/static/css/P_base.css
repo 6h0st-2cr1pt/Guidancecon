@@ -32,7 +32,7 @@ html, body {
 /* Professional utility class */
 .enterprise-card {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   box-shadow: var(--shadow);
 }
@@ -183,6 +183,19 @@ html, body {
   font-size: 1.25rem;
   width: 24px;
   text-align: center;
+}
+
+.menu-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover .menu-icon-img,
+.menu-item.active .menu-icon-img {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(28%) saturate(1654%) hue-rotate(114deg) brightness(94%) contrast(96%);
 }
 
 .menu-text {

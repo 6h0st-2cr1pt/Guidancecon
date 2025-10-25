@@ -19,22 +19,6 @@
                   {% endfor %}
                 </select>
       </div>
-
-      <div class="form-group">
-        <label for="program-select">Program:</label>
-        <select id="program-select" class="form-select">
-          <option value="">Select Program</option>
-          <option value="BSIT">BSIT - Bachelor of Science in Information Technology</option>
-          <option value="BSCS">BSCS - Bachelor of Science in Computer Science</option>
-          <option value="BSIS">BSIS - Bachelor of Science in Information Systems</option>
-          <option value="BSCE">BSCE - Bachelor of Science in Computer Engineering</option>
-          <option value="BSA">BSA - Bachelor of Science in Accountancy</option>
-          <option value="BSBA">BSBA - Bachelor of Science in Business Administration</option>
-          <option value="BSED">BSED - Bachelor of Science in Education</option>
-          <option value="AB">AB - Bachelor of Arts</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
       
       <div class="form-group">
         <label for="date-select">Date:</label>
@@ -145,7 +129,6 @@
         <div class="appointment-details">
           <p><strong>Date:</strong> <span id="modal-date"></span></p>
           <p><strong>Time:</strong> <span id="modal-time"></span></p>
-          <p><strong>Program:</strong> <span id="modal-program"></span></p>
         </div>
       </div>
     </div>
@@ -324,14 +307,6 @@ function selectTimeSlot(slotElement) {
 }
 
 function submitBooking() {
-  const programSelect = document.getElementById('program-select');
-  const program = programSelect.value;
-  
-  if (!program) {
-    alert('Please select a program');
-    return;
-  }
-  
   if (!selectedTimeslotId) {
     alert('Please select a time slot');
     return;
@@ -351,7 +326,6 @@ function submitBooking() {
   const formData = new FormData();
   formData.append('timeslot_id', selectedTimeslotId);
   formData.append('counselor_id', selectedCounselorId);
-  formData.append('program', program);
   formData.append('selected_date', selectedDate);
   
   // Submit booking

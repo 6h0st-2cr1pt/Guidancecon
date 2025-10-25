@@ -20,30 +20,41 @@ def signup(request):
         fname = request.POST.get('fname', '').strip()
         lname = request.POST.get('lname', '').strip()
         studentid = request.POST.get('studentid', '').strip()
+        college = request.POST.get('college', '').strip()
         course = request.POST.get('course', '').strip()
         yearlevel = request.POST.get('yearlevel', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
+        profile_picture = request.FILES.get('profile_picture')
 
         # Keep form data for re-population
         context = {
             'fname': fname,
             'lname': lname,
             'studentid': studentid,
+            'college': college,
             'course': course,
             'yearlevel': yearlevel,
             'email': email
         }
 
         # Validate required fields
-        if not all([studentid, email, password, confirm_password]):
+        if not all([studentid, college, course, email, password, confirm_password]):
             context['error'] = 'All fields are required.'
             return render(request, 'public/registration.html', context)
 
         if password != confirm_password:
             context['error'] = 'Passwords do not match.'
             return render(request, 'public/registration.html', context)
+
+        # Validate profile picture size (2 MB limit)
+        if profile_picture:
+            max_size = 2 * 1024 * 1024  # 2 MB in bytes
+            if profile_picture.size > max_size:
+                size_mb = profile_picture.size / (1024 * 1024)
+                context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
+                return render(request, 'public/registration.html', context)
 
         # Check uniqueness
         if User.objects.filter(username=studentid).exists():
@@ -69,10 +80,22 @@ def signup(request):
                 last_name=lname
             )
 
+            # Process profile picture if uploaded
+            if profile_picture:
+                image_binary = profile_picture.read()
+                from django.db import connection
+                from psycopg2 import Binary
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE auth_user SET image_data = %s WHERE id = %s",
+                        [Binary(image_binary), user.id]
+                    )
+
             # Create profile
             profile = UserProfile.objects.create(
                 user=user,
                 student_id=studentid,
+                college=college,
                 course=course,
                 year_level=yearlevel
             )
@@ -106,18 +129,30 @@ def dashboard(request):
 @login_required
 def appointments(request):
     """Display appointment booking page with counselor selection and time slots"""
+    # Get student's college from their profile
+    try:
+        student_profile = UserProfile.objects.get(user=request.user)
+        student_college = student_profile.college
+    except UserProfile.DoesNotExist:
+        student_college = None
+    
     counselors = User.objects.filter(is_staff=True, is_active=True)
     
-    # Add counselor information from User model using raw SQL
+    # Add counselor information from User model using raw SQL and filter by college
     from django.db import connection
     counselors_with_profiles = []
     for counselor in counselors:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT middle_initial, title, bio FROM auth_user WHERE id = %s", [counselor.id])
+            cursor.execute("SELECT middle_initial, assigned_college, title, bio FROM auth_user WHERE id = %s", [counselor.id])
             row = cursor.fetchone()
             middle_initial = row[0] if row[0] else ''
-            title = row[1] if row[1] else ''
-            bio = row[2] if row[2] else ''
+            assigned_college = row[1] if row[1] else ''
+            title = row[2] if row[2] else ''
+            bio = row[3] if row[3] else ''
+        
+        # Only include counselors from the same college as the student
+        if student_college and assigned_college and assigned_college != student_college:
+            continue
         
         # Helper function to get full name with middle initial
         def get_full_name_with_mi(user, mi):
@@ -130,6 +165,7 @@ def appointments(request):
             'username': counselor.username,
             'name': get_full_name_with_mi(counselor, middle_initial),
             'title': title,
+            'assigned_college': assigned_college,
             'has_profile': bool(title or bio)
         }
         counselors_with_profiles.append(counselor_data)
@@ -184,13 +220,15 @@ def counselor_availability(request, counselor_id):
     
     # Get counselor information from User model using raw SQL
     from django.db import connection
+    from django.urls import reverse
     with connection.cursor() as cursor:
-        cursor.execute("SELECT middle_initial, title, bio, profile_picture FROM auth_user WHERE id = %s", [counselor.id])
+        cursor.execute("SELECT middle_initial, assigned_college, title, bio, image_data FROM auth_user WHERE id = %s", [counselor.id])
         row = cursor.fetchone()
         middle_initial = row[0] if row[0] else ''
-        title = row[1] if row[1] else ''
-        bio = row[2] if row[2] else ''
-        profile_picture = row[3] if row[3] else None
+        assigned_college = row[1] if row[1] else ''
+        title = row[2] if row[2] else ''
+        bio = row[3] if row[3] else ''
+        has_image = row[4] is not None
     
     # Helper function to get full name with middle initial
     def get_full_name_with_mi(user, mi):
@@ -198,12 +236,17 @@ def counselor_availability(request, counselor_id):
             return f"{user.first_name} {mi}. {user.last_name}"
         return f"{user.first_name} {user.last_name}"
     
+    # Generate profile picture URL if image exists
+    profile_picture_url = None
+    if has_image:
+        profile_picture_url = reverse('public:profile_picture', args=[counselor.id])
+    
     counselor_info = {
         'id': counselor.id,
         'name': get_full_name_with_mi(counselor, middle_initial),
         'title': title,
         'bio': bio,
-        'profile_picture': profile_picture,
+        'profile_picture': profile_picture_url,
     }
     
     return JsonResponse({
@@ -220,8 +263,14 @@ def book_appointment(request):
     if request.method == 'POST':
         timeslot_hour = request.POST.get('timeslot_id')  # This is now the hour (8, 9, 10, etc.)
         counselor_id = request.POST.get('counselor_id')
-        program = request.POST.get('program', '')
         selected_date = request.POST.get('selected_date')
+        
+        # Get program from user's profile
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            program = user_profile.course  # Using 'course' field to store program
+        except UserProfile.DoesNotExist:
+            program = 'Not Specified'
         
         try:
             counselor = get_object_or_404(User, id=counselor_id, is_staff=True)
@@ -342,3 +391,165 @@ def cancel_appointment(request, appointment_id):
 def notifications(request):
     """Display notifications page"""
     return render(request, 'public/notifications.html')
+
+
+def profile_picture(request, user_id):
+    """Serve profile picture from database"""
+    from django.db import connection
+    from django.http import HttpResponse, HttpResponseNotFound
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT image_data FROM auth_user WHERE id = %s", [user_id])
+        row = cursor.fetchone()
+        
+        if row and row[0]:
+            image_data = bytes(row[0])
+            # Try to determine content type from image data
+            content_type = 'image/jpeg'  # default
+            if image_data.startswith(b'\x89PNG'):
+                content_type = 'image/png'
+            elif image_data.startswith(b'GIF'):
+                content_type = 'image/gif'
+            elif image_data.startswith(b'\xff\xd8\xff'):
+                content_type = 'image/jpeg'
+            
+            response = HttpResponse(image_data, content_type=content_type)
+            response['Cache-Control'] = 'public, max-age=86400'  # Cache for 1 day
+            return response
+    
+    # Return a default placeholder image or 404
+    return HttpResponseNotFound('No profile picture found')
+
+
+@login_required
+def profile(request):
+    """Manage student profile"""
+    # Get student's profile
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Profile not found. Please contact administrator.')
+        return redirect('public:dashboard')
+    
+    if request.method == 'POST':
+        # Get form data
+        email = request.POST.get('email', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        student_id = request.POST.get('student_id', '').strip()
+        college = request.POST.get('college', '').strip()
+        course = request.POST.get('course', '').strip()
+        year_level = request.POST.get('year_level', '').strip()
+        profile_picture = request.FILES.get('profile_picture')
+        current_password = request.POST.get('current_password', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+        
+        context = {
+            'email': email,
+            'first_name': first_name,
+            'last_name': last_name,
+            'student_id': student_id,
+            'college': college,
+            'course': course,
+            'year_level': year_level,
+        }
+        
+        # Validation
+        if not all([email, first_name, last_name, student_id, college, course]):
+            context['error'] = 'Email, name, student ID, college, and course are required.'
+            return render(request, 'public/profile.html', context)
+        
+        # Check if email is taken by another user
+        if User.objects.filter(email=email).exclude(id=request.user.id).exists():
+            context['error'] = 'This email is already taken by another user.'
+            return render(request, 'public/profile.html', context)
+        
+        # Check if student ID is taken by another user
+        if UserProfile.objects.filter(student_id=student_id).exclude(user=request.user).exists():
+            context['error'] = 'This student ID is already taken by another user.'
+            return render(request, 'public/profile.html', context)
+        
+        # Validate profile picture size (2 MB limit)
+        if profile_picture:
+            max_size = 2 * 1024 * 1024  # 2 MB in bytes
+            if profile_picture.size > max_size:
+                size_mb = profile_picture.size / (1024 * 1024)
+                context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
+                return render(request, 'public/profile.html', context)
+        
+        # Handle password change
+        if new_password or confirm_password:
+            if not current_password:
+                context['error'] = 'Current password is required to change password.'
+                return render(request, 'public/profile.html', context)
+            
+            if not request.user.check_password(current_password):
+                context['error'] = 'Current password is incorrect.'
+                return render(request, 'public/profile.html', context)
+            
+            if new_password != confirm_password:
+                context['error'] = 'New passwords do not match.'
+                return render(request, 'public/profile.html', context)
+            
+            if len(new_password) < 6:
+                context['error'] = 'New password must be at least 6 characters long.'
+                return render(request, 'public/profile.html', context)
+        
+        try:
+            # Update user information
+            user = request.user
+            user.email = email
+            user.username = email
+            user.first_name = first_name
+            user.last_name = last_name
+            
+            # Update password if provided
+            if new_password:
+                user.set_password(new_password)
+            
+            user.save()
+            
+            # Process profile picture if uploaded
+            if profile_picture:
+                image_binary = profile_picture.read()
+                from django.db import connection
+                from psycopg2 import Binary
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE auth_user SET image_data = %s WHERE id = %s",
+                        [Binary(image_binary), user.id]
+                    )
+            
+            # Update profile information
+            user_profile.student_id = student_id
+            user_profile.college = college
+            user_profile.course = course
+            user_profile.year_level = year_level
+            user_profile.save()
+            
+            messages.success(request, 'Profile updated successfully!')
+            
+            # If password was changed, re-authenticate
+            if new_password:
+                user = authenticate(request, username=email, password=new_password)
+                if user:
+                    login(request, user)
+            
+            return redirect('public:profile')
+            
+        except Exception as e:
+            context['error'] = f'Error updating profile: {str(e)}'
+            return render(request, 'public/profile.html', context)
+    
+    # GET request - display form with current data
+    context = {
+        'email': request.user.email,
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+        'student_id': user_profile.student_id,
+        'college': user_profile.college,
+        'course': user_profile.course,
+        'year_level': user_profile.year_level,
+    }
+    return render(request, 'public/profile.html', context)

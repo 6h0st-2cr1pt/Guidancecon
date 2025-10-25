@@ -15,7 +15,10 @@
   {% endif %}
 
   <!-- Upcoming Appointments -->
-  <h2 class="page-title">📋 Upcoming Appointments</h2>
+  <h2 class="page-title">
+      <img src="{{ MEDIA_URL }}icons/upcoming.png" alt="Print" style="width: 20px; height: 20px;">
+      Upcoming Appointments
+  </h2>
   <section class="section">
     <div class="section-body">
       {% if upcoming_appointments %}
@@ -58,7 +61,9 @@
         {% endfor %}
       {% else %}
         <div class="no-appointments">
-          <div class="no-appointments-icon">📅</div>
+          <div class="no-appointments-icon">
+              <img src="{{ MEDIA_URL }}icons/empty.gif" alt="No Appointments" style="width: 80px; height: 80px;">
+          </div>
           <h3>No Upcoming Appointments</h3>
           <p>You don't have any upcoming appointments scheduled.</p>
       </div>
@@ -67,7 +72,10 @@
   </section>
 
   <!-- Past Appointments -->
-  <h2 class="page-title">📚 Past Appointments</h2>
+  <h2 class="page-title">
+      <img src="{{ MEDIA_URL }}icons/past.png" alt="Print" style="width: 20px; height: 20px;">
+      Past Appointments
+  </h2>
   <section class="section">
     <div class="section-body">
       {% if past_appointments %}
@@ -109,24 +117,32 @@
 
   <!-- Quick Stats -->
   <div class="dashboard-stats enterprise-card">
-    <h3 class="stats-title">📊 Quick Statistics</h3>
+    <h3 class="stats-title">
+        <img src="{{ MEDIA_URL }}icons/analytics.png" alt="Print" style="width: 20px; height: 20px;">
+        Quick Statistics</h3>
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon">
+            <img src="{{ MEDIA_URL }}icons/upcoming.png" alt="Print" style="width: 20px; height: 20px;">
+        </div>
         <div class="stat-content">
           <div class="stat-number">{{ upcoming_appointments.count }}</div>
           <div class="stat-label">Upcoming</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">
+            <img src="{{ MEDIA_URL }}icons/checked.png" alt="Print" style="width: 20px; height: 20px;">
+        </div>
         <div class="stat-content">
           <div class="stat-number">{{ past_appointments.count }}</div>
           <div class="stat-label">Completed</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🔔</div>
+        <div class="stat-icon">
+            <img src="{{ MEDIA_URL }}icons/notification.png" alt="Print" style="width: 20px; height: 20px;">
+        </div>
         <div class="stat-content">
           <div class="stat-number">{{ unread_count }}</div>
           <div class="stat-label">Notifications</div>
@@ -161,7 +177,7 @@
       padding: 16px;
       background: var(--light-gray);
       border-radius: 6px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--dark-green);
     }
 
     .stat-number {
@@ -237,7 +253,7 @@
       text-align: center;
       padding: 40px 20px;
       background: var(--white);
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--dark-green);
       border-radius: 8px;
       box-shadow: var(--shadow);
     }
@@ -289,7 +305,7 @@
       gap: 12px;
       padding: 16px;
       background: var(--light-gray);
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--dark-green);
       border-radius: 6px;
       transition: all 0.3s ease;
     }

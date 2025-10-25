@@ -17,7 +17,7 @@
 /* Selection Form */
 .selection-form {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 30px;
@@ -26,7 +26,7 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: end;
 }
@@ -65,7 +65,7 @@
 /* Counselor Information Section */
 .counselor-info-section {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 30px;
@@ -234,7 +234,7 @@
   padding: 40px;
   text-align: center;
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   box-shadow: var(--shadow);
 }
@@ -477,7 +477,7 @@
 
 .dashboard-card {
   background: var(--white);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--dark-green);
   border-radius: 8px;
   padding: 40px;
   box-shadow: var(--shadow);

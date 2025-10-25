@@ -24,7 +24,10 @@
   <main>
     <div class="form-container">
       <h2>FILL OUT INFORMATION</h2>
-      <form method="post" action="{% url 'public:signup' %}">
+      {% if error %}
+        <div class="form-error">{{ error }}</div>
+      {% endif %}
+      <form method="post" action="{% url 'public:signup' %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-row">
           <div class="form-group">
@@ -49,8 +52,23 @@
         </div>
 
         <div class="form-group">
+          <label for="college">College</label>
+          <select id="college" name="college" required onchange="updateCourses()">
+            <option value="">Select College</option>
+            <option value="College of Arts & Sciences">College of Arts & Sciences</option>
+            <option value="College of Business Management & Accountancy">College of Business Management & Accountancy</option>
+            <option value="College of Computer Studies">College of Computer Studies</option>
+            <option value="College of Education">College of Education</option>
+            <option value="College of Engineering">College of Engineering</option>
+            <option value="College of Industrial Technology">College of Industrial Technology</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="course">Course</label>
-          <input type="text" id="course" name="course" required>
+          <select id="course" name="course" required>
+            <option value="">Select College first</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -69,12 +87,107 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="profile_picture">Profile Picture (Optional)</label>
+          <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="validateFileSize(this)">
+          <small style="display: block; margin-top: 5px; color: #666; font-size: 0.9rem;">Maximum file size: 2 MB</small>
+          <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 5px;"></small>
+        </div>
+
         <div class="button-row">
           <a href="{% url 'public:login' %}" class="btn back">BACK</a>
-          <button type="submit" class="btn continue">CONTINUE</button>
+          <button type="submit" class="btn continue" id="submit-btn">CONTINUE</button>
         </div>
       </form>
     </div>
   </main>
+
+  <script>
+    const coursesByCollege = {
+      "College of Arts & Sciences": [
+        "Bachelor of Arts in English Language",
+        "Bachelor of Arts in Social Science",
+        "Bachelor of Public Administration",
+        "Bachelor of Science in Applied Mathematics",
+        "Bachelor of Science in Psychology"
+      ],
+      "College of Business Management & Accountancy": [
+        "Bachelor of Science in Hospitality Management"
+      ],
+      "College of Computer Studies": [
+        "Bachelor of Science in Information Systems"
+      ],
+      "College of Education": [
+        "Bachelor of Early Childhood Education",
+        "Bachelor of Elementary Education",
+        "Bachelor of Physical Education",
+        "Bachelor of Secondary Education, major in English",
+        "Bachelor of Secondary Education, major in Filipino",
+        "Bachelor of Secondary Education, major in Mathematics",
+        "Bachelor of Secondary Education, major in Science",
+        "Bachelor of Special Needs Education",
+        "Bachelor of Technology & Livelihood Education, major in Home Economics"
+      ],
+      "College of Engineering": [
+        "Bachelor of Science in Civil Engineering"
+      ],
+      "College of Industrial Technology": [
+        "Bachelor of Science in Industrial Technology, major in Architectural Drafting Technology",
+        "Bachelor of Science in Industrial Technology, major in Automotive Technology",
+        "Bachelor of Science in Industrial Technology, major in Electrical Technology",
+        "Bachelor of Science in Industrial Technology, major in Electronics Technology",
+        "Bachelor of Science in Industrial Technology, major in Apparel & Fashion Technology",
+        "Bachelor of Science in Industrial Technology, major in Food Trades/Technology",
+        "Bachelor of Science in Industrial Technology, major in Mechanical Technology",
+        "Bachelor of Science in Industrial Technology, major in Heating, Ventilating, Air-Conditioning & Refrigeration Technology (RAC)"
+      ]
+    };
+
+    function updateCourses() {
+      const collegeSelect = document.getElementById('college');
+      const courseSelect = document.getElementById('course');
+      const selectedCollege = collegeSelect.value;
+
+      // Clear existing options
+      courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+      if (selectedCollege && coursesByCollege[selectedCollege]) {
+        // Add courses for selected college
+        coursesByCollege[selectedCollege].forEach(course => {
+          const option = document.createElement('option');
+          option.value = course;
+          option.textContent = course;
+          courseSelect.appendChild(option);
+        });
+      } else {
+        courseSelect.innerHTML = '<option value="">Select College first</option>';
+      }
+    }
+
+    function validateFileSize(input) {
+      const fileError = document.getElementById('file-size-error');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      if (input.files && input.files[0]) {
+        const fileSize = input.files[0].size;
+        const maxSize = 2 * 1024 * 1024; // 2 MB
+        const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+        
+        if (fileSize > maxSize) {
+          fileError.textContent = `File is too large (${fileSizeMB} MB). Please select an image smaller than 2 MB.`;
+          fileError.style.display = 'block';
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          input.value = '';
+        } else {
+          fileError.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+      }
+    }
+  </script>
 </body>
 </html>

@@ -149,6 +149,7 @@ def signup(request):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         middle_initial = request.POST.get('middle_initial', '').strip()
+        assigned_college = request.POST.get('assigned_college', '').strip()
         title = request.POST.get('title', '').strip()
         bio = request.POST.get('bio', '').strip()
         profile_picture = request.FILES.get('profile_picture')
@@ -158,6 +159,7 @@ def signup(request):
             'first_name': first_name,
             'last_name': last_name,
             'middle_initial': middle_initial,
+            'assigned_college': assigned_college,
             'title': title,
             'bio': bio,
         }
@@ -171,6 +173,10 @@ def signup(request):
             context['error'] = 'First name and last name are required.'
             return render(request, 'sysadmin/signup.html', context)
 
+        if not assigned_college:
+            context['error'] = 'Please select an assigned college.'
+            return render(request, 'sysadmin/signup.html', context)
+
         if password != confirm_password:
             context['error'] = 'Passwords do not match.'
             return render(request, 'sysadmin/signup.html', context)
@@ -179,6 +185,14 @@ def signup(request):
             context['error'] = 'An account with this email already exists.'
             return render(request, 'sysadmin/signup.html', context)
 
+        # Validate profile picture size (2 MB limit)
+        if profile_picture:
+            max_size = 2 * 1024 * 1024  # 2 MB in bytes
+            if profile_picture.size > max_size:
+                size_mb = profile_picture.size / (1024 * 1024)
+                context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
+                return render(request, 'sysadmin/signup.html', context)
+
         try:
             # Create user with counselor information
             user = User.objects.create_user(username=email, email=email, password=password)
@@ -186,12 +200,18 @@ def signup(request):
             user.first_name = first_name
             user.last_name = last_name
             
+            # Process profile picture if uploaded
+            image_binary = None
+            if profile_picture:
+                image_binary = profile_picture.read()
+            
             # Set the new counselor fields using raw SQL since they're not in the model
             from django.db import connection
+            from psycopg2 import Binary
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "UPDATE auth_user SET middle_initial = %s, title = %s, bio = %s WHERE id = %s",
-                    [middle_initial, title, bio, user.id]
+                    "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s, image_data = %s WHERE id = %s",
+                    [middle_initial, assigned_college, title, bio, Binary(image_binary) if image_binary else None, user.id]
                 )
             
             user.save()
@@ -394,7 +414,7 @@ def reschedule_appointment(request, appointment_id):
 
 @login_required
 def analytics(request):
-    """Display analytics dashboard with charts and metrics"""
+    """Display analytics dashboard with charts and metrics - COUNSELOR SPECIFIC"""
     from django.db.models import Count, Q
     from datetime import timedelta
     import json
@@ -402,9 +422,9 @@ def analytics(request):
     today = timezone.now().date()
     thirty_days_ago = today - timedelta(days=30)
     
-    # Get all appointments
-    all_appointments = Appointment.objects.all()
-    recent_appointments = Appointment.objects.filter(created_at__gte=thirty_days_ago)
+    # Get appointments for THIS COUNSELOR ONLY
+    all_appointments = Appointment.objects.filter(counselor=request.user)
+    recent_appointments = all_appointments.filter(created_at__gte=thirty_days_ago)
     
     # KPI Metrics
     total_appointments = all_appointments.count()
@@ -422,12 +442,13 @@ def analytics(request):
     status_labels = [item['status'].title() for item in status_data]
     status_counts = [item['count'] for item in status_data]
     
-    # Appointments by Counselor (for bar chart)
-    counselor_data = all_appointments.values(
-        'counselor__first_name', 'counselor__last_name'
+    # Student Activity (replacing counselor comparison - for bar chart)
+    # Show top students who have appointments with THIS counselor
+    student_data = all_appointments.values(
+        'student__first_name', 'student__last_name'
     ).annotate(count=Count('id')).order_by('-count')[:10]
-    counselor_labels = [f"{item['counselor__first_name']} {item['counselor__last_name']}" for item in counselor_data]
-    counselor_counts = [item['count'] for item in counselor_data]
+    counselor_labels = [f"{item['student__first_name']} {item['student__last_name']}" for item in student_data]
+    counselor_counts = [item['count'] for item in student_data]
     
     # Popular Time Slots (for bar chart)
     timeslot_data = all_appointments.values('timeslot__start_time').annotate(
@@ -468,9 +489,9 @@ def analytics(request):
         monthly_data.append(count)
         monthly_labels.append(month_start.strftime('%b %Y'))
     
-    # Capacity Utilization
-    total_timeslots = Timeslot.objects.filter(date__gte=today).count()
-    available_timeslots = Timeslot.objects.filter(date__gte=today, available=True).count()
+    # Capacity Utilization - THIS COUNSELOR ONLY
+    total_timeslots = Timeslot.objects.filter(user=request.user, date__gte=today).count()
+    available_timeslots = Timeslot.objects.filter(user=request.user, date__gte=today, available=True).count()
     booked_timeslots = all_appointments.filter(
         timeslot__date__gte=today,
         status__in=['pending', 'confirmed']
@@ -512,7 +533,7 @@ def analytics(request):
 
 @login_required
 def reports(request):
-    """Generate comprehensive reports for counselors"""
+    """Generate comprehensive reports for counselors - COUNSELOR SPECIFIC"""
     from django.db.models import Count, Q
     from datetime import timedelta
     
@@ -528,8 +549,9 @@ def reports(request):
     else:
         start_date = end_date - timedelta(days=30)
     
-    # Filter appointments by date range
+    # Filter appointments by date range AND THIS COUNSELOR ONLY
     appointments = Appointment.objects.filter(
+        counselor=request.user,
         created_at__date__gte=start_date,
         created_at__date__lte=end_date
     ).select_related('student', 'counselor', 'timeslot')
@@ -544,15 +566,16 @@ def reports(request):
     completion_rate = (completed / total_appointments * 100) if total_appointments > 0 else 0
     cancellation_rate = (cancelled / total_appointments * 100) if total_appointments > 0 else 0
     
-    # Appointments by Counselor
-    counselor_stats = appointments.values(
-        'counselor__first_name', 'counselor__last_name', 'counselor__email'
-    ).annotate(
-        total=Count('id'),
-        completed=Count('id', filter=Q(status='completed')),
-        cancelled=Count('id', filter=Q(status='cancelled')),
-        pending=Count('id', filter=Q(status='pending'))
-    ).order_by('-total')
+    # This counselor's information (for report header)
+    counselor_stats = [{
+        'counselor__first_name': request.user.first_name,
+        'counselor__last_name': request.user.last_name,
+        'counselor__email': request.user.email,
+        'total': total_appointments,
+        'completed': completed,
+        'cancelled': cancelled,
+        'pending': pending
+    }]
     
     # Appointments by Program/Course
     program_stats = appointments.values('program').annotate(
@@ -622,7 +645,7 @@ def reports(request):
 
 @login_required
 def export_report_pdf(request):
-    """Export report as PDF"""
+    """Export report as PDF - COUNSELOR SPECIFIC"""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
     try:
@@ -647,7 +670,9 @@ def export_report_pdf(request):
     else:
         start_date = end_date - timedelta(days=30)
     
+    # Filter appointments by THIS COUNSELOR ONLY
     appointments = Appointment.objects.filter(
+        counselor=request.user,
         created_at__date__gte=start_date,
         created_at__date__lte=end_date
     ).select_related('student', 'counselor', 'timeslot')
@@ -661,13 +686,15 @@ def export_report_pdf(request):
     completion_rate = (completed / total_appointments * 100) if total_appointments > 0 else 0
     cancellation_rate = (cancelled / total_appointments * 100) if total_appointments > 0 else 0
     
-    counselor_stats = appointments.values(
-        'counselor__first_name', 'counselor__last_name', 'counselor__email'
-    ).annotate(
-        total=Count('id'),
-        completed=Count('id', filter=Q(status='completed')),
-        cancelled=Count('id', filter=Q(status='cancelled'))
-    ).order_by('-total')
+    # This counselor's information (for PDF header)
+    counselor_stats = [{
+        'counselor__first_name': request.user.first_name,
+        'counselor__last_name': request.user.last_name,
+        'counselor__email': request.user.email,
+        'total': total_appointments,
+        'completed': completed,
+        'cancelled': cancelled
+    }]
     
     program_stats = appointments.values('program').annotate(
         count=Count('id')
@@ -701,3 +728,169 @@ def export_report_pdf(request):
     response['Content-Disposition'] = f'attachment; filename="report_{start_date}_to_{end_date}.pdf"'
     
     return response
+
+
+def profile_picture(request, user_id):
+    """Serve profile picture from database"""
+    from django.db import connection
+    from django.http import HttpResponse, HttpResponseNotFound
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT image_data FROM auth_user WHERE id = %s", [user_id])
+        row = cursor.fetchone()
+        
+        if row and row[0]:
+            image_data = bytes(row[0])
+            # Try to determine content type from image data
+            content_type = 'image/jpeg'  # default
+            if image_data.startswith(b'\x89PNG'):
+                content_type = 'image/png'
+            elif image_data.startswith(b'GIF'):
+                content_type = 'image/gif'
+            elif image_data.startswith(b'\xff\xd8\xff'):
+                content_type = 'image/jpeg'
+            
+            response = HttpResponse(image_data, content_type=content_type)
+            response['Cache-Control'] = 'public, max-age=86400'  # Cache for 1 day
+            return response
+    
+    # Return a default placeholder image or 404
+    return HttpResponseNotFound('No profile picture found')
+
+
+@login_required
+def profile(request):
+    """Manage counselor profile"""
+    from django.db import connection
+    
+    # Get current counselor information
+    user = request.user
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT middle_initial, assigned_college, title, bio FROM auth_user WHERE id = %s", [user.id])
+        row = cursor.fetchone()
+        middle_initial = row[0] if row and row[0] else ''
+        assigned_college = row[1] if row and row[1] else ''
+        title = row[2] if row and row[2] else ''
+        bio = row[3] if row and row[3] else ''
+    
+    if request.method == 'POST':
+        # Get form data
+        email = request.POST.get('email', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        middle_initial_new = request.POST.get('middle_initial', '').strip()
+        assigned_college_new = request.POST.get('assigned_college', '').strip()
+        title_new = request.POST.get('title', '').strip()
+        bio_new = request.POST.get('bio', '').strip()
+        profile_picture = request.FILES.get('profile_picture')
+        current_password = request.POST.get('current_password', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+        
+        context = {
+            'email': email,
+            'first_name': first_name,
+            'last_name': last_name,
+            'middle_initial': middle_initial_new,
+            'assigned_college': assigned_college_new,
+            'title': title_new,
+            'bio': bio_new,
+        }
+        
+        # Validation
+        if not email or not first_name or not last_name:
+            context['error'] = 'Email, first name, and last name are required.'
+            return render(request, 'sysadmin/profile.html', context)
+        
+        if not assigned_college_new:
+            context['error'] = 'Please select an assigned college.'
+            return render(request, 'sysadmin/profile.html', context)
+        
+        # Check if email is taken by another user
+        if User.objects.filter(email=email).exclude(id=user.id).exists():
+            context['error'] = 'This email is already taken by another user.'
+            return render(request, 'sysadmin/profile.html', context)
+        
+        # Validate profile picture size (2 MB limit)
+        if profile_picture:
+            max_size = 2 * 1024 * 1024  # 2 MB in bytes
+            if profile_picture.size > max_size:
+                size_mb = profile_picture.size / (1024 * 1024)
+                context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
+                return render(request, 'sysadmin/profile.html', context)
+        
+        # Handle password change
+        if new_password or confirm_password:
+            if not current_password:
+                context['error'] = 'Current password is required to change password.'
+                return render(request, 'sysadmin/profile.html', context)
+            
+            if not user.check_password(current_password):
+                context['error'] = 'Current password is incorrect.'
+                return render(request, 'sysadmin/profile.html', context)
+            
+            if new_password != confirm_password:
+                context['error'] = 'New passwords do not match.'
+                return render(request, 'sysadmin/profile.html', context)
+            
+            if len(new_password) < 6:
+                context['error'] = 'New password must be at least 6 characters long.'
+                return render(request, 'sysadmin/profile.html', context)
+        
+        try:
+            # Update user information
+            user.email = email
+            user.username = email
+            user.first_name = first_name
+            user.last_name = last_name
+            
+            # Update password if provided
+            if new_password:
+                user.set_password(new_password)
+            
+            user.save()
+            
+            # Process profile picture if uploaded
+            image_binary = None
+            if profile_picture:
+                image_binary = profile_picture.read()
+            
+            # Update counselor-specific fields using raw SQL
+            from psycopg2 import Binary
+            with connection.cursor() as cursor:
+                if profile_picture:
+                    cursor.execute(
+                        "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s, image_data = %s WHERE id = %s",
+                        [middle_initial_new, assigned_college_new, title_new, bio_new, Binary(image_binary), user.id]
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s WHERE id = %s",
+                        [middle_initial_new, assigned_college_new, title_new, bio_new, user.id]
+                    )
+            
+            messages.success(request, 'Profile updated successfully!')
+            
+            # If password was changed, re-authenticate
+            if new_password:
+                user = authenticate(request, username=email, password=new_password)
+                if user:
+                    login(request, user)
+            
+            return redirect('sysadmin:profile')
+            
+        except Exception as e:
+            context['error'] = f'Error updating profile: {str(e)}'
+            return render(request, 'sysadmin/profile.html', context)
+    
+    # GET request - display form with current data
+    context = {
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'middle_initial': middle_initial,
+        'assigned_college': assigned_college,
+        'title': title,
+        'bio': bio,
+    }
+    return render(request, 'sysadmin/profile.html', context)

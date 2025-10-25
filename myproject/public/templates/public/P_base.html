@@ -5,8 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Home{% endblock %} • CHMSU Guidance Connect</title>
-  <link rel="stylesheet" href="{% static 'css/P_base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/appointment.css' %}">
+  <link rel="stylesheet" href="{% static 'css/P_base.css' %}?v=2.0">
+  <link rel="stylesheet" href="{% static 'css/appointment.css' %}?v=3.0">
+  {% block extra_css %}{% endblock %}
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -35,16 +36,20 @@
       </div>
       <nav class="menu">
         <a class="menu-item{% if request.resolver_match.url_name == 'appointments' %} active{% endif %}" href="{% url 'public:appointments' %}">
-          <span class="menu-icon">📅</span>
+          <img src="{% static 'icons/appointment.png' %}" alt="Appointments" class="menu-icon-img">
           <span class="menu-text">Appointments</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'my_appointments' %} active{% endif %}" href="{% url 'public:my_appointments' %}">
-          <span class="menu-icon">📋</span>
+          <img src="{% static 'icons/my appointment.png' %}" alt="My Appointments" class="menu-icon-img">
           <span class="menu-text">My Appointments</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'public:notifications' %}">
-          <span class="menu-icon">🔔</span>
+          <img src="{% static 'icons/bell.png' %}" alt="Notifications" class="menu-icon-img">
           <span class="menu-text">Notifications</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'public:profile' %}">
+          <img src="{% static 'icons/user.png' %}" alt="Profile" class="menu-icon-img">
+          <span class="menu-text">Manage Profile</span>
         </a>
       </nav>
     </aside>

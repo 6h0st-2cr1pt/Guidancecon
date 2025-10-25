@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHMSU Guidance Connect • Sign up</title>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}?v=5.0">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
 
 </head>
@@ -35,46 +35,61 @@
       <form method="post" action="{% url 'sysadmin:signup' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="form-section">
-          <h3>Account Information</h3>
-          <label for="id_email">Email</label>
-          <input class="input-border" type="email" id="id_email" name="email" placeholder="Enter your Email" value="{{ email }}" required autofocus>
+        <div class="form-sections-container">
+          <div class="form-section">
+            <h3>Account Information</h3>
+            <label for="id_email">Email</label>
+            <input class="input-border" type="email" id="id_email" name="email" placeholder="Enter your Email" value="{{ email }}" required autofocus>
 
-          <label for="id_password">Password</label>
-          <input class="input-border" type="password" id="id_password" name="password" placeholder="Create Password" required>
+            <label for="id_password">Password</label>
+            <input class="input-border" type="password" id="id_password" name="password" placeholder="Create Password" required>
 
-          <label for="id_confirm_password">Confirm Password</label>
-          <input class="input-border" type="password" id="id_confirm_password" name="confirm_password" placeholder="Confirm Password" required>
-        </div>
-
-        <div class="form-section">
-          <h3>Counselor Information</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="id_first_name">First Name</label>
-              <input class="input-border" type="text" id="id_first_name" name="first_name" placeholder="First Name" value="{{ first_name }}" required>
-            </div>
-            <div class="form-group">
-              <label for="id_middle_initial">Middle Initial</label>
-              <input class="input-border" type="text" id="id_middle_initial" name="middle_initial" placeholder="MI" value="{{ middle_initial }}" maxlength="10">
-            </div>
-            <div class="form-group">
-              <label for="id_last_name">Last Name</label>
-              <input class="input-border" type="text" id="id_last_name" name="last_name" placeholder="Last Name" value="{{ last_name }}" required>
-            </div>
+            <label for="id_confirm_password">Confirm Password</label>
+            <input class="input-border" type="password" id="id_confirm_password" name="confirm_password" placeholder="Confirm Password" required>
           </div>
 
-          <label for="id_title">Title/Qualifications</label>
-          <input class="input-border" type="text" id="id_title" name="title" placeholder="e.g., PhD, RGC, LPT" value="{{ title }}">
+          <div class="form-section">
+            <h3>Counselor Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                <input class="input-border" type="text" id="id_first_name" name="first_name" placeholder="First Name" value="{{ first_name }}" required>
+              </div>
+              <div class="form-group">
+                <label for="id_middle_initial">Middle Initial</label>
+                <input class="input-border" type="text" id="id_middle_initial" name="middle_initial" placeholder="MI" value="{{ middle_initial }}" maxlength="10">
+              </div>
+              <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                <input class="input-border" type="text" id="id_last_name" name="last_name" placeholder="Last Name" value="{{ last_name }}" required>
+              </div>
+            </div>
 
-          <label for="id_bio">Bio/Description</label>
-          <textarea class="input-border" id="id_bio" name="bio" placeholder="Brief description about yourself" rows="3">{{ bio }}</textarea>
+            <label for="id_assigned_college">Assigned College</label>
+            <select class="input-border" id="id_assigned_college" name="assigned_college" required>
+              <option value="">Select College</option>
+              <option value="College of Arts & Sciences" {% if assigned_college == 'College of Arts & Sciences' %}selected{% endif %}>College of Arts & Sciences</option>
+              <option value="College of Business Management & Accountancy" {% if assigned_college == 'College of Business Management & Accountancy' %}selected{% endif %}>College of Business Management & Accountancy</option>
+              <option value="College of Computer Studies" {% if assigned_college == 'College of Computer Studies' %}selected{% endif %}>College of Computer Studies</option>
+              <option value="College of Education" {% if assigned_college == 'College of Education' %}selected{% endif %}>College of Education</option>
+              <option value="College of Engineering" {% if assigned_college == 'College of Engineering' %}selected{% endif %}>College of Engineering</option>
+              <option value="College of Industrial Technology" {% if assigned_college == 'College of Industrial Technology' %}selected{% endif %}>College of Industrial Technology</option>
+            </select>
 
-          <label for="id_profile_picture">Profile Picture</label>
-          <input class="input-border" type="file" id="id_profile_picture" name="profile_picture" accept="image/*">
+            <label for="id_title">Title/Qualifications</label>
+            <input class="input-border" type="text" id="id_title" name="title" placeholder="e.g., PhD, RGC, LPT" value="{{ title }}">
+
+            <label for="id_bio">Bio/Description</label>
+            <textarea class="input-border" id="id_bio" name="bio" placeholder="Brief description about yourself" rows="3">{{ bio }}</textarea>
+
+            <label for="id_profile_picture">Profile Picture</label>
+            <input class="input-border" type="file" id="id_profile_picture" name="profile_picture" accept="image/*" onchange="validateFileSize(this)">
+            <small class="italic-text" style="display: block; margin-top: 5px; color: #666;">Maximum file size: 2 MB</small>
+            <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 5px;"></small>
+          </div>
         </div>
 
-        <button type="submit" class="btn-login">Sign up</button>
+        <button type="submit" class="btn-login" id="submit-btn">Sign up</button>
       </form>
 
       <p class="signup-text">
@@ -82,6 +97,33 @@
       </p>
     </div>
   </main>
+
+  <script>
+    function validateFileSize(input) {
+      const fileError = document.getElementById('file-size-error');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      if (input.files && input.files[0]) {
+        const fileSize = input.files[0].size; // Size in bytes
+        const maxSize = 2 * 1024 * 1024; // 2 MB in bytes
+        const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+        
+        if (fileSize > maxSize) {
+          fileError.textContent = `File is too large (${fileSizeMB} MB). Please select an image smaller than 2 MB.`;
+          fileError.style.display = 'block';
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          input.value = ''; // Clear the file input
+        } else {
+          fileError.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+      }
+    }
+  </script>
 
 </body>
 </html>
