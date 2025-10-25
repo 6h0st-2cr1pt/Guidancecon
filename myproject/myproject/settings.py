@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-gl_@(ma(v2(p9chw6emig_^pj)0g79y&l_nr&4^5eo#-$^h_@8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -113,6 +113,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# Email Configuration for Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'jonaldsabordo@gmail.com'
+EMAIL_HOST_PASSWORD = 'YOUR_NEW_APP_PASSWORD_HERE'  # Replace with your new Gmail App Password (16 characters, no spaces)
+DEFAULT_FROM_EMAIL = 'CHMSU Guidance Connect <jonaldsabordo@gmail.com>'
+ADMIN_EMAIL = 'jonaldsabordo@gmail.com'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

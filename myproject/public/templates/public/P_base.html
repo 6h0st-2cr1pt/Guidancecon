@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/P_base.css' %}">
   <link rel="stylesheet" href="{% static 'css/appointment.css' %}">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header class="topbar">
@@ -21,7 +22,7 @@
       {% if request.user.is_authenticated %}
       <form method="post" action="{% url 'public:logout' %}" style="display:inline; margin-left:12px;">
         {% csrf_token %}
-        <button type="submit" class="btn" style="background:#ef4444; color:#fff; padding:6px 10px; border-radius:8px; border:none; cursor:pointer;">Logout</button>
+        <button type="submit" class="logout-btn">Logout</button>
       </form>
       {% endif %}
     </div>
@@ -30,12 +31,21 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-section">
-        <div class="sidebar-title">MENU</div>
+        <div class="sidebar-title">STUDENT</div>
       </div>
       <nav class="menu">
-        <a class="menu-item" href="{% url 'public:appointments' %}">Appointments</a>
-        <a class="menu-item" href="{% url 'public:my_appointments' %}">My Appointments</a>
-        <a class="menu-item" href="{% url 'public:notifications' %}">Notifications</a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'appointments' %} active{% endif %}" href="{% url 'public:appointments' %}">
+          <span class="menu-icon">📅</span>
+          <span class="menu-text">Appointments</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'my_appointments' %} active{% endif %}" href="{% url 'public:my_appointments' %}">
+          <span class="menu-icon">📋</span>
+          <span class="menu-text">My Appointments</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'public:notifications' %}">
+          <span class="menu-icon">🔔</span>
+          <span class="menu-text">Notifications</span>
+        </a>
       </nav>
     </aside>
 

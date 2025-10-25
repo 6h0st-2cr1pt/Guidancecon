@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Admin{% endblock %} • CHMSU Guidance Connect</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=5.0">
+  {% block extra_css %}{% endblock %}
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header class="topbar">
@@ -15,13 +17,25 @@
       <span class="brand-name">CARLOS HILADO MEMORIAL STATE UNIVERSITY</span>
     </div>
     <div class="user-pill">
-      <span class="avatar">👤</span>
-      <span class="user-name">{{ request.user.is_authenticated|yesno:'Admin,Guest' }}</span>
       {% if request.user.is_authenticated %}
-      <form method="post" action="{% url 'sysadmin:logout' %}" style="display:inline; margin-left:12px;">
-        {% csrf_token %}
-        <button type="submit" class="btn" style="background:#ef4444; color:#fff; padding:6px 10px; border-radius:8px; border:none; cursor:pointer;">Logout</button>
-      </form>
+        {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" alt="Profile" class="counselor-avatar">
+        {% else %}
+          <div class="counselor-avatar-default">
+            <span class="avatar-text">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
+          </div>
+        {% endif %}
+        <div class="user-info">
+          <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+          <span class="user-title">{{ request.user.title|default:"Counselor" }}</span>
+        </div>
+        <form method="post" action="{% url 'sysadmin:logout' %}" style="display:inline; margin-left:12px;">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      {% else %}
+        <span class="avatar">👤</span>
+        <span class="user-name">Guest</span>
       {% endif %}
     </div>
   </header>
@@ -29,13 +43,38 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-section">
-        <div class="sidebar-title">COUNSELORS</div>
-        <a class="counselor active" href="#">Julian C. Sian Jr.</a>
+        <div class="sidebar-title">COUNSELOR</div>
+        {% if request.user.is_authenticated %}
+          <div class="counselor-info">
+            <div class="counselor-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+            <div class="counselor-role">{{ request.user.title|default:"Guidance Counselor" }}</div>
+          </div>
+        {% endif %}
       </div>
       <nav class="menu">
-        <a class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'sysadmin:dashboard' %}">Appointments</a>
-        <a class="menu-item {% if request.resolver_match.url_name == 'availability' %}active{% endif %}" href="{% url 'sysadmin:availability' %}">Schedule Availability</a>
-        <a class="menu-item" href="#">Notifications</a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}" href="{% url 'sysadmin:dashboard' %}">
+          <img src="{{ MEDIA_URL }}icons/dashboard.png" alt="Dashboard" class="menu-icon-img">
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'availability' %} active{% endif %}" href="{% url 'sysadmin:availability' %}">
+          <img src="{{ MEDIA_URL }}icons/schedule.png" alt="Schedule" class="menu-icon-img">
+          <span class="menu-text">Schedule Availability</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'analytics' %} active{% endif %}" href="{% url 'sysadmin:analytics' %}">
+          <img src="{{ MEDIA_URL }}icons/analytics.png" alt="Analytics" class="menu-icon-img">
+          <span class="menu-text">Analytics</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'reports' %} active{% endif %}" href="{% url 'sysadmin:reports' %}">
+          <img src="{{ MEDIA_URL }}icons/report.png" alt="Reports" class="menu-icon-img">
+          <span class="menu-text">Reports</span>
+        </a>
+        <a class="menu-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'sysadmin:notifications' %}">
+          <img src="{{ MEDIA_URL }}icons/notification.png" alt="Notifications" class="menu-icon-img">
+          <span class="menu-text">Notifications</span>
+          {% if unread_count and unread_count > 0 %}
+            <span class="notification-badge">{{ unread_count }}</span>
+          {% endif %}
+        </a>
       </nav>
     </aside>
     <main class="content">
@@ -44,5 +83,3 @@
   </div>
 </body>
 </html>
-
-

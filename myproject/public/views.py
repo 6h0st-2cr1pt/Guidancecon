@@ -108,29 +108,30 @@ def appointments(request):
     """Display appointment booking page with counselor selection and time slots"""
     counselors = User.objects.filter(is_staff=True, is_active=True)
     
-    # Add counselor profile information
+    # Add counselor information from User model using raw SQL
+    from django.db import connection
     counselors_with_profiles = []
     for counselor in counselors:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT middle_initial, title, bio FROM auth_user WHERE id = %s", [counselor.id])
+            row = cursor.fetchone()
+            middle_initial = row[0] if row[0] else ''
+            title = row[1] if row[1] else ''
+            bio = row[2] if row[2] else ''
+        
+        # Helper function to get full name with middle initial
+        def get_full_name_with_mi(user, mi):
+            if mi:
+                return f"{user.first_name} {mi}. {user.last_name}"
+            return f"{user.first_name} {user.last_name}"
+        
         counselor_data = {
             'id': counselor.id,
             'username': counselor.username,
-            'name': counselor.get_full_name(),
-            'title': '',
-            'has_profile': False
+            'name': get_full_name_with_mi(counselor, middle_initial),
+            'title': title,
+            'has_profile': bool(title or bio)
         }
-        
-        # Try to get counselor profile
-        try:
-            from sysadmin.models import CounselorProfile
-            profile = CounselorProfile.objects.get(user=counselor)
-            counselor_data.update({
-                'name': profile.get_full_name(),
-                'title': profile.title,
-                'has_profile': True
-            })
-        except CounselorProfile.DoesNotExist:
-            pass
-        
         counselors_with_profiles.append(counselor_data)
     
     context = {
@@ -181,27 +182,29 @@ def counselor_availability(request, counselor_id):
             'available': ts.available,
         })
     
-    # Get counselor profile information
+    # Get counselor information from User model using raw SQL
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT middle_initial, title, bio, profile_picture FROM auth_user WHERE id = %s", [counselor.id])
+        row = cursor.fetchone()
+        middle_initial = row[0] if row[0] else ''
+        title = row[1] if row[1] else ''
+        bio = row[2] if row[2] else ''
+        profile_picture = row[3] if row[3] else None
+    
+    # Helper function to get full name with middle initial
+    def get_full_name_with_mi(user, mi):
+        if mi:
+            return f"{user.first_name} {mi}. {user.last_name}"
+        return f"{user.first_name} {user.last_name}"
+    
     counselor_info = {
         'id': counselor.id,
-        'name': counselor.get_full_name(),
-        'title': '',
-        'bio': '',
-        'profile_picture': None,
+        'name': get_full_name_with_mi(counselor, middle_initial),
+        'title': title,
+        'bio': bio,
+        'profile_picture': profile_picture,
     }
-    
-    # Try to get counselor profile if it exists
-    try:
-        from sysadmin.models import CounselorProfile
-        profile = CounselorProfile.objects.get(user=counselor)
-        counselor_info.update({
-            'name': profile.get_full_name(),
-            'title': profile.title,
-            'bio': profile.bio,
-            'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-        })
-    except CounselorProfile.DoesNotExist:
-        pass
     
     return JsonResponse({
         'counselor': counselor_info['name'],
@@ -265,7 +268,16 @@ def book_appointment(request):
             timeslot.available = False
             timeslot.save()
             
-            messages.success(request, 'Appointment booked successfully!')
+            # Send email notification to student
+            from .utils import send_appointment_confirmation_email, create_counselor_notification
+            email_sent = send_appointment_confirmation_email(request.user, appointment)
+            
+            # Create notification for counselor
+            notification_created = create_counselor_notification(counselor, appointment, 'appointment_booked')
+            
+            # Always show success message regardless of email status
+            messages.success(request, 'Appointment booked successfully! Check your appointments page.')
+            
             return redirect('public:my_appointments')
             
         except Exception as e:
@@ -307,15 +319,19 @@ def cancel_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, student=request.user)
     
     if appointment.status in ['pending', 'confirmed']:
-        # Mark timeslot as available again
-        appointment.timeslot.available = True
-        appointment.timeslot.save()
-        
-        # Cancel appointment
-        appointment.status = 'cancelled'
-        appointment.save()
-        
-        messages.success(request, 'Appointment cancelled successfully.')
+            # Mark timeslot as available again
+            appointment.timeslot.available = True
+            appointment.timeslot.save()
+            
+            # Cancel appointment
+            appointment.status = 'cancelled'
+            appointment.save()
+            
+            # Create notification for counselor about cancellation
+            from .utils import create_counselor_notification
+            create_counselor_notification(appointment.counselor, appointment, 'appointment_cancelled')
+            
+            messages.success(request, 'Appointment cancelled successfully.')
     else:
         messages.error(request, 'This appointment cannot be cancelled.')
     

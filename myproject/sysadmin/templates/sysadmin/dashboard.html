@@ -1,38 +1,667 @@
 {% extends 'sysadmin/base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-  <h2 class="page-title">Booked Counseling</h2>
+  <!-- Today's Appointments Overview -->
+  {% if today_appointments %}
+  <div class="dashboard-overview enterprise-card">
+    <h3 class="overview-title">📅 Today's Appointments ({{ today|date:"M d, Y" }})</h3>
+    <div class="overview-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ today_appointments.count }}</span>
+        <span class="stat-label">Appointments Today</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Upcoming Appointments -->
+  <h2 class="page-title">📋 Upcoming Appointments</h2>
   <section class="section">
     <div class="section-body">
-      <div class="appointment">
-        <div class="avatar-circle">🧑</div>
+      {% if upcoming_appointments %}
+        {% for appointment in upcoming_appointments %}
+        <div class="appointment {% if appointment.timeslot.date == today %}today{% endif %}">
+          <div class="avatar-circle">
+            {{ appointment.student.first_name|first|default:appointment.student.username|first|upper }}
+          </div>
         <div class="client">
-          <h4>Isabelle Faith J. Barcas</h4>
-          <p>CAS · BS PSYCHOLOGY 3B</p>
+            <h4>{{ appointment.student.get_full_name|default:appointment.student.username }}</h4>
+            <p>{{ appointment.program|default:"No Program Specified" }}</p>
+            <p class="appointment-status status-{{ appointment.status }}">{{ appointment.status|title }}</p>
         </div>
         <div class="actions">
-          <span class="pill">Schedule: 9:00 - 10:00 AM · March 7, 2025</span>
-          <button class="btn btn-danger">Cancel</button>
-          <button class="btn btn-secondary">Reschedule</button>
+            <span class="pill">
+              {{ appointment.timeslot.start_time|time:"g:i A" }} - {{ appointment.timeslot.date|date:"M d, Y" }}
+            </span>
+            <div class="appointment-actions">
+              {% if appointment.status == 'pending' %}
+                <form method="post" action="{% url 'sysadmin:confirm_appointment' appointment.id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary" onclick="return confirm('Are you sure you want to confirm this appointment?')">Confirm</button>
+                </form>
+              {% elif appointment.status == 'confirmed' %}
+                <form method="post" action="{% url 'sysadmin:complete_appointment' appointment.id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary" onclick="return confirm('Mark this appointment as completed?')">Complete</button>
+                </form>
+              {% endif %}
+              {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                <button type="button" class="btn btn-warning" onclick="openRescheduleModal({{ appointment.id }})">Reschedule</button>
+                <form method="post" action="{% url 'sysadmin:cancel_appointment' appointment.id %}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
         </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-appointments">
+          <div class="no-appointments-icon">📅</div>
+          <h3>No Upcoming Appointments</h3>
+          <p>You don't have any upcoming appointments scheduled.</p>
       </div>
+      {% endif %}
     </div>
   </section>
 
-  <h2 class="page-title">Past Appointments</h2>
+  <!-- Past Appointments -->
+  <h2 class="page-title">📚 Past Appointments</h2>
   <section class="section">
     <div class="section-body">
+      {% if past_appointments %}
+        {% for appointment in past_appointments %}
       <div class="appointment past">
-        <div class="avatar-circle">🧑</div>
+          <div class="avatar-circle">
+            {{ appointment.student.first_name|first|default:appointment.student.username|first|upper }}
+          </div>
         <div class="client">
-          <h4>Katrina J. Mogasa</h4>
-          <p>CAS · BS PSYCHOLOGY 3B</p>
+            <h4>{{ appointment.student.get_full_name|default:appointment.student.username }}</h4>
+            <p>{{ appointment.program|default:"No Program Specified" }}</p>
+            <p class="appointment-status status-{{ appointment.status }}">{{ appointment.status|title }}</p>
+          </div>
+          <div class="actions">
+            <span class="pill status-{{ appointment.status }}">
+              {% if appointment.status == 'completed' %}
+                Completed
+              {% elif appointment.status == 'cancelled' %}
+                Cancelled
+              {% else %}
+                {{ appointment.status|title }}
+              {% endif %}
+            </span>
+            <span class="appointment-date">
+              {{ appointment.timeslot.start_time|time:"g:i A" }} - {{ appointment.timeslot.date|date:"M d, Y" }}
+            </span>
+          </div>
         </div>
-        <div class="actions">
-          <span class="pill">Done</span>
-          <span>Schedule: 9:00 - 10:00 AM · March 7, 2025</span>
+        {% endfor %}
+      {% else %}
+        <div class="no-appointments">
+          <div class="no-appointments-icon">📚</div>
+          <h3>No Past Appointments</h3>
+          <p>You don't have any past appointments yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Quick Stats -->
+  <div class="dashboard-stats enterprise-card">
+    <h3 class="stats-title">📊 Quick Statistics</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ upcoming_appointments.count }}</div>
+          <div class="stat-label">Upcoming</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ past_appointments.count }}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ unread_count }}</div>
+          <div class="stat-label">Notifications</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+
+  <style>
+    .dashboard-overview {
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .overview-title {
+      color: var(--text-dark);
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .overview-stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: var(--light-gray);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark-green);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .appointment.today {
+      border-left: 4px solid var(--dark-green);
+      background: var(--light-gray);
+    }
+
+    .appointment-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-completed {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .btn-warning {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .btn-warning:hover {
+      background: #e55a2b;
+    }
+
+    .appointment-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .appointment-date {
+      color: var(--text-dark);
+      font-size: 0.8rem;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .no-appointments {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .no-appointments-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.6;
+      color: var(--dark-green);
+    }
+
+    .no-appointments h3 {
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .no-appointments p {
+      color: var(--text-dark);
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .dashboard-stats {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .stats-title {
+      color: var(--text-dark);
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--light-gray);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      color: var(--dark-green);
+    }
+
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-card .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-dark);
+      font-weight: 500;
+      opacity: 0.8;
+    }
+  </style>
+
+  <script>
+    function openRescheduleModal(appointmentId) {
+      // Remove any existing modal
+      const existingModal = document.querySelector('.reschedule-modal-content');
+      if (existingModal) {
+        existingModal.closest('div').remove();
+      }
+      
+      // Create modal container
+      const modalContainer = document.createElement('div');
+      modalContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      `;
+      
+      modalContainer.innerHTML = `
+        <div class="reschedule-modal-content glassmorphism" style="
+          background: var(--glass-bg);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--glass-border);
+          border-radius: 20px;
+          width: 90%;
+          max-width: 500px;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: var(--shadow-xl);
+        ">
+          <div class="modal-header" style="
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+            color: white;
+            padding: 24px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          ">
+            <h3 style="margin: 0; font-size: 1.4rem; font-weight: 700;">🔄 Reschedule Appointment</h3>
+            <button class="close-btn" onclick="closeRescheduleModal()" style="
+              background: none;
+              border: none;
+              color: white;
+              font-size: 28px;
+              font-weight: bold;
+              cursor: pointer;
+              line-height: 1;
+              transition: all 0.3s ease;
+              padding: 0;
+              width: 32px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='none'; this.style.transform='scale(1)'">&times;</button>
+          </div>
+          
+          <div class="modal-body" style="padding: 30px;">
+            <div class="appointment-info" style="
+              margin-bottom: 30px;
+              padding: 20px;
+              background: rgba(16, 185, 129, 0.05);
+              border: 1px solid rgba(16, 185, 129, 0.1);
+              border-radius: 16px;
+            ">
+              <div class="student-info" style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                <div class="student-avatar" style="
+                  width: 50px;
+                  height: 50px;
+                  border-radius: 50%;
+                  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 20px;
+                  color: white;
+                  font-weight: 600;
+                  box-shadow: var(--shadow-lg);
+                ">
+                  Loading...
+                </div>
+                <div class="student-details">
+                  <h4 style="margin: 0 0 4px 0; color: var(--text-primary); font-size: 1.2rem; font-weight: 600;">Loading...</h4>
+                  <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Loading...</p>
+                </div>
+              </div>
+              
+              <div class="current-appointment">
+                <h5 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 1rem; font-weight: 600;">Current Appointment:</h5>
+                <p class="current-time" style="
+                  margin: 0;
+                  color: var(--text-secondary);
+                  font-size: 0.95rem;
+                  font-weight: 500;
+                  background: var(--glass-bg);
+                  padding: 8px 12px;
+                  border-radius: 8px;
+                  border: 1px solid var(--glass-border);
+                ">Loading...</p>
+              </div>
+            </div>
+            
+            <form id="rescheduleForm" method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value="${document.querySelector('[name=csrfmiddlewaretoken]').value}">
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label for="new_date" style="
+                  display: block;
+                  margin-bottom: 8px;
+                  color: var(--text-primary);
+                  font-weight: 600;
+                  font-size: 0.95rem;
+                ">Select New Date:</label>
+                <select id="new_date" name="new_date" class="form-select" required style="
+                  width: 100%;
+                  padding: 12px 16px;
+                  border: 1px solid var(--glass-border);
+                  border-radius: 12px;
+                  font-size: 1rem;
+                  background: rgba(15, 23, 42, 0.6);
+                  color: var(--text-primary);
+                  transition: all 0.3s ease;
+                  backdrop-filter: blur(10px);
+                  -webkit-backdrop-filter: blur(10px);
+                " onfocus="this.style.outline='none'; this.style.borderColor='var(--primary-green)'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.1)'; this.style.transform='translateY(-2px)'" onblur="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='none'; this.style.transform='translateY(0)'">
+                  <option value="">Choose a date...</option>
+                </select>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label for="new_time" style="
+                  display: block;
+                  margin-bottom: 8px;
+                  color: var(--text-primary);
+                  font-weight: 600;
+                  font-size: 0.95rem;
+                ">Select New Time:</label>
+                <select id="new_time" name="new_time" class="form-select" required style="
+                  width: 100%;
+                  padding: 12px 16px;
+                  border: 1px solid var(--glass-border);
+                  border-radius: 12px;
+                  font-size: 1rem;
+                  background: rgba(15, 23, 42, 0.6);
+                  color: var(--text-primary);
+                  transition: all 0.3s ease;
+                  backdrop-filter: blur(10px);
+                  -webkit-backdrop-filter: blur(10px);
+                " onfocus="this.style.outline='none'; this.style.borderColor='var(--primary-green)'; this.style.boxShadow='0 0 0 3px rgba(16, 185, 129, 0.1)'; this.style.transform='translateY(-2px)'" onblur="this.style.borderColor='var(--glass-border)'; this.style.boxShadow='none'; this.style.transform='translateY(0)'">
+                  <option value="">Choose a time...</option>
+                  <option value="8">8:00 AM - 9:00 AM</option>
+                  <option value="9">9:00 AM - 10:00 AM</option>
+                  <option value="10">10:00 AM - 11:00 AM</option>
+                  <option value="11">11:00 AM - 12:00 PM</option>
+                  <option value="13">1:00 PM - 2:00 PM</option>
+                  <option value="14">2:00 PM - 3:00 PM</option>
+                  <option value="15">3:00 PM - 4:00 PM</option>
+                  <option value="16">4:00 PM - 5:00 PM</option>
+                </select>
+              </div>
+              
+              <div class="form-actions" style="
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+                margin-top: 30px;
+              ">
+                <button type="button" class="btn btn-secondary" onclick="closeRescheduleModal()" style="
+                  padding: 12px 24px;
+                  border: none;
+                  border-radius: 12px;
+                  font-size: 1rem;
+                  font-weight: 600;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  min-width: 120px;
+                  background: linear-gradient(135deg, #6b7280, #4b5563);
+                  color: white;
+                  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+                " onmouseover="this.style.background='linear-gradient(135deg, #5a6268, #4a5568)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(107, 114, 128, 0.4)'" onmouseout="this.style.background='linear-gradient(135deg, #6b7280, #4b5563)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(107, 114, 128, 0.3)'">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="
+                  padding: 12px 24px;
+                  border: none;
+                  border-radius: 12px;
+                  font-size: 1rem;
+                  font-weight: 600;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  min-width: 120px;
+                  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+                  color: white;
+                  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+                " onmouseover="this.style.background='linear-gradient(135deg, var(--primary-green-dark), #047857)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.background='linear-gradient(135deg, var(--primary-green), var(--primary-green-dark))'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)'">Reschedule Appointment</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to page
+      document.body.appendChild(modalContainer);
+      
+      // Load appointment data
+      fetch(`/sysadmin/appointments/${appointmentId}/reschedule/`)
+        .then(response => response.text())
+        .then(html => {
+          // Extract the modal content from the response
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const modalContent = doc.querySelector('.reschedule-modal');
+          
+          if (modalContent) {
+            // Extract the appointment data from the response
+            const studentName = modalContent.querySelector('.student-details h4')?.textContent || 'Unknown Student';
+            const studentProgram = modalContent.querySelector('.student-details p')?.textContent || 'No Program';
+            const currentTime = modalContent.querySelector('.current-time')?.textContent || 'Unknown Time';
+            const studentInitial = studentName.charAt(0).toUpperCase();
+            
+            // Update the modal content with real data while preserving styles
+            const studentAvatar = modalContainer.querySelector('.student-avatar');
+            const studentDetailsH4 = modalContainer.querySelector('.student-details h4');
+            const studentDetailsP = modalContainer.querySelector('.student-details p');
+            const currentTimeP = modalContainer.querySelector('.current-time');
+            
+            if (studentAvatar) studentAvatar.textContent = studentInitial;
+            if (studentDetailsH4) studentDetailsH4.textContent = studentName;
+            if (studentDetailsP) studentDetailsP.textContent = studentProgram;
+            if (currentTimeP) currentTimeP.textContent = currentTime;
+            
+            // Populate date options
+            const dateSelect = modalContainer.querySelector('#new_date');
+            if (dateSelect) {
+              // Clear existing options except the first one
+              dateSelect.innerHTML = '<option value="">Choose a date...</option>';
+              
+              // Add date options (next 30 days)
+              const today = new Date();
+              for (let i = 0; i < 30; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const option = document.createElement('option');
+                option.value = date.toISOString().split('T')[0];
+                option.textContent = date.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                });
+                dateSelect.appendChild(option);
+              }
+            }
+            
+            // Add event listeners
+            setupRescheduleModal(appointmentId);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading reschedule modal:', error);
+          alert('Error loading reschedule form. Please try again.');
+          closeRescheduleModal();
+        });
+    }
+    
+    function setupRescheduleModal(appointmentId) {
+      // Handle form submission
+      const form = document.getElementById('rescheduleForm');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData(this);
+          const submitBtn = this.querySelector('button[type="submit"]');
+          
+          // Disable submit button
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Rescheduling...';
+          
+          fetch(`/sysadmin/appointments/${appointmentId}/reschedule/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show success message
+              alert(data.message);
+              // Close modal and reload page
+              closeRescheduleModal();
+              location.reload();
+            } else {
+              // Show error message
+              alert('Error: ' + data.error);
+              // Re-enable submit button
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Reschedule Appointment';
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while rescheduling the appointment.');
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Reschedule Appointment';
+          });
+        });
+      }
+      
+      // Close modal when clicking outside
+      const modalContainer = document.querySelector('div[style*="position: fixed"]');
+      if (modalContainer && modalContainer.querySelector('.reschedule-modal-content')) {
+        modalContainer.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeRescheduleModal();
+          }
+        });
+      }
+    }
+    
+    function closeRescheduleModal() {
+      // Find the modal container (the div with fixed positioning)
+      const modalContainers = document.querySelectorAll('div[style*="position: fixed"]');
+      modalContainers.forEach(container => {
+        if (container.querySelector('.reschedule-modal-content')) {
+          container.remove();
+        }
+      });
+    }
+  </script>
+
 {% endblock %}

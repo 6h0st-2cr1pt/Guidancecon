@@ -14,6 +14,15 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('availability/', views.availability, name='availability'),
     path('availability/toggle/', views.toggle_availability, name='toggle_availability'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('appointments/<int:appointment_id>/confirm/', views.confirm_appointment, name='confirm_appointment'),
+    path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
+    path('appointments/<int:appointment_id>/complete/', views.complete_appointment, name='complete_appointment'),
+    path('appointments/<int:appointment_id>/reschedule/', views.reschedule_appointment, name='reschedule_appointment'),
+    path('analytics/', views.analytics, name='analytics'),
+    path('reports/', views.reports, name='reports'),
+    path('reports/export-pdf/', views.export_report_pdf, name='export_report_pdf'),
 ]
 
 

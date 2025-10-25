@@ -3,28 +3,6 @@ from django.conf import settings
 from django.utils import timezone
 
 
-# Counselor profile model for additional information
-class CounselorProfile(models.Model):
-    """Extended profile information for counselors"""
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='counselor_profile')
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    middle_initial = models.CharField(max_length=10, blank=True)
-    title = models.CharField(max_length=100, blank=True, help_text="e.g., PhD, RGC, LPT")
-    profile_picture = models.ImageField(upload_to='counselor_profiles/', blank=True, null=True)
-    bio = models.TextField(blank=True, help_text="Brief description about the counselor")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.title}"
-
-    def get_full_name(self):
-        if self.middle_initial:
-            return f"{self.first_name} {self.middle_initial}. {self.last_name}"
-        return f"{self.first_name} {self.last_name}"
-
-
 # Simple timeslot model for availability
 class Timeslot(models.Model):
 	"""Represents a 1-hour timeslot on a given date for a user (counselor).
@@ -45,3 +23,31 @@ class Timeslot(models.Model):
 	def __str__(self):
 		return f"{self.user} - {self.date} {self.start_time} - {'Available' if self.available else 'Not Available'}"
 
+
+# Notification model for counselor notifications
+class Notification(models.Model):
+	"""Notifications for counselors about appointments and other events"""
+	NOTIFICATION_TYPES = [
+		('appointment_booked', 'Appointment Booked'),
+		('appointment_cancelled', 'Appointment Cancelled'),
+		('appointment_confirmed', 'Appointment Confirmed'),
+		('appointment_rescheduled', 'Appointment Rescheduled'),
+		('appointment_reminder', 'Appointment Reminder'),
+		('system_update', 'System Update'),
+	]
+	
+	counselor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+	title = models.CharField(max_length=255)
+	message = models.TextField()
+	notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES, default='appointment_booked')
+	is_read = models.BooleanField(default=False)
+	created_at = models.DateTimeField(auto_now_add=True)
+	
+	# Optional: Link to related appointment
+	appointment = models.ForeignKey('public.Appointment', on_delete=models.CASCADE, null=True, blank=True)
+	
+	class Meta:
+		ordering = ['-created_at']
+	
+	def __str__(self):
+		return f"{self.counselor.get_full_name()} - {self.title}"
