@@ -10,22 +10,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gl_@(ma(v2(p9chw6emig_^pj)0g79y&l_nr&4^5eo#-$^h_@8'
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']  # No default, must be set
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'testserver,localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -77,12 +82,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',     # PostgreSQL backend
-        'NAME': 'guidance',                            # database name
-        'USER': 'postgres',                            # PostgreSQL username
-        'PASSWORD': 'sysadmin',                        # PostgreSQL password
-        'HOST': 'localhost',                           # or server IP if remote
-        'PORT': '5432',                                # default PostgreSQL port
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'guidance'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ['DB_PASSWORD'],  # No default, must be set
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -119,10 +124,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'jonaldsabordo@gmail.com'
-EMAIL_HOST_PASSWORD = 'YOUR_NEW_APP_PASSWORD_HERE'  # Replace with your new Gmail App Password (16 characters, no spaces)
-DEFAULT_FROM_EMAIL = 'CHMSU Guidance Connect <jonaldsabordo@gmail.com>'
-ADMIN_EMAIL = 'jonaldsabordo@gmail.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'jonaldsabordo@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']  # No default, must be set
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'CHMSU Guidance Connect <jonaldsabordo@gmail.com>')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'jonaldsabordo@gmail.com')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
