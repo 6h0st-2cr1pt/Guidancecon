@@ -1,0 +1,3 @@
+# Include requirements.txt in all pushes
+!requirements.txt
+
