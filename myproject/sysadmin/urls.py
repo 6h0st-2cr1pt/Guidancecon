@@ -20,6 +20,7 @@ urlpatterns = [
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
     path('appointments/<int:appointment_id>/complete/', views.complete_appointment, name='complete_appointment'),
     path('appointments/<int:appointment_id>/reschedule/', views.reschedule_appointment, name='reschedule_appointment'),
+    path('api/available-slots/', views.get_available_slots_for_date, name='get_available_slots'),
     path('analytics/', views.analytics, name='analytics'),
     path('reports/', views.reports, name='reports'),
     path('reports/export-pdf/', views.export_report_pdf, name='export_report_pdf'),

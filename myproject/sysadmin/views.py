@@ -333,6 +333,55 @@ def complete_appointment(request, appointment_id):
 
 
 @login_required
+def get_available_slots_for_date(request):
+    """Get available timeslots for a specific date (for reschedule modal)"""
+    date_str = request.GET.get('date')
+    
+    if not date_str:
+        return JsonResponse({'error': 'Date parameter required'}, status=400)
+    
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+    
+    # Define time slots
+    time_slots = [
+        (8, '8:00 AM - 9:00 AM'),
+        (9, '9:00 AM - 10:00 AM'),
+        (10, '10:00 AM - 11:00 AM'),
+        (11, '11:00 AM - 12:00 PM'),
+        (13, '1:00 PM - 2:00 PM'),
+        (14, '2:00 PM - 3:00 PM'),
+        (15, '3:00 PM - 4:00 PM'),
+        (16, '4:00 PM - 5:00 PM'),
+    ]
+    
+    available_slots = []
+    for hour, label in time_slots:
+        slot_time = time(hour=hour, minute=0)
+        try:
+            ts = Timeslot.objects.get(
+                user=request.user,
+                date=selected_date,
+                start_time=slot_time
+            )
+            if ts.available:
+                available_slots.append({
+                    'hour': hour,
+                    'label': label
+                })
+        except Timeslot.DoesNotExist:
+            # If slot doesn't exist, it's available
+            available_slots.append({
+                'hour': hour,
+                'label': label
+            })
+    
+    return JsonResponse({'slots': available_slots})
+
+
+@login_required
 def reschedule_appointment(request, appointment_id):
     """Display reschedule form for an appointment"""
     appointment = get_object_or_404(Appointment, id=appointment_id, counselor=request.user)

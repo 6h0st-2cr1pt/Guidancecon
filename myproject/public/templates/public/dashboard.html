@@ -1,4 +1,5 @@
 {% extends 'public/P_base.html' %}
+{% load static %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
   <div class="dashboard-container">
@@ -6,7 +7,9 @@
     
     <div class="dashboard-cards">
       <div class="dashboard-card">
-        <div class="card-icon">📅</div>
+        <div class="card-icon">
+          <img src="{% static 'icons/appointment.gif' %}" alt="Book Appointment" class="card-icon-img">
+        </div>
         <div class="card-content">
           <h3>Book Appointment</h3>
           <p>Schedule a counseling session with our guidance counselors</p>
@@ -15,7 +18,9 @@
       </div>
       
       <div class="dashboard-card">
-        <div class="card-icon">🔔</div>
+        <div class="card-icon">
+          <img src="{% static 'icons/notification.gif' %}" alt="Notifications" class="card-icon-img">
+        </div>
         <div class="card-content">
           <h3>Notifications</h3>
           <p>View your appointment updates and important messages</p>
@@ -24,7 +29,9 @@
       </div>
       
       <div class="dashboard-card">
-        <div class="card-icon">📋</div>
+        <div class="card-icon">
+          <img src="{% static 'icons/upcoming.gif' %}" alt="My Appointments" class="card-icon-img">
+        </div>
         <div class="card-content">
           <h3>My Appointments</h3>
           <p>Manage your upcoming and past appointments</p>
