@@ -54,7 +54,7 @@ def signup(request):
             if profile_picture.size > max_size:
                 size_mb = profile_picture.size / (1024 * 1024)
                 context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
-                return render(request, 'public/registration.html', context)
+            return render(request, 'public/registration.html', context)
 
         # Check uniqueness
         if User.objects.filter(username=studentid).exists():
@@ -89,7 +89,7 @@ def signup(request):
                     cursor.execute(
                         "UPDATE auth_user SET image_data = %s WHERE id = %s",
                         [Binary(image_binary), user.id]
-                    )
+            )
 
             # Create profile
             profile = UserProfile.objects.create(
