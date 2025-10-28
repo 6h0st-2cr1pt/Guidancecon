@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CHMSU Guidance Connect</title>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/registration.css' %}">
+  <link rel="stylesheet" href="{% static 'css/registration.css' %}?v=2.0">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
   
 </head>
@@ -29,6 +29,8 @@
       {% endif %}
       <form method="post" action="{% url 'public:signup' %}" enctype="multipart/form-data">
         {% csrf_token %}
+        
+        <!-- Personal Information -->
         <div class="form-row">
           <div class="form-group">
             <label for="fname">First Name</label>
@@ -40,39 +42,42 @@
           </div>
         </div>
 
+        <!-- Academic Information -->
         <div class="form-row">
           <div class="form-group">
-            <label for="yearlevel">Year & Level</label>
-            <input type="text" id="yearlevel" name="yearlevel" required>
-          </div>
-          <div class="form-group">
-            <label for="studentid">Student ID No.</label>
+            <label for="studentid">Student ID</label>
             <input type="text" id="studentid" name="studentid" required>
           </div>
+          <div class="form-group">
+            <label for="yearlevel">Year & Level</label>
+            <input type="text" id="yearlevel" name="yearlevel" required placeholder="e.g., 1st Year">
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="college">College</label>
-          <select id="college" name="college" required onchange="updateCourses()">
-            <option value="">Select College</option>
-            <option value="College of Arts & Sciences">College of Arts & Sciences</option>
-            <option value="College of Business Management & Accountancy">College of Business Management & Accountancy</option>
-            <option value="College of Computer Studies">College of Computer Studies</option>
-            <option value="College of Education">College of Education</option>
-            <option value="College of Engineering">College of Engineering</option>
-            <option value="College of Industrial Technology">College of Industrial Technology</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="college">College</label>
+            <select id="college" name="college" required onchange="updateCourses()">
+              <option value="">Select College</option>
+              <option value="College of Arts & Sciences">Arts & Sciences</option>
+              <option value="College of Business Management & Accountancy">Business & Accountancy</option>
+              <option value="College of Computer Studies">Computer Studies</option>
+              <option value="College of Education">Education</option>
+              <option value="College of Engineering">Engineering</option>
+              <option value="College of Industrial Technology">Industrial Technology</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="course">Course</label>
+            <select id="course" name="course" required>
+              <option value="">Select College first</option>
+            </select>
+          </div>
         </div>
 
+        <!-- Account Information -->
         <div class="form-group">
-          <label for="course">Course</label>
-          <select id="course" name="course" required>
-            <option value="">Select College first</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email">Email Address</label>
           <input type="email" id="email" name="email" required value="{{ email|default:'' }}">
         </div>
 
@@ -87,11 +92,11 @@
           </div>
         </div>
 
+        <!-- Profile Picture -->
         <div class="form-group">
-          <label for="profile_picture">Profile Picture (Optional)</label>
+          <label for="profile_picture">Profile Picture <span style="font-weight: normal; color: #666;">(Optional, Max 2 MB)</span></label>
           <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="validateFileSize(this)">
-          <small style="display: block; margin-top: 5px; color: #666; font-size: 0.9rem;">Maximum file size: 2 MB</small>
-          <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 5px;"></small>
+          <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 3px; font-size: 0.85rem;"></small>
         </div>
 
         <div class="button-row">

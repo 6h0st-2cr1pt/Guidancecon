@@ -79,23 +79,22 @@ header::before {
 }
 
 main {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 15px 16px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-start;
+    padding: 40px 16px;
+    padding-left: 60px;
 }
 
 .login-card {
-  width: 85%;
-  max-width: 1200px;
-  background: #fff;
-  padding: 24px;
-  padding-top: 12px;
-  border-radius: 30px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid #000;
+    width: 50%;
+    background: #fff;
+    padding: 24px;
+    padding-top: 10px;
+    border-radius: 30px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #000;
 }
 
 .login-card label {
@@ -198,7 +197,7 @@ main {
 }
 
 .admin-label {
-  font-size: 28px;
+  font-size: 30px;
   text-align: center;
   margin-bottom: 12px;
   font-weight: 700;

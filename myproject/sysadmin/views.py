@@ -697,11 +697,12 @@ def export_report_pdf(request):
     """Export report as PDF - COUNSELOR SPECIFIC"""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
+    from io import BytesIO
+    
     try:
-        from weasyprint import HTML
-        import tempfile
+        from xhtml2pdf import pisa
     except ImportError:
-        messages.error(request, 'PDF export requires WeasyPrint. Please install it: pip install weasyprint')
+        messages.error(request, 'PDF export requires xhtml2pdf. Please install it: pip install xhtml2pdf')
         return redirect('sysadmin:reports')
     
     # Get the same data as reports view
@@ -763,20 +764,24 @@ def export_report_pdf(request):
         'cancellation_rate': round(cancellation_rate, 1),
         'counselor_stats': counselor_stats,
         'program_stats': program_stats,
+        'request': request,
     }
     
-    # Render HTML
+    # Render HTML template
     html_string = render_to_string('sysadmin/reports_pdf.html', context)
-    html = HTML(string=html_string)
     
-    # Generate PDF
-    result = html.write_pdf()
+    # Create PDF
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html_string.encode("UTF-8")), result)
     
-    # Create response
-    response = HttpResponse(result, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="report_{start_date}_to_{end_date}.pdf"'
-    
-    return response
+    if not pdf.err:
+        # Create response
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="report_{start_date}_to_{end_date}.pdf"'
+        return response
+    else:
+        messages.error(request, 'Error generating PDF. Please try again.')
+        return redirect('sysadmin:reports')
 
 
 def profile_picture(request, user_id):

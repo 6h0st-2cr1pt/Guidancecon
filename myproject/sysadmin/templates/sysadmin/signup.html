@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHMSU Guidance Connect • Sign up</title>
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/login.css' %}?v=5.0">
+  <link rel="stylesheet" href="{% static 'css/signup.css' %}?v=5.0">
   <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
 
 </head>
@@ -28,7 +28,7 @@
 
   <main>
     <div class="login-card">
-      <label class="admin-label">Administrator</label>
+      <label class="admin-label" style="font-size: 30px;">Administrator</label>
       {% if error %}
         <div class="form-error">{{ error }}</div>
       {% endif %}
