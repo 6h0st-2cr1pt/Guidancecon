@@ -1,0 +1,292 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+
+{% block title %}Reports{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}?v=3.0">
+{% endblock %}
+
+{% block content %}
+<div class="report-header">
+  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+    <img src="{{ MEDIA_URL }}icons/report.gif" alt="Reports" class="animated-icon-spin" style="width: 48px; height: 48px;">
+    <div>
+      <h1 class="report-title" style="margin: 0;">My Counseling Reports</h1>
+      <p style="color: var(--medium-gray); font-size: 0.9rem; margin: 4px 0 0 0;">Report for: <strong>{{ request.user.get_full_name }}</strong></p>
+    </div>
+  </div>
+  <p class="report-subtitle">Generated on {{ generated_at|date:"F d, Y \a\t g:i A" }}</p>
+  
+  <!-- Report Controls -->
+  <form method="GET" action="{% url 'sysadmin:reports' %}" class="report-controls">
+    <div class="form-group">
+      <label class="form-label" for="start_date">Start Date</label>
+      <input type="date" id="start_date" name="start_date" class="form-input" 
+             value="{{ start_date|date:'Y-m-d' }}" required>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="end_date">End Date</label>
+      <input type="date" id="end_date" name="end_date" class="form-input" 
+             value="{{ end_date|date:'Y-m-d' }}" required>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="report_type">Report Type</label>
+      <select id="report_type" name="report_type" class="form-select">
+        <option value="summary" {% if report_type == 'summary' %}selected{% endif %}>Summary</option>
+        <option value="detailed" {% if report_type == 'detailed' %}selected{% endif %}>Detailed</option>
+      </select>
+    </div>
+    
+    <div class="form-group" style="align-self: flex-end;">
+      <button type="submit" class="btn-primary">
+          <img src="{{ MEDIA_URL }}icons/report.png" alt="Print" style="width: 20px; height: 20px;">
+        Generate Report
+      </button>
+    </div>
+  </form>
+  
+  <!-- Action Buttons -->
+  <div class="btn-group no-print" style="margin-top: 16px;">
+    <button onclick="window.print()" class="btn-print" style="display: inline-flex; align-items: center; gap: 8px;">
+      <img src="{{ MEDIA_URL }}icons/printer.png" alt="Print" style="width: 20px; height: 20px;">
+      Print Report
+    </button>
+    <a href="{% url 'sysadmin:export_report_pdf' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&report_type={{ report_type }}" 
+       class="btn-export" style="display: inline-flex; align-items: center; gap: 8px;">
+      <img src="{{ MEDIA_URL }}icons/pdf.png" alt="PDF" style="width: 20px; height: 20px;">
+      Export to PDF
+    </a>
+  </div>
+</div>
+
+<!-- Summary Statistics -->
+<div class="report-summary">
+  <div class="summary-card">
+    <div class="summary-label">Total Appointments</div>
+    <div class="summary-value">{{ total_appointments }}</div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-label">Completed</div>
+    <div class="summary-value" style="color: #28a745;">{{ completed }}</div>
+    <div class="summary-subtext">{{ completion_rate }}% completion rate</div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-label">Cancelled</div>
+    <div class="summary-value" style="color: #dc3545;">{{ cancelled }}</div>
+    <div class="summary-subtext">{{ cancellation_rate }}% cancellation rate</div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-label">Pending</div>
+    <div class="summary-value" style="color: #ffc107;">{{ pending }}</div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-label">Confirmed</div>
+    <div class="summary-value" style="color: #17a2b8;">{{ confirmed }}</div>
+  </div>
+</div>
+
+<!-- My Performance Summary -->
+{% if counselor_stats %}
+<div class="report-section">
+  <div class="section-header">My Performance Summary</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Counselor</th>
+          <th>Email</th>
+          <th>Total</th>
+          <th>Completed</th>
+          <th>Cancelled</th>
+          <th>Pending</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for counselor in counselor_stats %}
+        <tr>
+          <td>{{ counselor.counselor__first_name }} {{ counselor.counselor__last_name }}</td>
+          <td>{{ counselor.counselor__email }}</td>
+          <td><strong>{{ counselor.total }}</strong></td>
+          <td>{{ counselor.completed }}</td>
+          <td>{{ counselor.cancelled }}</td>
+          <td>{{ counselor.pending }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Appointments by Program -->
+{% if program_stats %}
+<div class="report-section">
+  <div class="section-header">Appointments by Program/Issue</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Program/Issue</th>
+          <th>Total Appointments</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for program in program_stats %}
+        <tr>
+          <td>{{ program.program|default:"Not Specified" }}</td>
+          <td><strong>{{ program.count }}</strong></td>
+          <td>{% widthratio program.count total_appointments 100 %}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Popular Time Slots -->
+{% if timeslot_stats %}
+<div class="report-section">
+  <div class="section-header">Most Booked Time Slots</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Bookings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for slot in timeslot_stats %}
+        <tr>
+          <td>{{ slot.timeslot__date|date:"M d, Y" }}</td>
+          <td>{{ slot.timeslot__start_time|time:"g:i A" }}</td>
+          <td><strong>{{ slot.count }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Student Activity -->
+{% if student_stats %}
+<div class="report-section">
+  <div class="section-header">Top Students by Appointments</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Student ID</th>
+          <th>Course</th>
+          <th>Email</th>
+          <th>Appointments</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in student_stats %}
+        <tr>
+          <td>{{ student.student__first_name }} {{ student.student__last_name }}</td>
+          <td>{{ student.student__profile__student_id|default:"N/A" }}</td>
+          <td>{{ student.student__profile__course|default:"N/A" }}</td>
+          <td>{{ student.student__email }}</td>
+          <td><strong>{{ student.appointment_count }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Daily Breakdown (only for shorter periods) -->
+{% if daily_stats and daily_stats|length <= 31 %}
+<div class="report-section">
+  <div class="section-header">Daily Breakdown</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Completed</th>
+          <th>Cancelled</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for day in daily_stats %}
+        {% if day.total > 0 %}
+        <tr>
+          <td>{{ day.date|date:"l, F d, Y" }}</td>
+          <td><strong>{{ day.total }}</strong></td>
+          <td>{{ day.completed }}</td>
+          <td>{{ day.cancelled }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Detailed Appointment List (only if detailed report type selected) -->
+{% if report_type == 'detailed' and appointment_list %}
+<div class="report-section">
+  <div class="section-header">Detailed Appointment List</div>
+  <div class="section-body">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Date/Time</th>
+          <th>Student</th>
+          <th>Counselor</th>
+          <th>Program</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appointment in appointment_list %}
+        <tr>
+          <td>
+            {% if appointment.timeslot %}
+              {{ appointment.timeslot.date|date:"M d, Y" }}<br>
+              <small>{{ appointment.timeslot.start_time|time:"g:i A" }}</small>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>{{ appointment.student.get_full_name }}</td>
+          <td>{{ appointment.counselor.get_full_name }}</td>
+          <td>{{ appointment.program|default:"N/A" }}</td>
+          <td>
+            <span class="status-badge status-{{ appointment.status }}">
+              {{ appointment.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; color: var(--medium-gray); font-size: 0.85rem;">
+  <p>Report Period: {{ start_date|date:"F d, Y" }} to {{ end_date|date:"F d, Y" }}</p>
+  <p>CARLOS HILADO MEMORIAL STATE UNIVERSITY - Guidance Office</p>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,245 @@
+/* Profile Page Styles */
+:root {
+  --green: #00a65a;
+  --dark-green: #1a4d3a;
+  --light-green: #e8f5e9;
+}
+
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-header {
+  margin-bottom: 24px;
+}
+
+.profile-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dark-green);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.profile-card {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--dark-green);
+}
+
+.form-success {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #c3e6cb;
+  font-weight: 500;
+}
+
+.form-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+  font-weight: 500;
+}
+
+.form-sections-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.form-section {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.form-section h3 {
+  margin: 0 0 16px 0;
+  color: var(--green);
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-bottom: 2px solid var(--green);
+  padding-bottom: 8px;
+}
+
+.form-section label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+.input-border {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input-border:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0, 166, 90, 0.1);
+}
+
+select.input-border {
+  cursor: pointer;
+  background-color: white;
+}
+
+textarea.input-border {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+input[type="file"].input-border {
+  padding: 10px;
+  background: white;
+}
+
+.italic-text {
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.password-section {
+  margin-top: 24px;
+  background: #fff9e6;
+  border: 1px solid #ffecb3;
+}
+
+.password-section h3 {
+  color: #f57c00;
+  border-bottom-color: #f57c00;
+}
+
+.section-note {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.password-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-top: 0;
+}
+
+.btn-save {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-save:hover {
+  background: var(--dark-green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 166, 90, 0.3);
+}
+
+.btn-save:active {
+  transform: translateY(0);
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .form-sections-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .password-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 15px;
+  }
+
+  .profile-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .page-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
+  .form-section h3 {
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .btn-save {
+    font-size: 1rem;
+    padding: 12px;
+  }
+}
+

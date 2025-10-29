@@ -1,0 +1,154 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+{% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/notifications.css' %}?v=6.0">
+<style>
+/* Inline fallback styles for notifications */
+.notifications-container {
+  max-width: 1000px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+.notification-card {
+  background: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+}
+.notification-card.unread {
+  border-left: 4px solid #1a4d3a !important;
+  background: #f0fff4 !important;
+}
+.notification-icon {
+  flex-shrink: 0 !important;
+  width: 56px !important;
+  height: 56px !important;
+  background: transparent !important;
+  border: 2px solid #dee2e6 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+.notification-content h3 {
+  color: #1a4d3a !important;
+  margin: 0 0 8px 0 !important;
+  font-size: 1.1rem !important;
+}
+.notification-content p {
+  color: #1a252f !important;
+  margin: 0 0 8px 0 !important;
+  font-size: 0.95rem !important;
+}
+.notification-time {
+  color: #6c757d !important;
+  font-size: 0.85rem !important;
+}
+.no-notifications {
+  text-align: center !important;
+  padding: 80px 40px !important;
+  background: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 12px !important;
+}
+.no-notifications h3 {
+  color: #1a4d3a !important;
+  font-size: 1.5rem !important;
+}
+.no-notifications p {
+  color: #6c757d !important;
+}
+.page-title {
+  color: #1a4d3a !important;
+  margin-bottom: 24px !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+}
+.notif-icon-img {
+  width: 28px !important;
+  height: 28px !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+@keyframes iconSpin {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(10deg); }
+  20% { transform: rotate(-10deg); }
+  30% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+.no-notif-icon {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: contain !important;
+  opacity: 0.5 !important;
+}
+.unread-dot {
+  width: 10px !important;
+  height: 10px !important;
+  background: #1a4d3a !important;
+  border-radius: 50% !important;
+  animation: dotPulse 2s infinite !important;
+}
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+  <h2 class="page-title">Notifications</h2>
+  
+  {% if notifications %}
+    <div class="notifications-list">
+      {% for notification in notifications %}
+      <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+        <div class="notification-icon notification-icon-{{ notification.notification_type }}">
+          {% if notification.notification_type == 'appointment_booked' %}
+            <img src="{{ MEDIA_URL }}icons/upcoming.gif" alt="Booked" class="notif-icon-img">
+          {% elif notification.notification_type == 'appointment_cancelled' %}
+            <img src="{{ MEDIA_URL }}icons/empty.gif" alt="Cancelled" class="notif-icon-img">
+          {% elif notification.notification_type == 'appointment_confirmed' %}
+            <img src="{{ MEDIA_URL }}icons/check.gif" alt="Confirmed" class="notif-icon-img">
+          {% elif notification.notification_type == 'appointment_reminder' %}
+            <img src="{{ MEDIA_URL }}icons/upcoming.gif" alt="Reminder" class="notif-icon-img">
+          {% else %}
+            <img src="{{ MEDIA_URL }}icons/report.gif" alt="Info" class="notif-icon-img">
+          {% endif %}
+        </div>
+        
+        <div class="notification-content">
+          <h3>{{ notification.title }}</h3>
+          <p>{{ notification.message }}</p>
+          <span class="notification-time">{{ notification.created_at|date:"M d, Y g:i A" }}</span>
+        </div>
+        
+        <div class="notification-actions">
+          {% if not notification.is_read %}
+            <span class="unread-dot"></span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-notifications">
+      <div class="no-notifications-icon">
+        <img src="{{ MEDIA_URL }}icons/empty.gif" alt="No Notifications" class="no-notif-icon">
+      </div>
+      <h3>No Notifications</h3>
+      <p>You don't have any notifications yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

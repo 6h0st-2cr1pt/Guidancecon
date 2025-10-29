@@ -1,0 +1,12 @@
+<div class="reschedule-modal">
+  <div class="student-info">
+    <div class="student-details">
+      <h4>{{ appointment.student.get_full_name|default:appointment.student.username }}</h4>
+      <p>{% if appointment.student.profile.course %}{{ appointment.student.profile.course }}{% else %}Student{% endif %}</p>
+    </div>
+    <div class="appointment-info">
+      <p class="current-time">Current: {{ appointment.timeslot.date|date:"M d, Y" }} at {{ appointment.timeslot.start_time|time:"g:i A" }}</p>
+    </div>
+  </div>
+</div>
+

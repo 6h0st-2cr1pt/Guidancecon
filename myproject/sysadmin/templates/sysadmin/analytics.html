@@ -1,0 +1,161 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}?v=4.0">
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 16px;">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h1 class="page-title" style="margin-bottom: 4px; font-size: 1.5rem;">Analytics</h1>
+      <p style="color: var(--medium-gray); font-size: 0.9rem; margin: 0;">Showing data for: <strong>{{ request.user.get_full_name }}</strong></p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+    <button onclick="window.print()" class="btn-print" style="background: var(--medium-gray); color: var(--white); border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;">
+      <img src="{{ MEDIA_URL }}icons/printer.png" alt="Print" style="width: 20px; height: 20px;">
+      Print
+    </button>
+    <a href="{% url 'sysadmin:reports' %}" class="btn-export" style="background: var(--orange); color: var(--white); text-decoration: none; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;">
+      <img src="{{ MEDIA_URL }}icons/pdf.png" alt="PDF" style="width: 20px; height: 20px;">
+      Export to PDF
+    </a>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-icon animated-icon-bounce" style="background: #1a4d3a;">
+      <img src="{{ MEDIA_URL }}icons/analytics.png" alt="Total" style="width: 32px; height: 32px;">
+    </div>
+    <div class="kpi-content">
+      <div class="kpi-label">Total Appointments</div>
+      <div class="kpi-value">{{ total_appointments }}</div>
+    </div>
+  </div>
+  
+  <div class="kpi-card">
+    <div class="kpi-icon animated-icon-bounce" style="background: #28a745;">
+      <img src="{{ MEDIA_URL }}icons/upcoming.png" alt="Completed" style="width: 32px; height: 32px;">
+    </div>
+    <div class="kpi-content">
+      <div class="kpi-label">Completed</div>
+      <div class="kpi-value">{{ completed_count }}</div>
+      <div class="kpi-subtext">{{ completion_rate }}% completion rate</div>
+    </div>
+  </div>
+  
+  <div class="kpi-card">
+    <div class="kpi-icon animated-icon-bounce" style="background: #dc3545;">
+      <img src="{{ MEDIA_URL }}icons/past.png" alt="Cancelled" style="width: 32px; height: 32px;">
+    </div>
+    <div class="kpi-content">
+      <div class="kpi-label">Cancelled</div>
+      <div class="kpi-value">{{ cancelled_count }}</div>
+      <div class="kpi-subtext">{{ cancellation_rate }}% cancellation rate</div>
+    </div>
+  </div>
+  
+  <div class="kpi-card">
+    <div class="kpi-icon animated-icon-bounce" style="background: #F0DF10; color: #1a4d3a;">
+      <img src="{{ MEDIA_URL }}icons/report.png" alt="Capacity" style="width: 32px; height: 32px;">
+    </div>
+    <div class="kpi-content">
+      <div class="kpi-label">Capacity Utilization</div>
+      <div class="kpi-value">{{ utilization_rate }}%</div>
+      <div class="kpi-subtext">{{ booked_timeslots }}/{{ available_timeslots }} slots</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+  <!-- Appointment Status Distribution -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">Appointment Status Distribution</h3>
+    </div>
+    <div class="chart-body">
+      <canvas id="statusChart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Monthly Trend -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">Appointment Trends (Last 6 Months)</h3>
+    </div>
+    <div class="chart-body">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Appointments by Students -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">Top Students by Appointments</h3>
+    </div>
+    <div class="chart-body">
+      <canvas id="counselorChart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Popular Time Slots -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">Popular Time Slots</h3>
+    </div>
+    <div class="chart-body">
+      <canvas id="timeslotChart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Appointments by Program -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <h3 class="chart-title">Appointments by Program</h3>
+    </div>
+    <div class="chart-body">
+      <canvas id="programChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<!-- Analytics Data -->
+<script>
+  const analyticsData = {
+    status: {
+      labels: {{ status_labels|safe }},
+      data: {{ status_counts|safe }}
+    },
+    counselor: {
+      labels: {{ counselor_labels|safe }},
+      data: {{ counselor_counts|safe }}
+    },
+    timeslot: {
+      labels: {{ timeslot_labels|safe }},
+      data: {{ timeslot_counts|safe }}
+    },
+    program: {
+      labels: {{ program_labels|safe }},
+      data: {{ program_counts|safe }}
+    },
+    monthly: {
+      labels: {{ monthly_labels|safe }},
+      data: {{ monthly_data|safe }}
+    }
+  };
+</script>
+
+<!-- Initialize Charts -->
+<script src="{% static 'js/analytics.js' %}"></script>
+{% endblock %}
+

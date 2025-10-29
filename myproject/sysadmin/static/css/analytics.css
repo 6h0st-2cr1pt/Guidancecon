@@ -1,0 +1,124 @@
+/* Analytics Page Specific Styles */
+
+/* Already defined in styles.css - this file is for future customizations */
+
+/* Additional analytics-specific styles can go here */
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.date-filter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Chart loading state */
+.chart-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--medium-gray);
+}
+
+.chart-loading-spinner {
+  border: 3px solid var(--light-gray);
+  border-top: 3px solid var(--dark-green);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Export buttons for analytics */
+.analytics-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-export-chart {
+  background: var(--dark-green);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-export-chart:hover {
+  background: var(--dark-green-light);
+}
+
+/* Print Styles for Analytics Page */
+@media print {
+  body {
+    background: white;
+  }
+  
+  .topbar,
+  .sidebar,
+  .btn-print,
+  .btn-export {
+    display: none !important;
+  }
+  
+  .layout {
+    display: block;
+    padding: 0;
+  }
+  
+  .content {
+    padding: 20px;
+    min-height: auto;
+  }
+  
+  .page-title {
+    margin-bottom: 20px;
+  }
+  
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .kpi-card {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+  
+  .charts-grid {
+    column-count: 1;
+  }
+  
+  .chart-container {
+    box-shadow: none;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  
+  @page {
+    margin: 1.5cm;
+    size: A4 landscape;
+  }
+}
+

@@ -1,0 +1,17 @@
+Django>=4.2,<5.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# PDF Export functionality (Windows-compatible)
+xhtml2pdf>=0.2.15
+
+# PDF dependencies
+Pillow>=10.0.0
+reportlab>=4.0.0
+
+# Production web server
+gunicorn>=21.0.0

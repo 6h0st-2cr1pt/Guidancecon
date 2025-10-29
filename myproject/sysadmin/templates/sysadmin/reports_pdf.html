@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Counseling Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #1a252f;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #1a4d3a;
+      padding-bottom: 20px;
+    }
+    
+    .header h1 {
+      color: #1a4d3a;
+      margin: 0 0 10px 0;
+      font-size: 24pt;
+    }
+    
+    .header p {
+      margin: 5px 0;
+      color: #6c757d;
+      font-size: 10pt;
+    }
+    
+    .summary-grid {
+      display: table;
+      width: 100%;
+      margin-bottom: 30px;
+      border-collapse: collapse;
+    }
+    
+    .summary-row {
+      display: table-row;
+    }
+    
+    .summary-cell {
+      display: table-cell;
+      width: 20%;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
+    }
+    
+    .summary-label {
+      font-size: 9pt;
+      color: #6c757d;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .summary-value {
+      font-size: 20pt;
+      font-weight: bold;
+      color: #1a4d3a;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      page-break-inside: avoid;
+    }
+    
+    .section-title {
+      background: #1a4d3a;
+      color: white;
+      padding: 10px 15px;
+      font-size: 12pt;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 10pt;
+    }
+    
+    th {
+      background: #BAD8B6;
+      color: #1a4d3a;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 9pt;
+      text-transform: uppercase;
+    }
+    
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+      text-align: center;
+      color: #6c757d;
+      font-size: 9pt;
+    }
+    
+    strong {
+      color: #1a4d3a;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 Counseling Report</h1>
+    <p><strong>CARLOS HILADO MEMORIAL STATE UNIVERSITY</strong></p>
+    <p>Guidance Office Report</p>
+    <p><strong>Counselor:</strong> {{ request.user.get_full_name }}</p>
+    <p>Period: {{ start_date|date:"F d, Y" }} to {{ end_date|date:"F d, Y" }}</p>
+    <p>Generated: {{ generated_at|date:"F d, Y \a\t g:i A" }}</p>
+  </div>
+  
+  <!-- Summary Statistics -->
+  <div class="summary-grid">
+    <div class="summary-row">
+      <div class="summary-cell">
+        <div class="summary-label">Total</div>
+        <div class="summary-value">{{ total_appointments }}</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-label">Completed</div>
+        <div class="summary-value" style="color: #28a745;">{{ completed }}</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-label">Cancelled</div>
+        <div class="summary-value" style="color: #dc3545;">{{ cancelled }}</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-label">Pending</div>
+        <div class="summary-value" style="color: #ffc107;">{{ pending }}</div>
+      </div>
+      <div class="summary-cell">
+        <div class="summary-label">Confirmed</div>
+        <div class="summary-value" style="color: #17a2b8;">{{ confirmed }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <p style="margin-bottom: 20px;">
+    <strong>Completion Rate:</strong> {{ completion_rate }}% &nbsp;|&nbsp;
+    <strong>Cancellation Rate:</strong> {{ cancellation_rate }}%
+  </p>
+  
+  <!-- My Performance Summary -->
+  {% if counselor_stats %}
+  <div class="section">
+    <div class="section-title">My Performance Summary</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Counselor</th>
+          <th>Email</th>
+          <th>Total</th>
+          <th>Completed</th>
+          <th>Cancelled</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for counselor in counselor_stats %}
+        <tr>
+          <td>{{ counselor.counselor__first_name }} {{ counselor.counselor__last_name }}</td>
+          <td>{{ counselor.counselor__email }}</td>
+          <td><strong>{{ counselor.total }}</strong></td>
+          <td>{{ counselor.completed }}</td>
+          <td>{{ counselor.cancelled }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  
+  <!-- Appointments by Program -->
+  {% if program_stats %}
+  <div class="section">
+    <div class="section-title">Appointments by Program/Issue</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Program/Issue</th>
+          <th>Total Appointments</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for program in program_stats %}
+        <tr>
+          <td>{{ program.program|default:"Not Specified" }}</td>
+          <td><strong>{{ program.count }}</strong></td>
+          <td>{% widthratio program.count total_appointments 100 %}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  
+  <div class="footer">
+    <p><strong>CARLOS HILADO MEMORIAL STATE UNIVERSITY</strong></p>
+    <p>Guidance Office - Confidential Report</p>
+    <p>Generated: {{ generated_at|date:"F d, Y \a\t g:i A" }}</p>
+  </div>
+</body>
+</html>
+

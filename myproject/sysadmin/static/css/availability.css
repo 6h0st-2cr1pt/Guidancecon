@@ -1,0 +1,97 @@
+/* Availability Page Specific Styles */
+
+/* Date picker section - already in styles.css */
+
+/* Additional availability customizations */
+.availability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.availability-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-select-all,
+.btn-clear-all {
+  background: var(--dark-green);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-select-all:hover {
+  background: var(--dark-green-light);
+}
+
+.btn-clear-all {
+  background: var(--orange);
+}
+
+.btn-clear-all:hover {
+  background: #e55a2b;
+}
+
+/* Slot time label */
+.slot-time {
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+/* Slot status indicators */
+.slot-status {
+  font-size: 0.8rem;
+  color: var(--medium-gray);
+  margin-left: 8px;
+}
+
+/* Calendar view for availability summary */
+.availability-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.calendar-day {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendar-day:hover {
+  border-color: var(--dark-green);
+  box-shadow: var(--shadow);
+}
+
+.calendar-day-name {
+  font-size: 0.7rem;
+  color: var(--medium-gray);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.calendar-day-date {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin: 4px 0;
+}
+
+.calendar-day-slots {
+  font-size: 0.75rem;
+  color: var(--medium-gray);
+}
+

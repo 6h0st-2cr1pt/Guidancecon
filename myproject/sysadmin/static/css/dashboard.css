@@ -1,0 +1,82 @@
+/* Dashboard Specific Styles */
+
+.dashboard-welcome {
+  background: linear-gradient(135deg, var(--dark-green) 0%, var(--dark-green-light) 100%);
+  color: var(--white);
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard-welcome h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.dashboard-welcome p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+/* Appointment sections styling */
+.section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-count {
+  background: var(--accent-yellow);
+  color: var(--dark-green);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--medium-gray);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state-text {
+  font-size: 0.95rem;
+}
+
+/* Appointment actions buttons */
+.appointment .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .dashboard-welcome h2 {
+    font-size: 1.4rem;
+  }
+  
+  .appointment {
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+  }
+  
+  .actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
