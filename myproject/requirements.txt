@@ -1,19 +1,43 @@
+# ---------------------------
+# Core Django
+# ---------------------------
 Django>=4.2,<5.0
 
-# Database
-psycopg2-binary>=2.9.0
+# ---------------------------
+# Database (PostgreSQL / Supabase)
+# ---------------------------
+psycopg2-binary>=2.9.9  # PostgreSQL adapter for Django
 
-# Environment variables
-python-dotenv>=1.0.0
+# ---------------------------
+# Environment Configuration
+# ---------------------------
+python-dotenv>=1.0.1    # Load .env files locally for development
+dj-database-url>=2.2.0  # Simplifies database URL parsing from environment variables
 
-# PDF Export functionality (Windows-compatible)
+# ---------------------------
+# Static Files (Render Deployment)
+# ---------------------------
+whitenoise==6.6.0       # Efficient static file serving for production
+
+# ---------------------------
+# Web Server
+# ---------------------------
+gunicorn>=21.2.0        # Production WSGI HTTP server
+
+# ---------------------------
+# Security & CORS
+# ---------------------------
+django-cors-headers>=4.3.0  # Allow CORS if frontend is hosted elsewhere
+django-environ>=0.11.2      # Alternative env manager (optional but common in production)
+
+# ---------------------------
+# PDF Export Functionality
+# ---------------------------
 xhtml2pdf>=0.2.15
-
-# PDF dependencies
 Pillow>=10.0.0
 reportlab>=4.0.0
 
-# Production web server
-gunicorn>=21.0.0
-
-whitenoise==6.6.0
+# ---------------------------
+# Performance & Debugging Tools (optional, safe in dev)
+# ---------------------------
+django-extensions>=3.2.3    # Helpful management commands for debugging and scripts

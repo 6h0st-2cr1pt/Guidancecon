@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# Local PostgreSQL Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -96,19 +96,31 @@ DATABASES = {
     }
 }
 
+# Render.com PostgreSQL Database
 #DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'postgres',  # database name from Supabase connection
-#        'USER': 'postgres',  # usually 'postgres' by default
-#        'PASSWORD': '<YOUR_SUPABASE_PASSWORD>',
-#        'HOST': 'db.<PROJECT_REF>.supabase.co',
-#        'PORT': '5432',
-#        'OPTIONS': {
-#            'sslmode': 'require',  # Supabase requires SSL
-#        },
+#        'NAME': os.environ.get('DB_NAME', 'guidance'),
+#        'USER': os.environ.get('DB_USER', 'postgres'),
+#        'PASSWORD': os.environ.get('DB_PASSWORD', 'sysadmin'),  # Set your DB password
+#        'HOST': os.environ.get('DB_HOST', 'localhost'),
+#        'PORT': os.environ.get('DB_PORT', '5432'),
 #    }
 #}
+
+# For Supabase Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        'OPTIONS': {'sslmode': 'require'},
+    }
+}
+
 
 
 
