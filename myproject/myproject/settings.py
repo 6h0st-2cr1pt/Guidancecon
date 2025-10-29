@@ -131,24 +131,36 @@ def ipv4_only_getaddrinfo(host, port, *args, **kwargs):
 socket.getaddrinfo = ipv4_only_getaddrinfo
 
 # --- Database Configuration ---
+#DATABASES = {
+#    'default': dj_database_url.config(
+#        default=os.getenv(
+#            'DATABASE_URL',
+#            'postgresql://postgres:guidanceconsysadmin@db.xnxxeeylozzchxfodevy.supabase.co:5432/postgres'
+#        ),
+#        conn_max_age=600,
+#        ssl_require=True,
+#    )
+#}
+#
+## Optional explicit parameters
+#DATABASES['default']['HOST'] = 'db.xnxxeeylozzchxfodevy.supabase.co'
+#DATABASES['default']['OPTIONS'] = {
+#    'sslmode': 'require',
+#    'target_session_attrs': 'read-write',
+#    'connect_timeout': 10,
+#    'application_name': 'django',
+#}
+
+# Neon.tech Database Config
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv(
             'DATABASE_URL',
-            'postgresql://postgres:guidanceconsysadmin@db.xnxxeeylozzchxfodevy.supabase.co:5432/postgres'
+            'postgresql://neondb_owner:npg_zfNFWe2yIx9K@ep-crimson-hall-a1ea4s54-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
         ),
         conn_max_age=600,
         ssl_require=True,
     )
-}
-
-# Optional explicit parameters
-DATABASES['default']['HOST'] = 'db.xnxxeeylozzchxfodevy.supabase.co'
-DATABASES['default']['OPTIONS'] = {
-    'sslmode': 'require',
-    'target_session_attrs': 'read-write',
-    'connect_timeout': 10,
-    'application_name': 'django',
 }
 
 
