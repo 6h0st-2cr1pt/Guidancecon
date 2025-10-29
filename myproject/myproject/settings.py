@@ -92,6 +92,21 @@ DATABASES = {
     }
 }
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'postgres',  # database name from Supabase connection
+#        'USER': 'postgres',  # usually 'postgres' by default
+#        'PASSWORD': '<YOUR_SUPABASE_PASSWORD>',
+#        'HOST': 'db.<PROJECT_REF>.supabase.co',
+#        'PORT': '5432',
+#        'OPTIONS': {
+#            'sslmode': 'require',  # Supabase requires SSL
+#        },
+#    }
+#}
+
+
 
 
 # Authentication backends
