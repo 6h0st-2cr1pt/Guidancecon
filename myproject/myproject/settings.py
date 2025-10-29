@@ -124,11 +124,11 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 #}
 
 # --- Force IPv4 to prevent Render IPv6 connection issues ---
-original_getaddrinfo = socket.getaddrinfo
-def ipv4_only_getaddrinfo(host, port, *args, **kwargs):
-    results = original_getaddrinfo(host, port, *args, **kwargs)
-    return [r for r in results if r[0] == socket.AF_INET]  # Filter for IPv4 only
-socket.getaddrinfo = ipv4_only_getaddrinfo
+#original_getaddrinfo = socket.getaddrinfo
+#def ipv4_only_getaddrinfo(host, port, *args, **kwargs):
+#    results = original_getaddrinfo(host, port, *args, **kwargs)
+#    return [r for r in results if r[0] == socket.AF_INET]  # Filter for IPv4 only
+#socket.getaddrinfo = ipv4_only_getaddrinfo
 
 # --- Database Configuration ---
 #DATABASES = {
