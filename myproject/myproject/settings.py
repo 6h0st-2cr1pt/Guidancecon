@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+import socket
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,7 +123,14 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 #    }
 #}
 
-# dj-database-url config
+# --- Force IPv4 to prevent Render IPv6 connection issues ---
+original_getaddrinfo = socket.getaddrinfo
+def ipv4_only_getaddrinfo(host, port, *args, **kwargs):
+    results = original_getaddrinfo(host, port, *args, **kwargs)
+    return [r for r in results if r[0] == socket.AF_INET]  # Filter for IPv4 only
+socket.getaddrinfo = ipv4_only_getaddrinfo
+
+# --- Database Configuration ---
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv(
@@ -134,14 +142,13 @@ DATABASES = {
     )
 }
 
-# Optional: explicitly override parts if needed
+# Optional explicit parameters
 DATABASES['default']['HOST'] = 'db.xnxxeeylozzchxfodevy.supabase.co'
 DATABASES['default']['OPTIONS'] = {
     'sslmode': 'require',
     'target_session_attrs': 'read-write',
     'connect_timeout': 10,
     'application_name': 'django',
-    'options': '-4',  # Force IPv4
 }
 
 
