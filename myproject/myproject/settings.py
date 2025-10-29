@@ -134,6 +134,17 @@ DATABASES = {
     )
 }
 
+# Optional: explicitly override parts if needed
+DATABASES['default']['HOST'] = 'db.xnxxeeylozzchxfodevy.supabase.co'
+DATABASES['default']['OPTIONS'] = {
+    'sslmode': 'require',
+    'target_session_attrs': 'read-write',
+    'connect_timeout': 10,
+    'application_name': 'django',
+    'options': '-4',  # Force IPv4
+}
+
+
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
