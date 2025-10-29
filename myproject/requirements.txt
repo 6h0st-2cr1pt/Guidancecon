@@ -42,5 +42,3 @@ reportlab>=4.0.0
 # ---------------------------
 django-extensions>=3.2.3    # Helpful management commands for debugging and scripts
 
-dj-database-url>=2.1.0
-
