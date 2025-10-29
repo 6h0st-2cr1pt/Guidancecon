@@ -165,10 +165,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'public' / 'static',
     BASE_DIR / 'sysadmin' / 'static',
 ]
+
+# Serve static files efficiently with WhiteNoise
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Authentication settings
 LOGIN_URL = '/sysadmin/login/'  # Default login URL (for staff)
