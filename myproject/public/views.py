@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import datetime, date, time
 from .models import UserProfile, Appointment
-from sysadmin.models import Timeslot
+from sysadmin.models import Timeslot, CounselorProfile
 
 
 def home(request):
@@ -135,41 +135,33 @@ def appointments(request):
         student_college = student_profile.college
     except UserProfile.DoesNotExist:
         student_college = None
-    
-    counselors = User.objects.filter(is_staff=True, is_active=True)
-    
-    # Add counselor information from User model using raw SQL and filter by college
-    from django.db import connection
+
+    # Select users who are staff and have a profile
+    counselors_qs = User.objects.filter(is_staff=True, is_active=True, counselor_profile__isnull=False)
+
     counselors_with_profiles = []
-    for counselor in counselors:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT middle_initial, assigned_college, title, bio FROM auth_user WHERE id = %s", [counselor.id])
-            row = cursor.fetchone()
-            middle_initial = row[0] if row[0] else ''
-            assigned_college = row[1] if row[1] else ''
-            title = row[2] if row[2] else ''
-            bio = row[3] if row[3] else ''
-        
-        # Only include counselors from the same college as the student
-        if student_college and assigned_college and assigned_college != student_college:
+    for counselor in counselors_qs:
+        profile = getattr(counselor, 'counselor_profile', None)
+        if not profile:
             continue
-        
-        # Helper function to get full name with middle initial
-        def get_full_name_with_mi(user, mi):
-            if mi:
-                return f"{user.first_name} {mi}. {user.last_name}"
-            return f"{user.first_name} {user.last_name}"
-        
-        counselor_data = {
+        # Optionally filter by college
+        if student_college and profile.assigned_college and profile.assigned_college != student_college:
+            continue
+        # Helper: Full name with middle initial
+        middle_initial = profile.middle_initial
+        if middle_initial:
+            name = f"{counselor.first_name} {middle_initial}. {counselor.last_name}"
+        else:
+            name = f"{counselor.first_name} {counselor.last_name}"
+        counselors_with_profiles.append({
             'id': counselor.id,
             'username': counselor.username,
-            'name': get_full_name_with_mi(counselor, middle_initial),
-            'title': title,
-            'assigned_college': assigned_college,
-            'has_profile': bool(title or bio)
-        }
-        counselors_with_profiles.append(counselor_data)
-    
+            'name': name,
+            'title': profile.title,
+            'assigned_college': profile.assigned_college,
+            'has_profile': bool(profile.title or profile.bio)
+        })
+
     context = {
         'counselors': counselors_with_profiles,
     }
