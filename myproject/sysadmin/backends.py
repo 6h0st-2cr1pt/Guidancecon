@@ -16,9 +16,8 @@ class EmailBackend(ModelBackend):
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
                 return None
-        
-        # Check password
-        if user.check_password(password) and self.user_can_authenticate(user):
+        # Only allow login if user is staff (counselor/admin)
+        if user.check_password(password) and self.user_can_authenticate(user) and user.is_staff:
             return user
         return None
 

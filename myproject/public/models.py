@@ -1,12 +1,13 @@
 from django.db import models
 from django.conf import settings
+from college_choices import COLLEGE_CHOICES
 
 
 # Profile for public users (students)
 class UserProfile(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
 	student_id = models.CharField(max_length=50, unique=True)
-	college = models.CharField(max_length=255, blank=True)
+	college = models.CharField(max_length=255, blank=True, choices=COLLEGE_CHOICES)
 	course = models.CharField(max_length=255, blank=True)
 	year_level = models.CharField(max_length=50, blank=True)
 

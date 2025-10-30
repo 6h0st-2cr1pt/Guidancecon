@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
+from public.models import UserProfile
+from college_choices import COLLEGE_CHOICES
 
 
 # Simple timeslot model for availability
@@ -57,7 +59,7 @@ class Notification(models.Model):
 class CounselorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='counselor_profile')
     middle_initial = models.CharField(max_length=10, blank=True)
-    assigned_college = models.CharField(max_length=100, blank=True)
+    assigned_college = models.CharField(max_length=100, blank=True, choices=COLLEGE_CHOICES)
     title = models.CharField(max_length=100, blank=True)
     bio = models.TextField(blank=True)
     image_data = models.BinaryField(null=True, blank=True)

@@ -132,22 +132,22 @@ def appointments(request):
     # Get student's college from their profile
     try:
         student_profile = UserProfile.objects.get(user=request.user)
-        student_college = student_profile.college
+        student_college = student_profile.college.strip().lower() if student_profile.college else ''
     except UserProfile.DoesNotExist:
-        student_college = None
+        student_college = ''
 
-    # Select users who are staff and have a profile
     counselors_qs = User.objects.filter(is_staff=True, is_active=True, counselor_profile__isnull=False)
-
     counselors_with_profiles = []
     for counselor in counselors_qs:
         profile = getattr(counselor, 'counselor_profile', None)
         if not profile:
             continue
-        # Optionally filter by college
-        if student_college and profile.assigned_college and profile.assigned_college != student_college:
+        profile_college = profile.assigned_college.strip().lower() if profile.assigned_college else ''
+        # Only include counselors that match student's college exactly (ignore case/whitespace)
+        if student_college == '' or profile_college == '':
             continue
-        # Helper: Full name with middle initial
+        if profile_college != student_college:
+            continue
         middle_initial = profile.middle_initial
         if middle_initial:
             name = f"{counselor.first_name} {middle_initial}. {counselor.last_name}"

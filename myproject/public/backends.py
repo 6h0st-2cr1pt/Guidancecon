@@ -21,9 +21,8 @@ class StudentIDBackend(ModelBackend):
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
                     return None
-        
-        # Check password
-        if user.check_password(password) and self.user_can_authenticate(user):
+        # Only allow login if user is not staff and has a UserProfile
+        if user.check_password(password) and self.user_can_authenticate(user) and not user.is_staff and hasattr(user, 'profile'):
             return user
         return None
 
