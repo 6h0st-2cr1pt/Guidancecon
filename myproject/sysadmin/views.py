@@ -8,7 +8,7 @@ from django.contrib import messages
 from datetime import date, time, datetime, timedelta
 from django.utils import timezone
 
-from .models import Timeslot, Notification
+from .models import Timeslot, Notification, CounselorProfile
 from public.models import Appointment
 
 @login_required
@@ -205,16 +205,15 @@ def signup(request):
             if profile_picture:
                 image_binary = profile_picture.read()
             
-            # Set the new counselor fields using raw SQL since they're not in the model
-            from django.db import connection
-            from psycopg2 import Binary
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s, image_data = %s WHERE id = %s",
-                    [middle_initial, assigned_college, title, bio, Binary(image_binary) if image_binary else None, user.id]
-                )
-            
-            user.save()
+            # Create CounselorProfile
+            CounselorProfile.objects.create(
+                user=user,
+                middle_initial=middle_initial,
+                assigned_college=assigned_college,
+                title=title,
+                bio=bio,
+                image_data=image_binary
+            )
 
             authenticated_user = authenticate(request, username=email, password=password)
             if authenticated_user is not None:
@@ -815,20 +814,10 @@ def profile_picture(request, user_id):
 @login_required
 def profile(request):
     """Manage counselor profile"""
-    from django.db import connection
-    
-    # Get current counselor information
     user = request.user
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT middle_initial, assigned_college, title, bio FROM auth_user WHERE id = %s", [user.id])
-        row = cursor.fetchone()
-        middle_initial = row[0] if row and row[0] else ''
-        assigned_college = row[1] if row and row[1] else ''
-        title = row[2] if row and row[2] else ''
-        bio = row[3] if row and row[3] else ''
-    
+    # Get profile or create if not present
+    profile, _ = CounselorProfile.objects.get_or_create(user=user)
     if request.method == 'POST':
-        # Get form data
         email = request.POST.get('email', '').strip()
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
@@ -840,7 +829,6 @@ def profile(request):
         current_password = request.POST.get('current_password', '').strip()
         new_password = request.POST.get('new_password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
-        
         context = {
             'email': email,
             'first_name': first_name,
@@ -850,101 +838,69 @@ def profile(request):
             'title': title_new,
             'bio': bio_new,
         }
-        
         # Validation
         if not email or not first_name or not last_name:
             context['error'] = 'Email, first name, and last name are required.'
             return render(request, 'sysadmin/profile.html', context)
-        
         if not assigned_college_new:
             context['error'] = 'Please select an assigned college.'
             return render(request, 'sysadmin/profile.html', context)
-        
-        # Check if email is taken by another user
         if User.objects.filter(email=email).exclude(id=user.id).exists():
             context['error'] = 'This email is already taken by another user.'
             return render(request, 'sysadmin/profile.html', context)
-        
-        # Validate profile picture size (2 MB limit)
         if profile_picture:
-            max_size = 2 * 1024 * 1024  # 2 MB in bytes
+            max_size = 2 * 1024 * 1024
             if profile_picture.size > max_size:
                 size_mb = profile_picture.size / (1024 * 1024)
                 context['error'] = f'Profile picture is too large ({size_mb:.2f} MB). Maximum allowed size is 2 MB.'
                 return render(request, 'sysadmin/profile.html', context)
-        
-        # Handle password change
         if new_password or confirm_password:
             if not current_password:
                 context['error'] = 'Current password is required to change password.'
                 return render(request, 'sysadmin/profile.html', context)
-            
             if not user.check_password(current_password):
                 context['error'] = 'Current password is incorrect.'
                 return render(request, 'sysadmin/profile.html', context)
-            
             if new_password != confirm_password:
                 context['error'] = 'New passwords do not match.'
                 return render(request, 'sysadmin/profile.html', context)
-            
             if len(new_password) < 6:
                 context['error'] = 'New password must be at least 6 characters long.'
                 return render(request, 'sysadmin/profile.html', context)
-        
         try:
-            # Update user information
             user.email = email
             user.username = email
             user.first_name = first_name
             user.last_name = last_name
-            
-            # Update password if provided
             if new_password:
                 user.set_password(new_password)
-            
             user.save()
-            
-            # Process profile picture if uploaded
-            image_binary = None
+            # Profile fields
+            profile.middle_initial = middle_initial_new
+            profile.assigned_college = assigned_college_new
+            profile.title = title_new
+            profile.bio = bio_new
             if profile_picture:
-                image_binary = profile_picture.read()
-            
-            # Update counselor-specific fields using raw SQL
-            from psycopg2 import Binary
-            with connection.cursor() as cursor:
-                if profile_picture:
-                    cursor.execute(
-                        "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s, image_data = %s WHERE id = %s",
-                        [middle_initial_new, assigned_college_new, title_new, bio_new, Binary(image_binary), user.id]
-                    )
-                else:
-                    cursor.execute(
-                        "UPDATE auth_user SET middle_initial = %s, assigned_college = %s, title = %s, bio = %s WHERE id = %s",
-                        [middle_initial_new, assigned_college_new, title_new, bio_new, user.id]
-                    )
-            
+                profile.image_data = profile_picture.read()
+            profile.save()
+            from django.contrib import messages
             messages.success(request, 'Profile updated successfully!')
-            
-            # If password was changed, re-authenticate
             if new_password:
                 user = authenticate(request, username=email, password=new_password)
                 if user:
                     login(request, user)
-            
             return redirect('sysadmin:profile')
-            
         except Exception as e:
             context['error'] = f'Error updating profile: {str(e)}'
             return render(request, 'sysadmin/profile.html', context)
-    
-    # GET request - display form with current data
+    # GET
     context = {
         'email': user.email,
         'first_name': user.first_name,
         'last_name': user.last_name,
-        'middle_initial': middle_initial,
-        'assigned_college': assigned_college,
-        'title': title,
-        'bio': bio,
+        'middle_initial': profile.middle_initial,
+        'assigned_college': profile.assigned_college,
+        'title': profile.title,
+        'bio': profile.bio,
     }
     return render(request, 'sysadmin/profile.html', context)
