@@ -24,7 +24,7 @@
     </div>
   </header>
   <div class="header-nav">
-    <a href="{% url 'public:home' %}" class="{% if request.path == '/' %}active{% endif %}">About</a>
+    <a href="{% url 'public:about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
     <a href="{% url 'public:login' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a>
   </div>
 

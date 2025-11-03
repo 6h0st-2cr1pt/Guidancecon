@@ -14,6 +14,10 @@ def home(request):
     return render(request, 'public/P_login.html')
 
 
+def about(request):
+    return render(request, 'public/about.html')
+
+
 def signup(request):
     if request.method == 'POST':
         # Get form data
@@ -593,7 +597,7 @@ def profile(request):
             # Update user information
             user = request.user
             user.email = email
-            user.username = email
+            # Note: username should stay as student_id, don't change it
             user.first_name = first_name
             user.last_name = last_name
             
@@ -625,7 +629,7 @@ def profile(request):
             
             # If password was changed, re-authenticate
             if new_password:
-                user = authenticate(request, username=email, password=new_password)
+                user = authenticate(request, username=user.username, password=new_password)
                 if user:
                     login(request, user)
             

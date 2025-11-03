@@ -8,6 +8,7 @@ app_name = 'sysadmin'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('about/', views.about, name='about'),
     path('login/', auth_views.LoginView.as_view(template_name='sysadmin/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('signup/', views.signup, name='signup'),

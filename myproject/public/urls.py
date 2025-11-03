@@ -7,6 +7,7 @@ app_name = 'public'
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('about/', views.about, name='about'),
     path('signup/', views.signup, name='signup'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('appointments/', views.appointments, name='appointments'),

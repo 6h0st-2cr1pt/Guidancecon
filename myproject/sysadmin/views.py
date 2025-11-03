@@ -55,6 +55,10 @@ def index(request):
     return redirect('sysadmin:login')
 
 
+def about(request):
+    return render(request, 'sysadmin/about.html')
+
+
 @login_required
 def availability(request):
     # Accept a date parameter (YYYY-MM-DD) or default to today

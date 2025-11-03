@@ -1,0 +1,509 @@
+{% extends 'public/P_base.html' %}
+{% load static %}
+{% block title %}Manage Profile{% endblock %}
+{% block extra_css %}
+<style>
+  .profile-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid var(--dark-green);
+  }
+  
+  .profile-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+  }
+  
+  .profile-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-green);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+  }
+  
+  .profile-info {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 32px;
+  }
+  
+  .profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .profile-image-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--dark-green);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .profile-avatar-default {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--dark-green), var(--accent-yellow));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--white);
+    border: 4px solid var(--dark-green);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .file-input-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--dark-green);
+    color: var(--white);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .file-input-label:hover {
+    background: var(--dark-green-light);
+  }
+  
+  .file-input-label input {
+    display: none;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+  }
+  
+  .form-label .optional {
+    font-weight: 400;
+    color: var(--medium-gray);
+    font-size: 0.9rem;
+  }
+  
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: var(--white);
+  }
+  
+  .form-input:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: var(--dark-green);
+    box-shadow: 0 0 0 3px rgba(26, 77, 58, 0.1);
+  }
+  
+  .form-input:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+    color: var(--medium-gray);
+  }
+  
+  .form-error {
+    background: #fee;
+    color: #c00;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #c00;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    padding-top: 24px;
+    border-top: 2px solid var(--border-color);
+  }
+  
+  .btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .btn-primary {
+    background: var(--dark-green);
+    color: var(--white);
+  }
+  
+  .btn-primary:hover {
+    background: var(--dark-green-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .btn-secondary {
+    background: var(--white);
+    color: var(--dark-green);
+    border: 2px solid var(--dark-green);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--light-gray);
+  }
+  
+  .password-section {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 2px solid var(--border-color);
+  }
+  
+  .password-toggle {
+    position: relative;
+  }
+  
+  .password-toggle-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.1rem;
+    color: var(--medium-gray);
+  }
+  
+  .password-toggle-icon:hover {
+    color: var(--dark-green);
+  }
+  
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 16px;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .profile-info {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+    
+    .form-actions {
+      flex-direction: column-reverse;
+    }
+    
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <h1 class="page-title">Manage Profile</h1>
+  
+  {% if error %}
+    <div class="form-error">{{ error }}</div>
+  {% endif %}
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="form-error" style="{% if message.tags == 'success' %}background: #efe; color: #060; border-color: #060;{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+  
+  <form method="post" action="{% url 'public:profile' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="profile-card">
+      <h2 class="profile-section-title">Profile Picture</h2>
+      
+      <div class="profile-info">
+        <div class="profile-picture-section">
+          <img id="profile-image-preview" src="{% url 'public:profile_picture' user.id %}" alt="Profile Picture" class="profile-image-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div id="profile-avatar-default" class="profile-avatar-default" style="display: none;">
+            <span>{{ user.first_name|first|default:user.username|first|upper }}</span>
+          </div>
+          <div class="file-input-wrapper">
+            <label for="profile_picture" class="file-input-label">
+              Change Picture
+              <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(this); validateFileSize(this);">
+            </label>
+          </div>
+          <small class="form-label optional">Max 2 MB</small>
+        </div>
+        
+        <div style="padding-top: 16px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="first_name" class="form-label">First Name</label>
+              <input type="text" id="first_name" name="first_name" class="form-input" value="{{ first_name|default:'' }}" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="last_name" class="form-label">Last Name</label>
+              <input type="text" id="last_name" name="last_name" class="form-input" value="{{ last_name|default:'' }}" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" id="email" name="email" class="form-input" value="{{ email|default:'' }}" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="student_id" class="form-label">Student ID</label>
+              <input type="text" id="student_id" name="student_id" class="form-input" value="{{ student_id|default:'' }}" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="profile-card">
+      <h2 class="profile-section-title">Academic Information</h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="college" class="form-label">College</label>
+          <select id="college" name="college" class="form-select" required onchange="updateCourses()">
+            <option value="">Select College</option>
+            <option value="College of Arts & Sciences" {% if college == "College of Arts & Sciences" %}selected{% endif %}>Arts & Sciences</option>
+            <option value="College of Business Management & Accountancy" {% if college == "College of Business Management & Accountancy" %}selected{% endif %}>Business & Accountancy</option>
+            <option value="College of Computer Studies" {% if college == "College of Computer Studies" %}selected{% endif %}>Computer Studies</option>
+            <option value="College of Education" {% if college == "College of Education" %}selected{% endif %}>Education</option>
+            <option value="College of Engineering" {% if college == "College of Engineering" %}selected{% endif %}>Engineering</option>
+            <option value="College of Industrial Technology" {% if college == "College of Industrial Technology" %}selected{% endif %}>Industrial Technology</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="course" class="form-label">Course</label>
+          <select id="course" name="course" class="form-select" required>
+            <option value="">Select Course</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="year_level" class="form-label">Year Level</label>
+          <input type="text" id="year_level" name="year_level" class="form-input" value="{{ year_level|default:'' }}" placeholder="e.g., 1st Year" required>
+        </div>
+      </div>
+    </div>
+    
+    <div class="profile-card password-section">
+      <h2 class="profile-section-title">Change Password <span class="optional">(Optional)</span></h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="current_password" class="form-label">Current Password</label>
+          <div class="password-toggle">
+            <input type="password" id="current_password" name="current_password" class="form-input">
+            <span class="password-toggle-icon" onclick="togglePassword('current_password')">👁️</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="new_password" class="form-label">New Password</label>
+          <div class="password-toggle">
+            <input type="password" id="new_password" name="new_password" class="form-input">
+            <span class="password-toggle-icon" onclick="togglePassword('new_password')">👁️</span>
+          </div>
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="confirm_password" class="form-label">Confirm New Password</label>
+          <div class="password-toggle">
+            <input type="password" id="confirm_password" name="confirm_password" class="form-input">
+            <span class="password-toggle-icon" onclick="togglePassword('confirm_password')">👁️</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <a href="{% url 'public:dashboard' %}" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary" id="submit-btn">Save Changes</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const coursesByCollege = {
+    "College of Arts & Sciences": [
+      "Bachelor of Arts in English Language",
+      "Bachelor of Arts in Social Science",
+      "Bachelor of Public Administration",
+      "Bachelor of Science in Applied Mathematics",
+      "Bachelor of Science in Psychology"
+    ],
+    "College of Business Management & Accountancy": [
+      "Bachelor of Science in Hospitality Management"
+    ],
+    "College of Computer Studies": [
+      "Bachelor of Science in Information Systems"
+    ],
+    "College of Education": [
+      "Bachelor of Early Childhood Education",
+      "Bachelor of Elementary Education",
+      "Bachelor of Physical Education",
+      "Bachelor of Secondary Education, major in English",
+      "Bachelor of Secondary Education, major in Filipino",
+      "Bachelor of Secondary Education, major in Mathematics",
+      "Bachelor of Secondary Education, major in Science",
+      "Bachelor of Special Needs Education",
+      "Bachelor of Technology & Livelihood Education, major in Home Economics"
+    ],
+    "College of Engineering": [
+      "Bachelor of Science in Civil Engineering"
+    ],
+    "College of Industrial Technology": [
+      "Bachelor of Science in Industrial Technology, major in Architectural Drafting Technology",
+      "Bachelor of Science in Industrial Technology, major in Automotive Technology",
+      "Bachelor of Science in Industrial Technology, major in Electrical Technology",
+      "Bachelor of Science in Industrial Technology, major in Electronics Technology",
+      "Bachelor of Science in Industrial Technology, major in Apparel & Fashion Technology",
+      "Bachelor of Science in Industrial Technology, major in Food Trades/Technology",
+      "Bachelor of Science in Industrial Technology, major in Mechanical Technology",
+      "Bachelor of Science in Industrial Technology, major in Heating, Ventilating, Air-Conditioning & Refrigeration Technology (RAC)"
+    ]
+  };
+  
+  const currentCourse = "{{ course|default:'' }}";
+  
+  function updateCourses() {
+    const collegeSelect = document.getElementById('college');
+    const courseSelect = document.getElementById('course');
+    const selectedCollege = collegeSelect.value;
+    
+    // Clear existing options
+    courseSelect.innerHTML = '<option value="">Select Course</option>';
+    
+    if (selectedCollege && coursesByCollege[selectedCollege]) {
+      // Add courses for selected college
+      coursesByCollege[selectedCollege].forEach(course => {
+        const option = document.createElement('option');
+        option.value = course;
+        option.textContent = course;
+        if (course === currentCourse) {
+          option.selected = true;
+        }
+        courseSelect.appendChild(option);
+      });
+    }
+  }
+  
+  // Initialize courses on page load
+  window.addEventListener('DOMContentLoaded', function() {
+    updateCourses();
+  });
+  
+  function previewImage(input) {
+    const preview = document.getElementById('profile-image-preview');
+    const defaultAvatar = document.getElementById('profile-avatar-default');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        defaultAvatar.style.display = 'none';
+      };
+      
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  
+  function validateFileSize(input) {
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (input.files && input.files[0]) {
+      const fileSize = input.files[0].size;
+      const maxSize = 2 * 1024 * 1024; // 2 MB
+      
+      if (fileSize > maxSize) {
+        const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+        alert(`File is too large (${fileSizeMB} MB). Please select an image smaller than 2 MB.`);
+        input.value = '';
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = false;
+      }
+    }
+  }
+  
+  function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.nextElementSibling;
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      icon.textContent = '👁️';
+    }
+  }
+</script>
+{% endblock %}
+
