@@ -16,7 +16,7 @@
 
   <!-- Upcoming Appointments -->
   <h2 class="page-title">
-      <img src="{{ MEDIA_URL }}icons/upcoming.png" alt="Print" style="width: 20px; height: 20px;">
+      <img src="{% static 'icons/upcoming.png' %}" alt="Print" style="width: 20px; height: 20px;">
       Upcoming Appointments
   </h2>
   <section class="section">
@@ -62,7 +62,7 @@
       {% else %}
         <div class="no-appointments">
           <div class="no-appointments-icon">
-              <img src="{{ MEDIA_URL }}icons/empty.gif" alt="No Appointments" style="width: 80px; height: 80px;">
+              <img src="{% static 'icons/empty.gif' %}" alt="No Appointments" style="width: 80px; height: 80px;">
           </div>
           <h3>No Upcoming Appointments</h3>
           <p>You don't have any upcoming appointments scheduled.</p>
@@ -73,7 +73,7 @@
 
   <!-- Past Appointments -->
   <h2 class="page-title">
-      <img src="{{ MEDIA_URL }}icons/past.png" alt="Print" style="width: 20px; height: 20px;">
+      <img src="{% static 'icons/past.png' %}" alt="Print" style="width: 20px; height: 20px;">
       Past Appointments
   </h2>
   <section class="section">
@@ -118,12 +118,12 @@
   <!-- Quick Stats -->
   <div class="dashboard-stats enterprise-card">
     <h3 class="stats-title">
-        <img src="{{ MEDIA_URL }}icons/analytics.png" alt="Print" style="width: 20px; height: 20px;">
+        <img src="{% static 'icons/analytics.png' %}" alt="Print" style="width: 20px; height: 20px;">
         Quick Statistics</h3>
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">
-            <img src="{{ MEDIA_URL }}icons/upcoming.png" alt="Print" style="width: 20px; height: 20px;">
+            <img src="{% static 'icons/upcoming.png' %}" alt="Print" style="width: 20px; height: 20px;">
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ upcoming_appointments.count }}</div>
@@ -132,7 +132,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-icon">
-            <img src="{{ MEDIA_URL }}icons/checked.png" alt="Print" style="width: 20px; height: 20px;">
+            <img src="{% static 'icons/checked.png' %}" alt="Print" style="width: 20px; height: 20px;">
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ past_appointments.count }}</div>
@@ -141,7 +141,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-icon">
-            <img src="{{ MEDIA_URL }}icons/notification.png" alt="Print" style="width: 20px; height: 20px;">
+            <img src="{% static 'icons/notification.png' %}" alt="Print" style="width: 20px; height: 20px;">
         </div>
         <div class="stat-content">
           <div class="stat-number">{{ unread_count }}</div>

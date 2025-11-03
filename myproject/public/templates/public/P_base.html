@@ -42,15 +42,15 @@
       </div>
       <nav class="menu">
         <a class="menu-item{% if request.resolver_match.url_name == 'appointments' %} active{% endif %}" href="{% url 'public:appointments' %}">
-          <img src="{% static 'icons/appointment.png' %}" alt="Appointments" class="menu-icon-img">
+          <img src="{% static 'icons/schedule.png' %}" alt="Appointments" class="menu-icon-img">
           <span class="menu-text">Appointments</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'my_appointments' %} active{% endif %}" href="{% url 'public:my_appointments' %}">
-          <img src="{% static 'icons/my-appointment.png' %}" alt="My Appointments" class="menu-icon-img">
+          <img src="{% static 'icons/upcoming.png' %}" alt="My Appointments" class="menu-icon-img">
           <span class="menu-text">My Appointments</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'public:notifications' %}">
-          <img src="{% static 'icons/bell.png' %}" alt="Notifications" class="menu-icon-img">
+          <img src="{% static 'icons/notification.png' %}" alt="Notifications" class="menu-icon-img">
           <span class="menu-text">Notifications</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'public:profile' %}">

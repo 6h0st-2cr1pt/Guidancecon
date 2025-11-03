@@ -50,30 +50,30 @@
       </div>
       <nav class="menu">
         <a class="menu-item{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}" href="{% url 'sysadmin:dashboard' %}">
-          <img src="{{ MEDIA_URL }}icons/dashboard.png" alt="Dashboard" class="menu-icon-img">
+          <img src="{% static 'icons/dashboard.png' %}" alt="Dashboard" class="menu-icon-img">
           <span class="menu-text">Dashboard</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'availability' %} active{% endif %}" href="{% url 'sysadmin:availability' %}">
-          <img src="{{ MEDIA_URL }}icons/schedule.png" alt="Schedule" class="menu-icon-img">
+          <img src="{% static 'icons/schedule.png' %}" alt="Schedule" class="menu-icon-img">
           <span class="menu-text">Schedule Availability</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'analytics' %} active{% endif %}" href="{% url 'sysadmin:analytics' %}">
-          <img src="{{ MEDIA_URL }}icons/analytics.png" alt="Analytics" class="menu-icon-img">
+          <img src="{% static 'icons/analytics.png' %}" alt="Analytics" class="menu-icon-img">
           <span class="menu-text">Analytics</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'reports' %} active{% endif %}" href="{% url 'sysadmin:reports' %}">
-          <img src="{{ MEDIA_URL }}icons/report.png" alt="Reports" class="menu-icon-img">
+          <img src="{% static 'icons/report.png' %}" alt="Reports" class="menu-icon-img">
           <span class="menu-text">Reports</span>
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'sysadmin:notifications' %}">
-          <img src="{{ MEDIA_URL }}icons/notification.png" alt="Notifications" class="menu-icon-img">
+          <img src="{% static 'icons/notification.png' %}" alt="Notifications" class="menu-icon-img">
           <span class="menu-text">Notifications</span>
           {% if unread_count and unread_count > 0 %}
             <span class="notification-badge">{{ unread_count }}</span>
           {% endif %}
         </a>
         <a class="menu-item{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'sysadmin:profile' %}">
-          <img src="{{ MEDIA_URL }}icons/user.png" alt="Profile" class="menu-icon-img">
+          <img src="{% static 'icons/user.png' %}" alt="Profile" class="menu-icon-img">
           <span class="menu-text">Manage Profile</span>
         </a>
       </nav>
