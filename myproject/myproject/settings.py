@@ -92,23 +92,6 @@ DATABASES = {
     }
 }
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'postgres',  # database name from Supabase connection
-#        'USER': 'postgres',  # usually 'postgres' by default
-#        'PASSWORD': '<YOUR_SUPABASE_PASSWORD>',
-#        'HOST': 'db.<PROJECT_REF>.supabase.co',
-#        'PORT': '5432',
-#        'OPTIONS': {
-#            'sslmode': 'require',  # Supabase requires SSL
-#        },
-#    }
-#}
-
-
-
-
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     'public.backends.StudentIDBackend',  # Try student ID first for public login
@@ -140,10 +123,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'jonaldsabordo@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']  # No default, must be set
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'CHMSU Guidance Connect <jonaldsabordo@gmail.com>')
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'jonaldsabordo@gmail.com')
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
+ADMIN_EMAIL = os.environ['ADMIN_EMAIL']
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
