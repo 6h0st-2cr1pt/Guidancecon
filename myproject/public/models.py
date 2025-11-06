@@ -9,6 +9,8 @@ class UserProfile(models.Model):
 	college = models.CharField(max_length=255, blank=True)
 	course = models.CharField(max_length=255, blank=True)
 	year_level = models.CharField(max_length=50, blank=True)
+	gender = models.CharField(max_length=32, blank=True)
+	age = models.PositiveIntegerField(null=True, blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)

@@ -1,0 +1,249 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+  <h2 class="page-title">
+    <img src="{% static 'icons/report.png' %}" alt="Reports" class="menu-icon-img">
+    Reports
+  </h2>
+
+  <div class="section">
+    <div class="section-header">Filters</div>
+    <div class="section-body" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:end;">
+      <form method="get" style="display:contents;">
+        <div>
+          <label for="start_date">Start Date</label>
+          <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+        </div>
+        <div>
+          <label for="end_date">End Date</label>
+          <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        </div>
+        <div>
+          <label for="report_type">Report Type</label>
+          <select id="report_type" name="report_type">
+            <option value="summary" {% if report_type == 'summary' %}selected{% endif %}>Summary</option>
+            <option value="detailed" {% if report_type == 'detailed' %}selected{% endif %}>Detailed</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button type="submit" class="btn btn-secondary">Apply</button>
+          <a class="btn btn-secondary" href="{% url 'sysadmin:export_report_pdf' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&report_type={{ report_type }}">Export PDF</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Summary</div>
+    <div class="section-body">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Total</div>
+            <div class="kpi-value">{{ total_appointments }}</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-value">{{ pending }}</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Confirmed</div>
+            <div class="kpi-value">{{ confirmed }}</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Completed</div>
+            <div class="kpi-value">{{ completed }}</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Cancelled</div>
+            <div class="kpi-value">{{ cancelled }}</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Completion Rate</div>
+            <div class="kpi-value">{{ completion_rate }}%</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-content">
+            <div class="kpi-label">Cancellation Rate</div>
+            <div class="kpi-value">{{ cancellation_rate }}%</div>
+          </div>
+        </div>
+      </div>
+      <!-- Demographics -->
+      <div style="margin-top:16px; display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+        <div class="enterprise-card">
+          <div class="section-header" style="border:none; padding:0; margin-bottom:8px;">Gender Distribution</div>
+          {% if gender_summary %}
+            <table style="width:100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e5e5;">Gender</th>
+                  <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e5e5;">Students</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for k,v in gender_summary.items %}
+                  <tr>
+                    <td style="padding:6px; border-bottom:1px solid #f0f0f0;">{{ k|default:'Not Specified' }}</td>
+                    <td style="padding:6px; border-bottom:1px solid #f0f0f0; text-align:right;">{{ v }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p style="color:var(--medium-gray);">No data.</p>
+          {% endif %}
+        </div>
+        <div class="enterprise-card">
+          <div class="section-header" style="border:none; padding:0; margin-bottom:8px;">Age Groups</div>
+          {% if age_summary %}
+            <table style="width:100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:6px; border-bottom:1px solid #e5e5e5;">Age Group</th>
+                  <th style="text-align:right; padding:6px; border-bottom:1px solid #e5e5e5;">Students</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for k,v in age_summary.items %}
+                  <tr>
+                    <td style="padding:6px; border-bottom:1px solid #f0f0f0;">{{ k }}</td>
+                    <td style="padding:6px; border-bottom:1px solid #f0f0f0; text-align:right;">{{ v }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p style="color:var(--medium-gray);">No data.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Appointments by Program</div>
+    <div class="section-body">
+      {% if program_stats %}
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Program</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid var(--dark-green);">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in program_stats %}
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ row.program|default:'Not Specified' }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5; text-align:right;">{{ row.count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p style="color:var(--medium-gray);">No data.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Top Time Slots</div>
+    <div class="section-body">
+      {% if timeslot_stats %}
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Date</th>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Start Time</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid var(--dark-green);">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in timeslot_stats %}
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ row.timeslot__date|date:"M d, Y" }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ row.timeslot__start_time|time:"g:i A" }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5; text-align:right;">{{ row.count }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p style="color:var(--medium-gray);">No data.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">Daily Breakdown</div>
+    <div class="section-body">
+      {% if daily_stats %}
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Date</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid var(--dark-green);">Total</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid var(--dark-green);">Completed</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid var(--dark-green);">Cancelled</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in daily_stats %}
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ d.date|date:"M d, Y" }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5; text-align:right;">{{ d.total }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5; text-align:right;">{{ d.completed }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5; text-align:right;">{{ d.cancelled }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p style="color:var(--medium-gray);">No data.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if report_type == 'detailed' and appointment_list %}
+    <div class="section">
+      <div class="section-header">Detailed Appointments</div>
+      <div class="section-body">
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Student</th>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Program</th>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Status</th>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Timeslot</th>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid var(--dark-green);">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in appointment_list %}
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ a.student.get_full_name|default:a.student.username }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ a.program|default:'Not Specified' }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ a.status|title }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ a.timeslot.date|date:"M d, Y" }} {{ a.timeslot.start_time|time:"g:i A" }}</td>
+                <td style="padding:8px; border-bottom:1px solid #e5e5e5;">{{ a.created_at|date:"M d, Y g:i A" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

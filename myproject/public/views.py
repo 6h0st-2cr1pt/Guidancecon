@@ -31,6 +31,10 @@ def signup(request):
         password = request.POST.get('password', '').strip()
         confirm_password = request.POST.get('confirm_password', '').strip()
         profile_picture = request.FILES.get('profile_picture')
+        gender = request.POST.get('gender', '').strip()
+        age = request.POST.get('age', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        age = request.POST.get('age', '').strip()
 
         # Keep form data for re-population
         context = {
@@ -40,16 +44,33 @@ def signup(request):
             'college': college,
             'course': course,
             'yearlevel': yearlevel,
-            'email': email
+            'email': email,
+            'gender': gender,
+            'age': age
         }
 
         # Validate required fields
-        if not all([studentid, college, course, email, password, confirm_password]):
+        if not all([studentid, college, course, email, password, confirm_password, gender, age]):
             context['error'] = 'All fields are required.'
+            return render(request, 'public/registration.html', context)
+
+        # Validate age is a number in range
+        try:
+            age_int = int(age)
+            if age_int < 12 or age_int > 120:
+                raise ValueError()
+        except ValueError:
+            context['error'] = 'Please enter a valid age (12-120).'
             return render(request, 'public/registration.html', context)
 
         if password != confirm_password:
             context['error'] = 'Passwords do not match.'
+            return render(request, 'public/registration.html', context)
+
+        # Validate terms acceptance
+        terms_accepted = request.POST.get('terms_accepted')
+        if not terms_accepted:
+            context['error'] = 'You must agree to the Terms of Services and Privacy Policy to continue.'
             return render(request, 'public/registration.html', context)
 
         # Validate profile picture size (2 MB limit)
@@ -101,7 +122,9 @@ def signup(request):
                 student_id=studentid,
                 college=college,
                 course=course,
-                year_level=yearlevel
+                year_level=yearlevel,
+                gender=gender,
+                age=age_int
             )
 
             # Log the user in
@@ -537,6 +560,8 @@ def profile(request):
         college = request.POST.get('college', '').strip()
         course = request.POST.get('course', '').strip()
         year_level = request.POST.get('year_level', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        age = request.POST.get('age', '').strip()
         profile_picture = request.FILES.get('profile_picture')
         current_password = request.POST.get('current_password', '').strip()
         new_password = request.POST.get('new_password', '').strip()
@@ -550,11 +575,22 @@ def profile(request):
             'college': college,
             'course': course,
             'year_level': year_level,
+            'gender': gender,
+            'age': age,
         }
         
         # Validation
-        if not all([email, first_name, last_name, student_id, college, course]):
+        if not all([email, first_name, last_name, student_id, college, course, gender, age]):
             context['error'] = 'Email, name, student ID, college, and course are required.'
+            return render(request, 'public/profile.html', context)
+
+        # Validate age
+        try:
+            age_int = int(age)
+            if age_int < 12 or age_int > 120:
+                raise ValueError()
+        except ValueError:
+            context['error'] = 'Please enter a valid age (12-120).'
             return render(request, 'public/profile.html', context)
         
         # Check if email is taken by another user
@@ -623,6 +659,8 @@ def profile(request):
             user_profile.college = college
             user_profile.course = course
             user_profile.year_level = year_level
+            user_profile.gender = gender
+            user_profile.age = age_int
             user_profile.save()
             
             messages.success(request, 'Profile updated successfully!')
@@ -648,5 +686,7 @@ def profile(request):
         'college': user_profile.college,
         'course': user_profile.course,
         'year_level': user_profile.year_level,
+        'gender': user_profile.gender,
+        'age': user_profile.age,
     }
     return render(request, 'public/profile.html', context)

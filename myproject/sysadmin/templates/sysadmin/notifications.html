@@ -1,0 +1,35 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+  <h2 class="page-title">
+    <img src="{% static 'icons/notification.png' %}" alt="Notifications" class="menu-icon-img">
+    Notifications
+  </h2>
+  
+  {% if notifications %}
+    <div class="notifications-list">
+      {% for n in notifications %}
+        <div class="notification-item enterprise-card" style="padding:16px; margin-bottom:12px; display:flex; gap:12px; align-items:flex-start;">
+          <div class="notification-icon" style="font-size:20px;">🔔</div>
+          <div class="notification-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <h4 style="margin:0; color:var(--text-dark);">{{ n.title|default:"Notification" }}</h4>
+              {% if not n.is_read %}
+                <span class="pill" style="background:#d4edda; color:#155724; padding:2px 8px; border-radius:12px; font-size:0.75rem;">New</span>
+              {% endif %}
+            </div>
+            <p style="margin:6px 0 0; color:var(--medium-gray);">{{ n.message|default:"" }}</p>
+            <small style="color:var(--medium-gray);">{{ n.created_at|date:"M d, Y g:i A" }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="enterprise-card" style="padding:24px; text-align:center;">
+      <div class="no-appointments-icon">🔕</div>
+      <h3>No Notifications</h3>
+      <p>You don't have any notifications yet.</p>
+    </div>
+  {% endif %}
+{% endblock %}

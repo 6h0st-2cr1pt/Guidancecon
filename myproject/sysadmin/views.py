@@ -39,7 +39,7 @@ def dashboard(request):
         timeslot__date=today,
         status__in=['pending', 'confirmed']
     ).order_by('timeslot__start_time')
-    
+
     context = {
         'notifications': notifications,
         'unread_count': unread_count,
@@ -183,6 +183,12 @@ def signup(request):
 
         if password != confirm_password:
             context['error'] = 'Passwords do not match.'
+            return render(request, 'sysadmin/signup.html', context)
+
+        # Validate terms acceptance
+        terms_accepted = request.POST.get('terms_accepted')
+        if not terms_accepted:
+            context['error'] = 'You must agree to the Terms of Services and Privacy Policy to continue.'
             return render(request, 'sysadmin/signup.html', context)
 
         if User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists():
@@ -553,6 +559,33 @@ def analytics(request):
     
     # Recent activity (last 30 days)
     recent_activity_count = recent_appointments.count()
+
+    # Gender distribution and Age groups for students seen by this counselor
+    student_ids = list(all_appointments.values_list('student_id', flat=True).distinct())
+    from public.models import UserProfile
+    gender_qs = UserProfile.objects.filter(user_id__in=student_ids).values('gender').annotate(count=Count('id'))
+    gender_labels = [item['gender'] if item['gender'] else 'Not Specified' for item in gender_qs]
+    gender_counts = [item['count'] for item in gender_qs]
+
+    # Age buckets
+    def age_bucket(a):
+        if a is None:
+            return 'Unknown'
+        if a < 18:
+            return '<18'
+        if a <= 24:
+            return '18-24'
+        if a <= 30:
+            return '25-30'
+        if a <= 40:
+            return '31-40'
+        return '41+'
+
+    ages = list(UserProfile.objects.filter(user_id__in=student_ids).values_list('age', flat=True))
+    from collections import Counter
+    age_counts_map = Counter(age_bucket(a) for a in ages)
+    age_labels = list(age_counts_map.keys())
+    age_counts = [age_counts_map[label] for label in age_labels]
     
     context = {
         # KPIs
@@ -579,6 +612,10 @@ def analytics(request):
         'monthly_data': json.dumps(monthly_data),
         'available_timeslots': available_timeslots,
         'booked_timeslots': booked_timeslots,
+        'gender_labels': json.dumps(gender_labels),
+        'gender_counts': json.dumps(gender_counts),
+        'age_labels': json.dumps(age_labels),
+        'age_counts': json.dumps(age_counts),
     }
     
     return render(request, 'sysadmin/analytics.html', context)
@@ -663,6 +700,29 @@ def reports(request):
         appointment_count=Count('id')
     ).order_by('-appointment_count')[:20]
     
+    # Gender and Age summaries for students in this report period
+    from public.models import UserProfile
+    student_ids = list(appointments.values_list('student_id', flat=True).distinct())
+    gender_qs = UserProfile.objects.filter(user_id__in=student_ids).values('gender').annotate(count=Count('id'))
+    gender_summary = { (item['gender'] or 'Not Specified'): item['count'] for item in gender_qs }
+
+    def age_bucket(a):
+        if a is None:
+            return 'Unknown'
+        if a < 18:
+            return '<18'
+        if a <= 24:
+            return '18-24'
+        if a <= 30:
+            return '25-30'
+        if a <= 40:
+            return '31-40'
+        return '41+'
+
+    from collections import Counter
+    ages = list(UserProfile.objects.filter(user_id__in=student_ids).values_list('age', flat=True))
+    age_summary = Counter(age_bucket(a) for a in ages)
+    
     # Detailed appointment list for detailed report
     if report_type == 'detailed':
         appointment_list = appointments.order_by('-created_at')
@@ -690,6 +750,8 @@ def reports(request):
         'timeslot_stats': timeslot_stats,
         'daily_stats': daily_stats,
         'student_stats': student_stats,
+        'gender_summary': dict(gender_summary),
+        'age_summary': dict(age_summary),
         'appointment_list': appointment_list,
     }
     

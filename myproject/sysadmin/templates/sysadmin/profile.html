@@ -1,0 +1,164 @@
+{% extends 'sysadmin/base.html' %}
+{% load static %}
+{% block title %}Manage Profile{% endblock %}
+{% block content %}
+  <style>
+    .profile-container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .page-title { font-size: 2rem; font-weight: 700; color: var(--dark-green); margin-bottom: 32px; padding-bottom: 16px; border-bottom: 3px solid var(--dark-green); display:flex; align-items:center; gap:10px; }
+    .profile-card { background: var(--white); border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 24px; }
+    .profile-section-title { font-size: 1.25rem; font-weight: 600; color: var(--dark-green); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border-color); }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .form-label { font-weight: 600; display:block; margin-bottom: 6px; }
+    .form-input, .form-select, textarea.form-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #000; outline:none; background:#ebebeb; }
+    .form-input:focus, .form-select:focus, textarea.form-input:focus { border: 2px solid #000; }
+    .profile-info { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; margin-bottom: 8px; }
+    .profile-image-preview { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--dark-green); box-shadow: var(--shadow-lg); }
+    .profile-avatar-default { width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--dark-green), var(--accent-yellow)); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 700; color: var(--white); border: 4px solid var(--dark-green); box-shadow: var(--shadow-lg); }
+    .file-input-wrapper { position: relative; display: inline-block; width: 100%; }
+    .file-input-label { display: inline-block; padding: 10px 20px; background: var(--dark-green); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .optional { color:#6b7280; font-style: italic; }
+    .form-actions { display:flex; gap:8px; justify-content:flex-end; }
+    .password-toggle { position: relative; }
+    .password-toggle-icon { position:absolute; right:10px; top:50%; transform: translateY(-50%); cursor:pointer; }
+    @media (max-width: 768px) { .profile-info { grid-template-columns: 1fr; } }
+  </style>
+
+  <div class="profile-container">
+    <h2 class="page-title">
+      <img src="{% static 'icons/user.png' %}" alt="Profile" style="width:20px; height:20px;">
+      Manage Profile
+    </h2>
+
+    {% if error %}
+      <div class="profile-card" style="padding:12px; border-left:4px solid #dc3545; background:#fee; color:#721c24;">{{ error }}</div>
+    {% endif %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="profile-card" style="padding:12px; border-left:4px solid {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %}; background:{% if message.tags == 'success' %}#efe{% else %}#fee{% endif %}; color:{% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %};">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="profile-card">
+        <h3 class="profile-section-title">Profile Picture</h3>
+        <div class="profile-info">
+          <div class="profile-picture-section">
+            <img id="profile-image-preview" src="{% url 'sysadmin:profile_picture' user.id %}" alt="Profile Picture" class="profile-image-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div id="profile-avatar-default" class="profile-avatar-default" style="display:none;">
+              <span>{{ user.first_name|first|default:user.username|first|upper }}</span>
+            </div>
+            <div class="file-input-wrapper">
+              <label for="profile_picture" class="file-input-label">
+                Change Picture
+                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(this);">
+              </label>
+            </div>
+            <small class="optional">Max 2 MB</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <h3 class="profile-section-title">Profile Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input id="email" name="email" type="email" class="form-input" value="{{ email|default:'' }}" required>
+          </div>
+          <div class="form-group">
+            <label for="first_name" class="form-label">First Name</label>
+            <input id="first_name" name="first_name" type="text" class="form-input" value="{{ first_name|default:'' }}" required>
+          </div>
+          <div class="form-group">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input id="last_name" name="last_name" type="text" class="form-input" value="{{ last_name|default:'' }}" required>
+          </div>
+          <div class="form-group">
+            <label for="middle_initial" class="form-label">Middle Initial</label>
+            <input id="middle_initial" name="middle_initial" type="text" class="form-input" value="{{ middle_initial|default:'' }}" maxlength="10">
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <h3 class="profile-section-title">Counselor Details</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="assigned_college" class="form-label">Assigned College</label>
+            <select id="assigned_college" name="assigned_college" class="form-select" required>
+              <option value="">Select College</option>
+              <option value="College of Arts & Sciences" {% if assigned_college == 'College of Arts & Sciences' %}selected{% endif %}>Arts & Sciences</option>
+              <option value="College of Business Management & Accountancy" {% if assigned_college == 'College of Business Management & Accountancy' %}selected{% endif %}>Business & Accountancy</option>
+              <option value="College of Computer Studies" {% if assigned_college == 'College of Computer Studies' %}selected{% endif %}>Computer Studies</option>
+              <option value="College of Education" {% if assigned_college == 'College of Education' %}selected{% endif %}>Education</option>
+              <option value="College of Engineering" {% if assigned_college == 'College of Engineering' %}selected{% endif %}>Engineering</option>
+              <option value="College of Industrial Technology" {% if assigned_college == 'College of Industrial Technology' %}selected{% endif %}>Industrial Technology</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="title" class="form-label">Title/Qualifications</label>
+            <input id="title" name="title" type="text" class="form-input" value="{{ title|default:'' }}" placeholder="e.g., PhD, RGC, LPT">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label for="bio" class="form-label">Bio/Description</label>
+            <textarea id="bio" name="bio" rows="4" class="form-input">{{ bio|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card password-section">
+        <h3 class="profile-section-title">Change Password <span class="optional">(Optional)</span></h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="current_password" class="form-label">Current Password</label>
+            <div class="password-toggle">
+              <input type="password" id="current_password" name="current_password" class="form-input">
+              <span class="password-toggle-icon" onclick="togglePassword('current_password')">👁️</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="new_password" class="form-label">New Password</label>
+            <div class="password-toggle">
+              <input type="password" id="new_password" name="new_password" class="form-input">
+              <span class="password-toggle-icon" onclick="togglePassword('new_password')">👁️</span>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="confirm_password" class="form-label">Confirm New Password</label>
+            <div class="password-toggle">
+              <input type="password" id="confirm_password" name="confirm_password" class="form-input">
+              <span class="password-toggle-icon" onclick="togglePassword('confirm_password')">👁️</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'sysadmin:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" id="submit-btn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function previewImage(input) {
+      const preview = document.getElementById('profile-image-preview');
+      const fallback = document.getElementById('profile-avatar-default');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          fallback.style.display = 'none';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+    function togglePassword(id) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+{% endblock %}

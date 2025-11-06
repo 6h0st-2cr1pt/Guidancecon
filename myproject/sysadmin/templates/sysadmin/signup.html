@@ -21,9 +21,9 @@
       </div>
     </div>
   </header>
-  <div class="header-nav">
-    <a href="#">About</a>
-    <a href="{% url 'sysadmin:login' %}">Login</a>
+<div class="header-nav">
+    <a href="{% url 'sysadmin:about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+    <a href="{% url 'sysadmin:signup' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Sign Up</a>
   </div>
 
   <main>
@@ -46,6 +46,16 @@
 
             <label for="id_confirm_password">Confirm Password</label>
             <input class="input-border" type="password" id="id_confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+
+            <!-- Terms and Privacy Policy Checkbox (moved inside Account Information) -->
+            <div style="margin-top: 12px;">
+              <label style="display: flex; align-items: flex-start; font-weight: normal; cursor: pointer;">
+                <input type="checkbox" id="terms_checkbox" name="terms_accepted" required style="margin-right: 8px; margin-top: 3px; cursor: pointer;">
+                <span style="font-size: 0.9rem; line-height: 1.5;">
+                  I agree to the <a href="#" onclick="event.preventDefault(); openModal('termsModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Terms of Services</a> and <a href="#" onclick="event.preventDefault(); openModal('privacyModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Privacy Policy</a>
+                </span>
+              </label>
+            </div>
           </div>
 
           <div class="form-section">
@@ -89,6 +99,8 @@
           </div>
         </div>
 
+        
+
         <button type="submit" class="btn-login" id="submit-btn">Sign up</button>
       </form>
 
@@ -123,6 +135,176 @@
         }
       }
     }
+  </script>
+
+  <!-- Terms of Services Modal -->
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Terms of Services</h2>
+        <span class="close" onclick="closeModal('termsModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p><strong>Guidance Connect</strong> is a digital counseling appointment system designed to give students a convenient and secure way to schedule and manage their counseling appointments. The system promotes accessibility, privacy, and support for mental health by connecting students with counselors in a safe digital environment. By using this system, users agree to follow these Terms and Conditions, which are designed to maintain a respectful, confidential, and organized counseling process.</p>
+        
+        <h3>Eligibility and Account Registration</h3>
+        <p>Only registered students, authorized counselors, and designated guidance staff are allowed to access and use Guidance Connect. Students are required to create an account using accurate and truthful personal information. During registration, users must agree to the system's Privacy Notice and Consent Agreement before proceeding. This ensures that all collected data is protected and used solely for counseling purposes. Each user is responsible for keeping their account information and password confidential. Unauthorized access, sharing of login details, or misuse of another person's account is not permitted.</p>
+        
+        <h3>Purpose and Acceptable Use</h3>
+        <p>Guidance Connect is created to support and manage counseling sessions in a convenient and secure way. It helps students book appointments, communicate with counselors, and receive guidance services more efficiently. Users are expected to use the system responsibly and respectfully. Submitting false information, accessing another user's account, or engaging in inappropriate behavior is not allowed. The system is meant to be used only for counseling purposes and to promote the well-being of its users.</p>
+        
+        <h3>Scheduling, Cancellation, and Rescheduling</h3>
+        <p>Students can schedule counseling sessions through the system based on the availability of the counselor. Once an appointment is booked, both the student and the counselor receive confirmation through their accounts. If a student cannot attend, they are encouraged to cancel or reschedule the appointment at least one day before the session.</p>
+        <p>Counselors also have the right to decline or reschedule an appointment if necessary, and students will be notified of any changes through the system.</p>
+        
+        <h3>System Availability and Updates</h3>
+        <p>Guidance Connect may occasionally be unavailable due to maintenance, updates, or technical issues.</p>
+        <p>The developers and administrators reserve the right to modify, add, or remove features at any time to improve functionality and security. Users will be informed of major changes affecting their use of the system.</p>
+        
+        <h3>Disclaimers and Limitations of Liability</h3>
+        <p>Guidance Connect serves only as a facilitation tool for counseling appointments. It does not replace professional counseling or emergency mental-health services.</p>
+        <p>The developers, administrators, and X university are not liable for any damages arising from misuse of the system, technical problems, or loss of data beyond their reasonable control.</p>
+        <p>In cases of psychological emergency, users should contact the Guidance Office directly or reach out to emergency hotlines.</p>
+        
+        <h3>Modifications to the Terms</h3>
+        <p>These Terms of Service may be updated from time to time. Users will be notified of significant revisions via email or on the system's home page. Continued use of the system after such updates constitutes acceptance of the new terms.</p>
+        
+        <h3>Contact Information</h3>
+        <p>For any questions, concerns, or requests regarding these Terms of Service, please contact:</p>
+        <p><strong>Guidance and Counseling Office</strong><br>
+        Email: guidanceoffice@university.edu.ph<br>
+        Phone: 09876543210</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('termsModal')" class="btn-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div id="privacyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Privacy Policy</h2>
+        <span class="close" onclick="closeModal('privacyModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>The <strong>Guidance Online Appointment System</strong> is designed to make counseling and guidance services more accessible and efficient. This Privacy Policy explains how we collect, use, store, disclose, and protect your personal information when you use our system.</p>
+        <p>We are fully committed to complying with the Data Privacy Act of 2012 (Republic Act No. 10173), its Implementing Rules and Regulations (IRR), and other applicable laws in the Philippines. By using our system, you acknowledge that you have read, understood, and agreed to the terms of this policy.</p>
+        
+        <h3>Information We Collect</h3>
+        <p>When you use the Guidance Online Appointment System, we collect specific categories of personal information necessary for the proper delivery of counseling and guidance services. All data collected is processed lawfully, fairly, and transparently, in accordance with the Data Privacy Act of 2012 and other applicable institutional policies. The following describes the types of information we may collect and how they are used:</p>
+        <ul>
+          <li><strong>Personal identification details</strong> – such as your full name, student id, contact number, and email address.</li>
+          <li><strong>Appointment details</strong> – including your preferred date and time and assigned counselor or guidance staff.</li>
+          <li><strong>Technical information</strong> – such as your IP address, device information, and browser type (collected automatically for system security and analytics).</li>
+          <li><strong>Other information</strong> – that you voluntarily provide during registration, counseling intake, or communication with our guidance staff.</li>
+        </ul>
+        
+        <h3>Purpose of Data Collection and Use</h3>
+        <p>Your personal data is collected and processed solely for legitimate, guidance-related, and administrative purposes. Each piece of information you provide is used only to support the effective delivery of counseling services, efficient appointment management, and continuous improvement of the Guidance Online Appointment System, in compliance with the Data Privacy Act of 2012.</p>
+        <ul>
+          <li><strong>Appointment management</strong> – to schedule, confirm, modify, or cancel appointments with counselors.</li>
+          <li><strong>Service delivery</strong> – to provide appropriate counseling, guidance, and support services.</li>
+          <li><strong>Communication</strong> – to send reminders, updates, or follow-up messages related to your appointments.</li>
+          <li><strong>Record-keeping</strong> – to maintain service logs and documentation for monitoring and evaluation.</li>
+          <li><strong>System improvement</strong> – to analyze usage trends and improve user experience and service quality.</li>
+          <li><strong>Legal and compliance purposes</strong> – to meet institutional and regulatory obligations as required by law.</li>
+        </ul>
+        <p>We do not use your data for commercial purposes, marketing, or any activity not related to the functions of the guidance office.</p>
+        
+        <h3>Legal Basis for Processing</h3>
+        <p>The Guidance Online Appointment System processes personal information only on lawful grounds as required by the Data Privacy Act of 2012 and its Implementing Rules and Regulations (IRR). The collection, storage, and use of your data are guided by legitimate purposes that support the effective delivery of counseling and guidance services. The following outlines the legal bases under which your personal data may be processed:</p>
+        <ul>
+          <li><strong>Consent</strong> – Your personal information is processed based on the consent you give when signing up or using the system. By agreeing to this Privacy Policy, you allow us to collect and use your data for appointment scheduling, communication, and counseling services. You may withdraw your consent at any time, subject to the limitations of system use.</li>
+          <li><strong>Contractual necessity</strong> – processing is necessary to provide the appointment and guidance services you request. Without this information, we would not be able to deliver or confirm your requested services.</li>
+          <li><strong>Legal obligation</strong> – compliance with relevant laws, school regulations, and reporting requirements. This ensures the system operates in line with institutional and government standards.</li>
+          <li><strong>Legitimate interests</strong> – ensuring the proper operation, safety, and improvement of our system and services without compromising your rights and privacy.</li>
+        </ul>
+        
+        <h3>Data Sharing and Disclosure</h3>
+        <p>Your personal information is treated with the highest level of confidentiality. The Guidance Online Appointment System ensures that your data is not disclosed, transferred, or made accessible to unauthorized individuals or organizations. As a general rule, your personal information will not be shared with third parties, except under specific and lawful circumstances as outlined below:</p>
+        <ul>
+          <li>You have given explicit consent for sharing;</li>
+          <li>It is required by law, regulation, or court order;</li>
+          <li>It is necessary to protect your life, health, or safety, or that of another person;</li>
+          <li>It is shared with authorized service providers or IT personnel who maintain the system, bound by strict confidentiality agreements.</li>
+        </ul>
+        <p>We do not sell, trade, or rent personal information to any individual or organization.</p>
+        
+        <h3>Data Retention and Disposal</h3>
+        <p>We retain your personal information only for as long as necessary to fulfill the purposes stated in this policy, or as required by institutional policy or law.</p>
+        <p>Once retention periods expire, data will be securely deleted, anonymized, or destroyed using methods that prevent unauthorized recovery or misuse.</p>
+        
+        <h3>Security Measures</h3>
+        <p>We implement both technical and organizational safeguards to protect your personal information, such as:</p>
+        <ul>
+          <li>Secure login and authentication controls</li>
+          <li>Data encryption and password protection</li>
+          <li>Regular system updates and security audits</li>
+          <li>Limited access to authorized personnel only</li>
+          <li>Confidentiality training for all staff handling personal data</li>
+        </ul>
+        <p>While we strive to ensure maximum protection, please note that no electronic transmission or storage system is completely secure. Users are encouraged to also practice responsible data sharing and password security.</p>
+        
+        <h3>Your Rights as a Data Subject</h3>
+        <p>Under the Data Privacy Act of 2012, you are entitled to the following rights:</p>
+        <ul>
+          <li><strong>Right to be informed</strong> – You have the right to know how your personal data is collected, processed, and used.</li>
+          <li><strong>Right to access</strong> – You may request a copy of your personal data held by the system.</li>
+          <li><strong>Right to rectification</strong> – You may request correction of inaccurate or incomplete data.</li>
+          <li><strong>Right to erasure or blocking</strong> – You may request deletion or blocking of your data under lawful conditions.</li>
+          <li><strong>Right to object</strong> – You may withhold consent or object to processing that is not essential to the service.</li>
+          <li><strong>Right to data portability</strong> – You may request a copy of your data in a structured, commonly used format.</li>
+          <li><strong>Right to lodge a complaint</strong> – You may file complaints with our Data Protection Officer (DPO) or the National Privacy Commission (NPC) if you believe your data privacy rights have been violated.</li>
+        </ul>
+        
+        <h3>Contact Information</h3>
+        <p>For questions, concerns, or to exercise your data privacy rights, you may contact:</p>
+        <p><strong>Data Protection Officer (DPO)</strong><br>
+        Guidance Online Appointment System<br>
+        Email: guidanceoffice@university.edu.ph<br>
+        Contact Number: 09876543210</p>
+        
+        <h3>Updates to This Privacy Policy</h3>
+        <p>This Privacy Policy may be updated periodically to comply with new laws, institutional policies, or service improvements. Any significant changes will be announced through official channels (e.g., website or system notice). We encourage you to review this page regularly to stay informed of any updates.</p>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('privacyModal')" class="btn-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      const termsModal = document.getElementById('termsModal');
+      const privacyModal = document.getElementById('privacyModal');
+      if (event.target == termsModal) {
+        closeModal('termsModal');
+      }
+      if (event.target == privacyModal) {
+        closeModal('privacyModal');
+      }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeModal('termsModal');
+        closeModal('privacyModal');
+      }
+    });
   </script>
 
 </body>

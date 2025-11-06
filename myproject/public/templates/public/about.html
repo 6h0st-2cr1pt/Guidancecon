@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About • CHMSU Guidance Connect</title>
+  <link rel="stylesheet" href="{% static 'css/P_login.css' %}">
+  <link rel="icon" type="image/png" href="{{ MEDIA_URL }}CHMSUlogo.png">
+</head>
+<body>
+  <div class="background"></div>
+
+  <header>
+    <div class="logo-title">
+      <img src="{{ MEDIA_URL }}CHMSUlogo.png" alt="School Logo" class="logo">
+      <div class="title-text">
+        <h1>CHMSU GUIDANCE CONNECT</h1>
+        <p>"Your mental wellness, our priority."</p>
+      </div>
+    </div>
+  </header>
+  <div class="header-nav">
+    <a href="{% url 'public:about' %}" class="active">About</a>
+    <a href="{% url 'public:login' %}">Login</a>
+  </div>
+
+  <main>
+    <div class="login-card" style="max-width: 900px; text-align:left;">
+      <h2>About Guidance Connect</h2>
+      <p style="margin-top:8px; line-height:1.6;">
+        Guidance Connect is a Digital Counseling Appointment System designed to provide college students with a simple, confidential, and accessible way to book and manage counseling appointments online. It supports mental health and well-being by connecting students with qualified guidance counselors assigned to their programs, ensuring privacy and ease of use within a secure digital environment. The system promotes timely access to guidance on academic, personal, and career-related issues.
+      </p>
+
+      <h3 style="margin-top:16px;">How the process works:</h3>
+      <ul style="margin-top:8px; line-height:1.6;">
+        <li><strong>REGISTRATION AND ACCESS:</strong> Students start by registering on the website, agreeing to a privacy notice and terms of services to ensure data confidentiality. Once logged in, they access a personalized student portal.</li>
+        <li><strong>DASHBOARD OVERVIEW :</strong> After logging in, students are presented with a dashboard that provides them quick access to the main features of the system.</li>
+        <li><strong>BOOK APPOINTMENT :</strong> This area allows students to schedule counseling sessions. By clicking "book now," they can select the date, time, and their preferred guidance counselor.</li>
+        <li><strong>NOTIFICATION:</strong> This section displays important announcements, allowing students to view appointment updates, reminders, and other important messages.</li>
+        <li><strong>MY APPOINTMENT:</strong> This section allows students to view and manage their counseling appointment schedule. It displays upcoming, completed, or cancelled appointments that help students to stay updated on their session status.</li>
+      </ul>
+
+      <h3 style="margin-top:16px;">Additional Information</h3>
+      <p style="margin-top:8px; line-height:1.6;">
+        The system operates Monday to Friday, 9:00 AM to 5:00 PM.
+      </p>
+      <p style="margin-top:8px; line-height:1.6;">
+        The system adheres to ethical standards, ensuring all data is used solely for counseling purposes and protected under privacy agreements.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

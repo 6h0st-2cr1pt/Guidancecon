@@ -324,6 +324,19 @@
       
       <div class="form-grid">
         <div class="form-group">
+          <label for="gender" class="form-label">Gender</label>
+          <select id="gender" name="gender" class="form-select" required>
+            <option value="">Select Gender</option>
+            <option value="Male" {% if gender == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if gender == 'Female' %}selected{% endif %}>Female</option>
+            <option value="Prefer not to say" {% if gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="age" class="form-label">Age</label>
+          <input type="number" id="age" name="age" class="form-input" min="12" max="120" value="{{ age|default:'' }}" required>
+        </div>
+        <div class="form-group">
           <label for="college" class="form-label">College</label>
           <select id="college" name="college" class="form-select" required onchange="updateCourses()">
             <option value="">Select College</option>
