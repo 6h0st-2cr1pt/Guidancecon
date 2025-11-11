@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
   <title>{% block title %}Admin{% endblock %} • Guidance Connect</title>
   <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=8.0">
   {% block extra_css %}{% endblock %}
@@ -13,6 +13,11 @@
 <body>
   <header class="topbar">
     <div class="brand">
+      <button class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <img src="{{ MEDIA_URL }}CHMSUlogo.png" alt="CHMSU" class="brand-logo">
       <span class="brand-name">GUIDANCE CONNECT</span>
     </div>
@@ -36,6 +41,8 @@
       {% endif %}
     </div>
   </header>
+
+  <div class="mobile-overlay"></div>
 
   <div class="layout">
     <aside class="sidebar">
@@ -82,5 +89,48 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  <script>
+    // Mobile menu toggle
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.mobile-overlay');
+    const body = document.body;
+
+    function toggleMenu() {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      body.classList.toggle('menu-open');
+      menuToggle.classList.toggle('active');
+    }
+
+    if (menuToggle) {
+      menuToggle.addEventListener('click', toggleMenu);
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', toggleMenu);
+    }
+
+    // Close menu when clicking on a menu item (mobile)
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+          toggleMenu();
+        }
+      });
+    });
+
+    // Close menu on window resize if it's desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        body.classList.remove('menu-open');
+        menuToggle.classList.remove('active');
+      }
+    });
+  </script>
 </body>
 </html>

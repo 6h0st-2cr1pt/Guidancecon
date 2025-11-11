@@ -535,9 +535,24 @@
     padding: 10px;
   }
   
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .selection-form {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
   .form-row {
     grid-template-columns: 1fr;
     gap: 15px;
+  }
+  
+  .counselor-info-section {
+    padding: 20px;
+    margin-bottom: 20px;
   }
   
   .counselor-header {
@@ -546,38 +561,223 @@
     gap: 15px;
   }
   
-  .time-slots-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 20px;
+  .counselor-avatar {
+    margin: 0 auto;
   }
   
-  .time-column {
-    gap: 10px;
+  .avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    font-size: 36px;
+  }
+  
+  .counselor-details h2 {
+    font-size: 1.5rem;
+  }
+  
+  .availability-section {
+    margin-bottom: 20px;
   }
   
   .availability-header {
     flex-direction: column;
     gap: 10px;
     text-align: center;
+    padding: 16px 20px;
+  }
+  
+  .availability-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .date-display {
+    font-size: 0.95rem;
+  }
+  
+  .times {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .slot {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+  }
+  
+  .submit-section {
+    padding: 30px 20px;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px 24px;
   }
   
   .modal-content {
     width: 95%;
     margin: 10px;
+    max-width: 450px;
+  }
+  
+  .modal-header {
+    padding: 20px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .modal-body {
+    padding: 20px;
   }
   
   .modal-footer {
     flex-direction: column;
+    padding: 20px;
+    gap: 12px;
   }
   
   .cancel-btn,
   .confirm-btn {
     width: 100%;
   }
+}
+
+@media (max-width: 480px) {
+  .appointment-container {
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+    margin-bottom: 16px;
+  }
+  
+  .selection-form {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  .form-select,
+  .form-date {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .counselor-info-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .counselor-header {
+    gap: 12px;
+  }
+  
+  .avatar-placeholder {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+  
+  .counselor-details h2 {
+    font-size: 1.3rem;
+  }
+  
+  .counselor-title {
+    font-size: 1rem;
+  }
+  
+  .counselor-description {
+    font-size: 0.9rem;
+  }
+  
+  .availability-header {
+    padding: 12px 16px;
+  }
+  
+  .availability-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .date-display {
+    font-size: 0.85rem;
+  }
+  
+  .date-display u {
+    padding: 3px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .times {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .slot {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+  
+  .badge {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+  
+  .submit-section {
+    padding: 24px 16px;
+  }
   
   .submit-btn {
-    width: 100%;
-    max-width: 300px;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+  
+  .modal-content {
+    width: 98%;
+    margin: 5px;
+    max-height: 90vh;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .counselor-info-modal {
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .counselor-avatar-modal {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .appointment-details {
+    padding: 16px;
+  }
+  
+  .appointment-details p {
+    font-size: 0.9rem;
+  }
+  
+  .modal-footer {
+    padding: 16px;
   }
 }

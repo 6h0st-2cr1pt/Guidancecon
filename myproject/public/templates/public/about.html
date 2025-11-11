@@ -26,14 +26,14 @@
   </div>
 
   <main>
-    <div class="login-card" style="max-width: 900px; text-align:left;">
+    <div class="login-card about-card">
       <h2>About Guidance Connect</h2>
-      <p style="margin-top:8px; line-height:1.6;">
+      <p>
         Guidance Connect is a Digital Counseling Appointment System designed to provide college students with a simple, confidential, and accessible way to book and manage counseling appointments online. It supports mental health and well-being by connecting students with qualified guidance counselors assigned to their programs, ensuring privacy and ease of use within a secure digital environment. The system promotes timely access to guidance on academic, personal, and career-related issues.
       </p>
 
-      <h3 style="margin-top:16px;">How the process works:</h3>
-      <ul style="margin-top:8px; line-height:1.6;">
+      <h3>How the process works:</h3>
+      <ul>
         <li><strong>REGISTRATION AND ACCESS:</strong> Students start by registering on the website, agreeing to a privacy notice and terms of services to ensure data confidentiality. Once logged in, they access a personalized student portal.</li>
         <li><strong>DASHBOARD OVERVIEW :</strong> After logging in, students are presented with a dashboard that provides them quick access to the main features of the system.</li>
         <li><strong>BOOK APPOINTMENT :</strong> This area allows students to schedule counseling sessions. By clicking "book now," they can select the date, time, and their preferred guidance counselor.</li>
@@ -41,14 +41,114 @@
         <li><strong>MY APPOINTMENT:</strong> This section allows students to view and manage their counseling appointment schedule. It displays upcoming, completed, or cancelled appointments that help students to stay updated on their session status.</li>
       </ul>
 
-      <h3 style="margin-top:16px;">Additional Information</h3>
-      <p style="margin-top:8px; line-height:1.6;">
+      <h3>Additional Information</h3>
+      <p>
         The system operates Monday to Friday, 9:00 AM to 5:00 PM.
       </p>
-      <p style="margin-top:8px; line-height:1.6;">
+      <p>
         The system adheres to ethical standards, ensuring all data is used solely for counseling purposes and protected under privacy agreements.
       </p>
     </div>
   </main>
+
+  <style>
+    .about-card {
+      width: 100%;
+      max-width: 900px;
+      text-align: left;
+      margin: 0 auto;
+    }
+
+    .about-card h2 {
+      margin-bottom: 12px;
+      color: var(--green);
+      font-size: 1.8rem;
+    }
+
+    .about-card h3 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: var(--green);
+      font-size: 1.3rem;
+    }
+
+    .about-card p {
+      margin-top: 8px;
+      line-height: 1.6;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    .about-card ul {
+      margin-top: 8px;
+      line-height: 1.6;
+      padding-left: 20px;
+    }
+
+    .about-card li {
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    .about-card strong {
+      color: #000;
+    }
+
+    @media (max-width: 768px) {
+      .about-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 24px;
+      }
+
+      .about-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .about-card h3 {
+        font-size: 1.2rem;
+        margin-top: 14px;
+      }
+
+      .about-card p,
+      .about-card li {
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .about-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+      }
+
+      .about-card h2 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+      }
+
+      .about-card h3 {
+        font-size: 1.1rem;
+        margin-top: 12px;
+        margin-bottom: 6px;
+      }
+
+      .about-card p {
+        font-size: 0.9rem;
+        margin-top: 6px;
+      }
+
+      .about-card ul {
+        padding-left: 18px;
+      }
+
+      .about-card li {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
 </body>
 </html>

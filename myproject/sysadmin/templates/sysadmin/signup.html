@@ -23,86 +23,97 @@
   </header>
 
   <main>
-    <div class="login-card">
-      <label class="admin-label" style="font-size: 30px;">Administrator</label>
+    <div class="form-container">
+      <h2>FILL OUT INFORMATION</h2>
       {% if error %}
         <div class="form-error">{{ error }}</div>
       {% endif %}
       <form method="post" action="{% url 'sysadmin:signup' %}" enctype="multipart/form-data">
         {% csrf_token %}
-
-        <div class="form-sections-container">
-          <div class="form-section">
-            <h3>Account Information</h3>
-            <label for="id_email">Email</label>
-            <input class="input-border" type="email" id="id_email" name="email" placeholder="Enter your Email" value="{{ email }}" required autofocus>
-
-            <label for="id_password">Password</label>
-            <input class="input-border" type="password" id="id_password" name="password" placeholder="Create Password" required>
-
-            <label for="id_confirm_password">Confirm Password</label>
-            <input class="input-border" type="password" id="id_confirm_password" name="confirm_password" placeholder="Confirm Password" required>
-
-            <!-- Terms and Privacy Policy Checkbox (moved inside Account Information) -->
-            <div style="margin-top: 12px;">
-              <label style="display: flex; align-items: flex-start; font-weight: normal; cursor: pointer;">
-                <input type="checkbox" id="terms_checkbox" name="terms_accepted" required style="margin-right: 8px; margin-top: 3px; cursor: pointer;">
-                <span style="font-size: 0.9rem; line-height: 1.5;">
-                  I agree to the <a href="#" onclick="event.preventDefault(); openModal('termsModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Terms of Services</a> and <a href="#" onclick="event.preventDefault(); openModal('privacyModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Privacy Policy</a>
-                </span>
-              </label>
-            </div>
+        
+        <!-- Account Information -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_email">Email Address</label>
+            <input type="email" id="id_email" name="email" placeholder="Enter your Email" value="{{ email|default:'' }}" required autofocus>
           </div>
-
-          <div class="form-section">
-            <h3>Counselor Information</h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="id_first_name">First Name</label>
-                <input class="input-border" type="text" id="id_first_name" name="first_name" placeholder="First Name" value="{{ first_name }}" required>
-              </div>
-              <div class="form-group">
-                <label for="id_middle_initial">Middle Initial</label>
-                <input class="input-border" type="text" id="id_middle_initial" name="middle_initial" placeholder="MI" value="{{ middle_initial }}" maxlength="10">
-              </div>
-              <div class="form-group">
-                <label for="id_last_name">Last Name</label>
-                <input class="input-border" type="text" id="id_last_name" name="last_name" placeholder="Last Name" value="{{ last_name }}" required>
-              </div>
-            </div>
-
+          <div class="form-group">
             <label for="id_assigned_college">Assigned College</label>
-            <select class="input-border" id="id_assigned_college" name="assigned_college" required>
+            <select id="id_assigned_college" name="assigned_college" required>
               <option value="">Select College</option>
-              <option value="College of Arts & Sciences" {% if assigned_college == 'College of Arts & Sciences' %}selected{% endif %}>College of Arts & Sciences</option>
-              <option value="College of Business Management & Accountancy" {% if assigned_college == 'College of Business Management & Accountancy' %}selected{% endif %}>College of Business Management & Accountancy</option>
-              <option value="College of Computer Studies" {% if assigned_college == 'College of Computer Studies' %}selected{% endif %}>College of Computer Studies</option>
-              <option value="College of Education" {% if assigned_college == 'College of Education' %}selected{% endif %}>College of Education</option>
-              <option value="College of Engineering" {% if assigned_college == 'College of Engineering' %}selected{% endif %}>College of Engineering</option>
-              <option value="College of Industrial Technology" {% if assigned_college == 'College of Industrial Technology' %}selected{% endif %}>College of Industrial Technology</option>
+              <option value="College of Arts & Sciences" {% if assigned_college == 'College of Arts & Sciences' %}selected{% endif %}>Arts & Sciences</option>
+              <option value="College of Business Management & Accountancy" {% if assigned_college == 'College of Business Management & Accountancy' %}selected{% endif %}>Business & Accountancy</option>
+              <option value="College of Computer Studies" {% if assigned_college == 'College of Computer Studies' %}selected{% endif %}>Computer Studies</option>
+              <option value="College of Education" {% if assigned_college == 'College of Education' %}selected{% endif %}>Education</option>
+              <option value="College of Engineering" {% if assigned_college == 'College of Engineering' %}selected{% endif %}>Engineering</option>
+              <option value="College of Industrial Technology" {% if assigned_college == 'College of Industrial Technology' %}selected{% endif %}>Industrial Technology</option>
             </select>
-
-            <label for="id_title">Title/Qualifications</label>
-            <input class="input-border" type="text" id="id_title" name="title" placeholder="e.g., PhD, RGC, LPT" value="{{ title }}">
-
-            <label for="id_bio">Bio/Description</label>
-            <textarea class="input-border" id="id_bio" name="bio" placeholder="Brief description about yourself" rows="3">{{ bio }}</textarea>
-
-            <label for="id_profile_picture">Profile Picture</label>
-            <input class="input-border" type="file" id="id_profile_picture" name="profile_picture" accept="image/*" onchange="validateFileSize(this)">
-            <small class="italic-text" style="display: block; margin-top: 5px; color: #666;">Maximum file size: 2 MB</small>
-            <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 5px;"></small>
           </div>
         </div>
 
-        
+        <!-- Personal Information -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_first_name">First Name</label>
+            <input type="text" id="id_first_name" name="first_name" placeholder="First Name" value="{{ first_name|default:'' }}" required>
+          </div>
+          <div class="form-group">
+            <label for="id_last_name">Last Name</label>
+            <input type="text" id="id_last_name" name="last_name" placeholder="Last Name" value="{{ last_name|default:'' }}" required>
+          </div>
+        </div>
 
-        <button type="submit" class="btn-login" id="submit-btn">Sign up</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_middle_initial">Middle Initial</label>
+            <input type="text" id="id_middle_initial" name="middle_initial" placeholder="MI (Optional)" value="{{ middle_initial|default:'' }}" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label for="id_title">Title/Qualifications</label>
+            <input type="text" id="id_title" name="title" placeholder="e.g., PhD, RGC, LPT" value="{{ title|default:'' }}">
+          </div>
+        </div>
+
+        <!-- Password Information -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_password">Password</label>
+            <input type="password" id="id_password" name="password" placeholder="Create Password" required>
+          </div>
+          <div class="form-group">
+            <label for="id_confirm_password">Confirm Password</label>
+            <input type="password" id="id_confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group">
+          <label for="id_bio">Bio/Description</label>
+          <textarea id="id_bio" name="bio" placeholder="Brief description about yourself" rows="3">{{ bio|default:'' }}</textarea>
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="form-group">
+          <label for="id_profile_picture">Profile Picture <span style="font-weight: normal; color: #666;">(Optional, Max 2 MB)</span></label>
+          <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*" onchange="validateFileSize(this)">
+          <small id="file-size-error" style="display: none; color: #dc3545; margin-top: 3px; font-size: 0.85rem;"></small>
+        </div>
+
+        <!-- Terms and Privacy Policy Checkbox -->
+        <div class="form-group" style="margin-top: 15px;">
+          <label style="display: flex; align-items: flex-start; font-weight: normal; cursor: pointer;">
+            <input type="checkbox" id="terms_checkbox" name="terms_accepted" required style="margin-right: 8px; margin-top: 3px; cursor: pointer;">
+            <span style="font-size: 0.9rem; line-height: 1.5;">
+              I agree to the <a href="#" onclick="event.preventDefault(); openModal('termsModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Terms of Services</a> and <a href="#" onclick="event.preventDefault(); openModal('privacyModal'); return false;" style="color: var(--green); text-decoration: underline; cursor: pointer;">Privacy Policy</a>
+            </span>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <a href="{% url 'sysadmin:login' %}" class="btn back">BACK</a>
+          <button type="submit" class="btn continue" id="submit-btn">CONTINUE</button>
+        </div>
       </form>
-
-      <p class="signup-text">
-        Already have an account? <a href="{% url 'sysadmin:login' %}">Login</a>
-      </p>
     </div>
   </main>
 

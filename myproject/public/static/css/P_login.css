@@ -82,19 +82,22 @@ main {
     position: relative;
     z-index: 1;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
     padding: 40px 16px;
-    padding-left: 60px;
+    min-height: calc(100vh - 200px);
 }
 
 .login-card {
-    width: 50%;
+    width: 100%;
+    max-width: 500px;
     background: #fff;
     padding: 24px;
     padding-top: 10px;
     border-radius: 30px;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid #000;
+    margin: 0 auto;
 }
 
 .login-card label {
@@ -192,4 +195,121 @@ main {
 .admin-label {
     font-size: 30px;
     text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        padding: 16px 20px;
+        min-height: auto;
+        flex-wrap: wrap;
+    }
+
+    .logo-title {
+        gap: 10px;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .title-text h1 {
+        font-size: 20px;
+    }
+
+    .title-text p {
+        font-size: 22px;
+    }
+
+    .header-nav {
+        padding: 10px 20px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .header-nav a {
+        padding: 6px 16px;
+        font-size: 1rem;
+    }
+
+    main {
+        padding: 30px 20px;
+        min-height: calc(100vh - 180px);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 24px;
+    }
+
+    .admin-label {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 12px 16px;
+    }
+
+    .logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .title-text h1 {
+        font-size: 18px;
+        letter-spacing: 0.05em;
+    }
+
+    .title-text p {
+        font-size: 18px;
+    }
+
+    .header-nav {
+        padding: 8px 16px;
+        justify-content: center;
+    }
+
+    .header-nav a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+
+    main {
+        padding: 20px 16px;
+        min-height: calc(100vh - 160px);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .admin-label {
+        font-size: 20px;
+    }
+
+    .login-card label {
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+
+    .login-card input {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+
+    .btn-login {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .signup-text {
+        font-size: 0.85rem;
+    }
 }

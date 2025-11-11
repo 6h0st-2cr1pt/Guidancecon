@@ -32,4 +32,103 @@
       <p>You don't have any notifications yet.</p>
     </div>
   {% endif %}
+
+  <style>
+    .notifications-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .notification-item {
+      transition: all 0.3s ease;
+    }
+
+    .notification-item:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .notification-icon {
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notification-content h4 {
+      word-wrap: break-word;
+    }
+
+    .notification-content p {
+      word-wrap: break-word;
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .notification-item {
+        padding: 12px;
+        flex-wrap: wrap;
+      }
+
+      .notification-icon {
+        font-size: 18px;
+      }
+
+      .notification-content h4 {
+        font-size: 0.95rem;
+      }
+
+      .notification-content p {
+        font-size: 0.85rem;
+      }
+
+      .notification-content small {
+        font-size: 0.75rem;
+      }
+
+      .pill {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.3rem;
+      }
+
+      .notification-item {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .notification-icon {
+        font-size: 16px;
+      }
+
+      .notification-content h4 {
+        font-size: 0.9rem;
+      }
+
+      .notification-content p {
+        font-size: 0.8rem;
+        margin: 4px 0 0;
+      }
+
+      .notification-content small {
+        font-size: 0.7rem;
+      }
+
+      .pill {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+      }
+    }
+  </style>
 {% endblock %}

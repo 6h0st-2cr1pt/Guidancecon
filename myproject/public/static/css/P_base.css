@@ -232,6 +232,61 @@ html, body {
   min-height: calc(100vh - 128px);
 }
 
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 101;
+  margin-right: 12px;
+}
+
+.mobile-menu-toggle span {
+  width: 24px;
+  height: 3px;
+  background: var(--white);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .layout {
@@ -240,27 +295,61 @@ html, body {
     padding: 16px;
   }
   
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
   .sidebar {
-    position: static;
-    order: 2;
+    position: fixed;
+    top: 80px;
+    left: -100%;
+    width: 280px;
+    height: calc(100vh - 80px);
+    z-index: 99;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar.active {
+    left: 0;
   }
   
   .content {
     order: 1;
+    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .topbar {
     padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  
+  .brand {
+    flex: 1;
+    min-width: 0;
   }
   
   .brand-name {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .user-pill {
-    padding: 8px 16px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .user-name {
+    font-size: 0.85rem;
+  }
+  
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
   
   .layout {
@@ -269,11 +358,21 @@ html, body {
   }
   
   .sidebar {
+    width: 260px;
     padding: 16px;
+  }
+  
+  .menu-item {
+    padding: 14px 16px;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
+  .topbar {
+    padding: 10px 12px;
+  }
+  
   .brand {
     gap: 8px;
   }
@@ -284,11 +383,48 @@ html, body {
   }
   
   .brand-name {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .user-pill {
+    padding: 6px 10px;
+    gap: 6px;
   }
   
   .user-name {
     display: none;
+  }
+  
+  .user-avatar,
+  .user-avatar-default {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .sidebar {
+    width: 100%;
+    left: -100%;
+  }
+  
+  .sidebar.active {
+    left: 0;
+  }
+  
+  .layout {
+    padding: 8px;
+  }
+  
+  .menu-item {
+    padding: 12px 14px;
+  }
+  
+  .menu-text {
+    font-size: 0.9rem;
   }
 }
 
@@ -393,7 +529,7 @@ html, body {
 /* Dashboard Responsive Design */
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 20px;
+    padding: 20px 16px;
   }
   
   .page-title {
@@ -407,7 +543,7 @@ html, body {
   }
   
   .dashboard-card {
-    padding: 24px;
+    padding: 24px 20px;
   }
   
   .card-icon {
@@ -426,6 +562,50 @@ html, body {
   }
   
   .card-content p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 16px 12px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-cards {
+    gap: 12px;
+  }
+  
+  .dashboard-card {
+    padding: 20px 16px;
+  }
+  
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+  
+  .card-icon-img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .card-content h3 {
+    font-size: 1.1rem;
+  }
+  
+  .card-content p {
+    font-size: 0.85rem;
+  }
+  
+  .card-button {
+    padding: 10px 24px;
     font-size: 0.9rem;
   }
 }

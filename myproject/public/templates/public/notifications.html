@@ -222,8 +222,27 @@
     padding: 10px;
   }
   
+  .page-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  
+  .notifications-section {
+    margin-bottom: 20px;
+  }
+  
+  .section-header {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .notifications-list {
+    padding: 16px;
+  }
+  
   .notification-card {
     padding: 12px;
+    margin-bottom: 10px;
   }
   
   .notification-icon {
@@ -231,15 +250,117 @@
     margin-right: 12px;
   }
   
+  .notification-content h3 {
+    font-size: 0.95rem;
+  }
+  
+  .notification-content p {
+    font-size: 0.85rem;
+  }
+  
+  .notification-time {
+    font-size: 0.7rem;
+  }
+  
   .notifications-actions {
     flex-direction: column;
     align-items: stretch;
     padding: 0 20px;
+    gap: 10px;
   }
   
   .mark-all-read-btn,
   .clear-notifications-btn {
     width: 100%;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-container {
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+  
+  .notifications-section {
+    margin-bottom: 16px;
+  }
+  
+  .section-header {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .notifications-list {
+    padding: 12px;
+  }
+  
+  .notification-card {
+    padding: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .notification-icon {
+    font-size: 20px;
+    margin-right: 10px;
+  }
+  
+  .notification-content {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .notification-content h3 {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+  
+  .notification-content p {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  
+  .notification-time {
+    font-size: 0.65rem;
+  }
+  
+  .notification-status {
+    margin-left: 8px;
+  }
+  
+  .status-dot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .notifications-actions {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  
+  .mark-all-read-btn,
+  .clear-notifications-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .no-notifications {
+    padding: 40px 16px;
+  }
+  
+  .no-notifications::before {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+  
+  .no-notifications p {
+    font-size: 0.9rem;
   }
 }
 </style>
