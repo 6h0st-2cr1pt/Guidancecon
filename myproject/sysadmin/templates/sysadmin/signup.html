@@ -16,15 +16,11 @@
     <div class="logo-title">
       <img src="{{ MEDIA_URL }}CHMSUlogo.png" alt="School Logo" class="logo">
       <div class="title-text">
-        <h1>CHMSU GUIDANCE CONNECT</h1>
+        <h1>GUIDANCE CONNECT</h1>
         <p>"Your mental wellness, our priority."</p>
       </div>
     </div>
   </header>
-<div class="header-nav">
-    <a href="{% url 'sysadmin:about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
-    <a href="{% url 'sysadmin:signup' %}" class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">Sign Up</a>
-  </div>
 
   <main>
     <div class="login-card">
