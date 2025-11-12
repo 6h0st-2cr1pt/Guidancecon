@@ -35,7 +35,11 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 # ALLOWED_HOSTS - support both environment variable and automatic Render detection
 ALLOWED_HOSTS_ENV = os.environ.get('ALLOWED_HOSTS', '')
 if ALLOWED_HOSTS_ENV:
+    # If ALLOWED_HOSTS is set, use it but also add .onrender.com if not present
     ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
+    # Always add .onrender.com to allow any Render subdomain
+    if '.onrender.com' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('.onrender.com')
 else:
     # Default for local development
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
