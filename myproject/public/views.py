@@ -14,6 +14,27 @@ def home(request):
     return render(request, 'public/P_login.html')
 
 
+def login_view(request):
+    """Custom login view for public that ensures is_staff=False"""
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # Ensure user is not staff when logging in through public
+            if user.is_staff:
+                user.is_staff = False
+                user.save()
+            login(request, user)
+            next_url = request.GET.get('next', 'public:dashboard')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid credentials. Please try again.')
+    
+    return render(request, 'public/P_login.html', {'form': None})
+
+
 def about(request):
     return render(request, 'public/about.html')
 
