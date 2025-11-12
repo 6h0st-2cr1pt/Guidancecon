@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             sql="""
             DO $$
             BEGIN
-                -- Check if table exists but doesn't have user_id column
+                -- If table exists but doesn't have user_id column, we need to fix it
                 IF EXISTS (
                     SELECT 1 FROM information_schema.tables 
                     WHERE table_name = 'sysadmin_timeslot'
@@ -23,30 +23,12 @@ class Migration(migrations.Migration):
                     WHERE table_name = 'sysadmin_timeslot' 
                     AND column_name = 'user_id'
                 ) THEN
-                    -- Table exists but missing user_id, need to fix it
-                    -- First, check if it has counselor_id (old structure)
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'sysadmin_timeslot' 
-                        AND column_name = 'counselor_id'
-                    ) THEN
-                        -- Old structure: drop the table and recreate
-                        DROP TABLE IF EXISTS sysadmin_timeslot CASCADE;
-                    ELSE
-                        -- Table exists but structure is wrong, drop it
-                        DROP TABLE IF EXISTS sysadmin_timeslot CASCADE;
-                    END IF;
+                    -- Table exists but missing user_id, drop it to recreate with correct structure
+                    -- This is safe because migration 0003 was faked, so the table structure is wrong
+                    DROP TABLE IF EXISTS sysadmin_timeslot CASCADE;
                 END IF;
-            END $$;
-            """,
-            reverse_sql=migrations.RunSQL.noop
-        ),
-        # Now recreate the table with correct structure
-        migrations.RunSQL(
-            sql="""
-            DO $$
-            BEGIN
-                -- Only create if it doesn't exist
+                
+                -- Now create the table with correct structure if it doesn't exist
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.tables 
                     WHERE table_name = 'sysadmin_timeslot'
