@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('public', '0004_add_college_field'),
+        ('public', '0005_userprofile_college_appointment'),
         ('sysadmin', '0005_add_user_custom_fields'),
     ]
 
