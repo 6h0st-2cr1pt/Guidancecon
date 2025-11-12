@@ -1,3 +1,3 @@
-web: gunicorn myproject.wsgi --bind 0.0.0.0:$PORT
+web: bash start.sh
 release: python manage.py migrate --noinput && python manage.py collectstatic --noinput
 
