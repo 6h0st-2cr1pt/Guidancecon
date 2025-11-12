@@ -128,10 +128,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Email Configuration for Gmail (optional - only if env vars are set)
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'powerpuffgirls6112@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@guidanceconnect.com')
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@guidanceconnect.com')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'powerpuffgirls6112@gmail.com')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'powerpuffgirls6112@gmail.com')
 
 if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
