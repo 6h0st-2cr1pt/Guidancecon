@@ -32,7 +32,16 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-2024-c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'testserver,localhost,127.0.0.1').split(',')
+# ALLOWED_HOSTS - support both environment variable and automatic Render detection
+ALLOWED_HOSTS_ENV = os.environ.get('ALLOWED_HOSTS', '')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
+else:
+    # Default for local development
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+    # Automatically allow Render domains (works for any .onrender.com subdomain)
+    # This allows guidancecon.onrender.com and any other Render subdomain
+    ALLOWED_HOSTS.append('.onrender.com')
 
 
 # Application definition
