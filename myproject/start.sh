@@ -3,7 +3,7 @@
 set -o errexit
 
 echo "=== Running database migrations ==="
-python manage.py migrate --noinput || {
+python manage.py migrate --fake-initial --noinput || {
     echo "Migration failed, but continuing..."
 }
 
