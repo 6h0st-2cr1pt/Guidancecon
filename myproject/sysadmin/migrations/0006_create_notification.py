@@ -13,21 +13,48 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Notification',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('message', models.TextField()),
-                ('notification_type', models.CharField(choices=[('appointment_booked', 'Appointment Booked'), ('appointment_cancelled', 'Appointment Cancelled'), ('appointment_confirmed', 'Appointment Confirmed'), ('appointment_rescheduled', 'Appointment Rescheduled'), ('appointment_reminder', 'Appointment Reminder'), ('system_update', 'System Update')], default='appointment_booked', max_length=50)),
-                ('is_read', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('appointment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='public.appointment')),
-                ('counselor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'ordering': ['-created_at'],
-            },
+        migrations.RunSQL(
+            sql="""
+            DO $$
+            BEGIN
+                -- Only create the table if it doesn't exist
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.tables 
+                    WHERE table_name = 'sysadmin_notification'
+                ) THEN
+                    CREATE TABLE sysadmin_notification (
+                        id BIGSERIAL PRIMARY KEY,
+                        title VARCHAR(255) NOT NULL,
+                        message TEXT NOT NULL,
+                        notification_type VARCHAR(50) NOT NULL DEFAULT 'appointment_booked',
+                        is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                        appointment_id BIGINT NULL,
+                        counselor_id INTEGER NOT NULL REFERENCES auth_user(id) ON DELETE CASCADE
+                    );
+                    
+                    CREATE INDEX sysadmin_notification_counselor_id_idx 
+                    ON sysadmin_notification (counselor_id);
+                    
+                    CREATE INDEX sysadmin_notification_appointment_id_idx 
+                    ON sysadmin_notification (appointment_id);
+                    
+                    IF EXISTS (
+                        SELECT 1 FROM information_schema.tables 
+                        WHERE table_name = 'public_appointment'
+                    ) THEN
+                        ALTER TABLE sysadmin_notification 
+                        ADD CONSTRAINT sysadmin_notification_appointment_id_fkey 
+                        FOREIGN KEY (appointment_id) 
+                        REFERENCES public_appointment(id) 
+                        ON DELETE CASCADE;
+                    END IF;
+                END IF;
+            END $$;
+            """,
+            reverse_sql="""
+            DROP TABLE IF EXISTS sysadmin_notification CASCADE;
+            """
         ),
     ]
 
