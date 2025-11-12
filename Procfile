@@ -1,3 +1,3 @@
 web: bash start.sh
-release: python manage.py migrate --noinput && python manage.py collectstatic --noinput
+release: bash run_migrations.sh && python manage.py collectstatic --noinput
 

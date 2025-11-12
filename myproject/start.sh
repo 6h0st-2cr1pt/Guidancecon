@@ -3,8 +3,8 @@
 set -o errexit
 
 echo "=== Running database migrations ==="
-python manage.py migrate --fake-initial --noinput || {
-    echo "Migration failed, but continuing..."
+bash run_migrations.sh || {
+    echo "Migration had issues, but continuing..."
 }
 
 echo "=== Starting server ==="
