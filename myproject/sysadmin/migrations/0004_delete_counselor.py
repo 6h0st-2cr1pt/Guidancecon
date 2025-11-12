@@ -10,7 +10,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='Counselor',
+        migrations.RunSQL(
+            # Only delete the table if it exists
+            sql="""
+                DO $$ 
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM information_schema.tables 
+                              WHERE table_name='sysadmin_counselor') THEN
+                        DROP TABLE sysadmin_counselor CASCADE;
+                    END IF;
+                END $$;
+            """,
+            reverse_sql=migrations.RunSQL.noop
         ),
     ]
