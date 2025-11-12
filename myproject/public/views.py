@@ -182,13 +182,17 @@ def appointments(request):
         # - If student has a college, show only counselors with matching assigned_college
         # - If student has no college, show all counselors with assigned_college
         # - Exclude counselors without assigned_college (empty/null)
-        if not assigned_college or not assigned_college.strip():
+        assigned_college = assigned_college.strip() if assigned_college else ''
+        
+        if not assigned_college:
             # Skip counselors without assigned_college
             continue
         
         if student_college:
             # Student has a college - only show counselors with matching assigned_college
-            if assigned_college.strip() != student_college:
+            # Compare case-insensitively and trim whitespace
+            student_college_clean = student_college.strip() if student_college else ''
+            if assigned_college.lower() != student_college_clean.lower():
                 continue
         
         # Helper function to get full name with middle initial
