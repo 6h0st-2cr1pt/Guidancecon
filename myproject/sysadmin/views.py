@@ -59,6 +59,31 @@ def about(request):
     return render(request, 'sysadmin/about.html')
 
 
+def login_view(request):
+    """Custom login view for sysadmin that ensures is_staff=True"""
+    from django.contrib.auth.views import LoginView as BaseLoginView
+    from django.contrib.auth import login as auth_login
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # Ensure user is staff when logging in through sysadmin
+            if not user.is_staff:
+                user.is_staff = True
+                user.save()
+            auth_login(request, user)
+            next_url = request.GET.get('next', 'sysadmin:dashboard')
+            return redirect(next_url)
+        else:
+            from django.contrib import messages
+            messages.error(request, 'Invalid credentials. Please try again.')
+    
+    return render(request, 'sysadmin/login.html', {'form': None})
+
+
 @login_required
 def availability(request):
     # Accept a date parameter (YYYY-MM-DD) or default to today

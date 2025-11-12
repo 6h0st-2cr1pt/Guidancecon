@@ -104,6 +104,9 @@ def signup(request):
                 first_name=fname,
                 last_name=lname
             )
+            # Ensure public users are not staff
+            user.is_staff = False
+            user.save()
 
             # Process profile picture if uploaded
             if profile_picture:

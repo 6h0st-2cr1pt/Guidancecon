@@ -18,7 +18,7 @@ urlpatterns = [
     path('notifications/', views.notifications, name='notifications'),
     path('profile-picture/<int:user_id>/', views.profile_picture, name='profile_picture'),
     path('profile/', views.profile, name='profile'),
-    path('login/', auth_views.LoginView.as_view(template_name='public/P_login.html'), name='login'),
+    path('login/', views.login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='public:home'), name='logout'),
 ]
 
