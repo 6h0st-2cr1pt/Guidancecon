@@ -178,15 +178,17 @@ def appointments(request):
             bio = row[3] if row[3] else ''
         
         # Filter counselors by college:
-        # - If student has no college, show all counselors
-        # - If student has a college, show counselors with:
-        #   * Matching assigned_college, OR
-        #   * No assigned_college (empty/null - can serve all colleges)
-        # - Exclude only counselors with a different assigned_college
+        # - Only show counselors who have an assigned_college set
+        # - If student has a college, show only counselors with matching assigned_college
+        # - If student has no college, show all counselors with assigned_college
+        # - Exclude counselors without assigned_college (empty/null)
+        if not assigned_college or not assigned_college.strip():
+            # Skip counselors without assigned_college
+            continue
+        
         if student_college:
-            # Student has a college - exclude only if counselor has a different assigned_college
-            # (counselors with no assigned_college or matching college will be shown)
-            if assigned_college and assigned_college.strip() and assigned_college != student_college:
+            # Student has a college - only show counselors with matching assigned_college
+            if assigned_college.strip() != student_college:
                 continue
         
         # Helper function to get full name with middle initial
