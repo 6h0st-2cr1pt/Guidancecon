@@ -177,9 +177,17 @@ def appointments(request):
             title = row[2] if row[2] else ''
             bio = row[3] if row[3] else ''
         
-        # Only include counselors from the same college as the student
-        if student_college and assigned_college and assigned_college != student_college:
-            continue
+        # Filter counselors by college:
+        # - If student has no college, show all counselors
+        # - If student has a college, show counselors with:
+        #   * Matching assigned_college, OR
+        #   * No assigned_college (empty/null - can serve all colleges)
+        # - Exclude only counselors with a different assigned_college
+        if student_college:
+            # Student has a college - exclude only if counselor has a different assigned_college
+            # (counselors with no assigned_college or matching college will be shown)
+            if assigned_college and assigned_college.strip() and assigned_college != student_college:
+                continue
         
         # Helper function to get full name with middle initial
         def get_full_name_with_mi(user, mi):
