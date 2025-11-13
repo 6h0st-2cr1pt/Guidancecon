@@ -378,9 +378,16 @@ def book_appointment(request):
                 status='pending'
             )
             
+            # Verify appointment was created
+            print(f"Appointment created: ID={appointment.id}, Student={appointment.student.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
+            
             # Mark timeslot as unavailable
             timeslot.available = False
             timeslot.save()
+            
+            # Refresh appointment to ensure timeslot is linked
+            appointment.refresh_from_db()
+            print(f"Appointment after refresh: Timeslot={appointment.timeslot}, Date={appointment.timeslot.date if appointment.timeslot else 'None'}")
             
             # Send email notification to student
             from .utils import send_appointment_confirmation_email, create_counselor_notification
@@ -408,18 +415,36 @@ def my_appointments(request):
     now = timezone.now()
     today = now.date()
     
-    # Get upcoming appointments
-    upcoming_appointments = Appointment.objects.filter(
-        student=request.user,
-        timeslot__date__gte=today,
-        status__in=['pending', 'confirmed']
-    ).order_by('timeslot__date', 'timeslot__start_time')
+    # Get all appointments for the student first
+    all_appointments = Appointment.objects.filter(
+        student=request.user
+    ).select_related('timeslot', 'counselor')
     
-    # Get past appointments
-    past_appointments = Appointment.objects.filter(
-        student=request.user,
-        timeslot__date__lt=today
-    ).order_by('-timeslot__date', '-timeslot__start_time')
+    # Separate into upcoming and past based on timeslot date
+    upcoming_appointments = []
+    past_appointments = []
+    
+    for appointment in all_appointments:
+        if appointment.timeslot and appointment.timeslot.date:
+            if appointment.timeslot.date >= today and appointment.status in ['pending', 'confirmed']:
+                upcoming_appointments.append(appointment)
+            elif appointment.timeslot.date < today:
+                past_appointments.append(appointment)
+        # If no timeslot, include pending/confirmed in upcoming
+        elif not appointment.timeslot and appointment.status in ['pending', 'confirmed']:
+            upcoming_appointments.append(appointment)
+    
+    # Sort upcoming by date and time
+    upcoming_appointments.sort(key=lambda x: (
+        x.timeslot.date if x.timeslot and x.timeslot.date else date.today(),
+        x.timeslot.start_time if x.timeslot and x.timeslot.start_time else time.min
+    ))
+    
+    # Sort past by date and time (descending)
+    past_appointments.sort(key=lambda x: (
+        x.timeslot.date if x.timeslot and x.timeslot.date else date.min,
+        x.timeslot.start_time if x.timeslot and x.timeslot.start_time else time.min
+    ), reverse=True)
     
     # Fetch counselor titles for all appointments
     def add_counselor_info(appointments):
