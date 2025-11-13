@@ -325,6 +325,9 @@ def counselor_availability(request, counselor_id):
 @login_required
 def book_appointment(request):
     """Handle appointment booking"""
+    # Check if this is an AJAX/fetch request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json'
+    
     if request.method == 'POST':
         timeslot_hour = request.POST.get('timeslot_id')  # This is now the hour (8, 9, 10, etc.)
         counselor_id = request.POST.get('counselor_id')
@@ -333,7 +336,10 @@ def book_appointment(request):
         # Validate required fields
         if not timeslot_hour or not counselor_id or not selected_date:
             print(f"❌ Missing required fields: timeslot_hour={timeslot_hour}, counselor_id={counselor_id}, selected_date={selected_date}")
-            messages.error(request, 'Missing required information. Please try again.')
+            error_msg = 'Missing required information. Please try again.'
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': error_msg})
+            messages.error(request, error_msg)
             return redirect('public:appointments')
         
         print(f"📥 Received booking request - Student: {request.user.username}, Timeslot: {timeslot_hour}, Counselor: {counselor_id}, Date: {selected_date}")
@@ -370,7 +376,11 @@ def book_appointment(request):
             
             # Check if timeslot is still available
             if not timeslot.available:
-                messages.error(request, 'This time slot is no longer available.')
+                error_msg = 'This time slot is no longer available.'
+                print(f"❌ {error_msg}")
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': error_msg})
+                messages.error(request, error_msg)
                 return redirect('public:appointments')
             
             # Check if student already has an appointment at this time
@@ -382,7 +392,11 @@ def book_appointment(request):
             ).exists()
             
             if existing_appointment:
-                messages.error(request, 'You already have an appointment scheduled at this time.')
+                error_msg = 'You already have an appointment scheduled at this time.'
+                print(f"❌ {error_msg}")
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': error_msg})
+                messages.error(request, error_msg)
                 return redirect('public:appointments')
             
             # Create appointment with explicit transaction handling
@@ -436,20 +450,26 @@ def book_appointment(request):
             except Exception as create_error:
                 import traceback
                 error_trace = traceback.format_exc()
-                print(f"❌ ERROR creating appointment: {str(create_error)}")
+                error_msg = f'Error creating appointment: {str(create_error)}'
+                print(f"❌ {error_msg}")
                 print(f"Error type: {type(create_error).__name__}")
                 print(f"Traceback: {error_trace}")
                 # Also log to Django's logging system for Render
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Appointment creation failed: {str(create_error)}", exc_info=True)
-                messages.error(request, f'Error creating appointment: {str(create_error)}')
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': error_msg, 'details': str(create_error)})
+                messages.error(request, error_msg)
                 return redirect('public:appointments')
             
             # Ensure we have a valid appointment before proceeding
             if not appointment or not appointment.id:
-                print(f"❌ CRITICAL: No valid appointment object after creation attempt!")
-                messages.error(request, 'Failed to create appointment. Please try again.')
+                error_msg = 'Failed to create appointment. Please try again.'
+                print(f"❌ CRITICAL: {error_msg}")
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': error_msg})
+                messages.error(request, error_msg)
                 return redirect('public:appointments')
             
             # Timeslot already marked as unavailable in the transaction above
@@ -474,18 +494,32 @@ def book_appointment(request):
                 print(f"Notification error (non-fatal): {str(notif_error)}")
             
             # Always show success message regardless of email status
-            messages.success(request, 'Appointment booked successfully! Check your appointments page.')
+            success_msg = 'Appointment booked successfully! Check your appointments page.'
+            print(f"✅ SUCCESS: {success_msg}")
             
+            if is_ajax:
+                return JsonResponse({
+                    'success': True, 
+                    'message': success_msg,
+                    'appointment_id': appointment.id
+                })
+            
+            messages.success(request, success_msg)
             return redirect('public:my_appointments')
             
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"❌ ERROR in book_appointment: {str(e)}")
+            error_msg = f'Error booking appointment: {str(e)}'
+            print(f"❌ ERROR in book_appointment: {error_msg}")
             print(f"Traceback: {error_trace}")
-            messages.error(request, f'Error booking appointment: {str(e)}')
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': error_msg, 'details': str(e)})
+            messages.error(request, error_msg)
             return redirect('public:appointments')
     
+    if is_ajax:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
     return redirect('public:appointments')
 
 

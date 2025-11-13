@@ -340,28 +340,33 @@ function submitBooking() {
     method: 'POST',
     body: formData,
     headers: {
-      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      'X-Requested-With': 'XMLHttpRequest'  // Mark as AJAX request
     },
     credentials: 'same-origin'  // Include cookies for CSRF
   })
   .then(response => {
     console.log('Response status:', response.status, response.statusText);
-    // Check if it's a redirect (302) or success (200)
-    if (response.status === 200 || response.status === 302) {
-      // Follow redirect to get the final response
-      return response.text().then(html => {
-        console.log('Response received, redirecting...');
-        // Check if there's an error message in the HTML
-        if (html.includes('error') || html.includes('Error')) {
-          alert('Error booking appointment. Please check the page for details.');
+    // Try to parse as JSON first
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json().then(data => {
+        console.log('JSON response:', data);
+        if (data.success) {
+          alert(data.message || 'Appointment booked successfully!');
+          window.location.href = '{% url "public:my_appointments" %}';
         } else {
-          alert('Appointment booked successfully!');
+          alert('Error: ' + (data.error || 'Failed to book appointment'));
+          console.error('Error details:', data);
         }
-        window.location.href = '{% url "public:my_appointments" %}';
       });
     } else {
-      console.error('Unexpected response status:', response.status);
-      alert('Error booking appointment. Status: ' + response.status);
+      // Fallback for HTML response (redirect)
+      return response.text().then(html => {
+        console.log('HTML response received');
+        alert('Appointment booked successfully!');
+        window.location.href = '{% url "public:my_appointments" %}';
+      });
     }
   })
   .catch(error => {
