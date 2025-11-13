@@ -344,6 +344,13 @@ def book_appointment(request):
             hour = int(timeslot_hour)
             start_time = time(hour, 0)
             
+            # Convert selected_date string to date object
+            if isinstance(selected_date, str):
+                from datetime import datetime
+                selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+            
+            print(f"Booking appointment - Student: {request.user.username}, Counselor: {counselor.username}, Date: {selected_date}, Time: {start_time}")
+            
             # Get or create timeslot
             timeslot, created = Timeslot.objects.get_or_create(
                 user=counselor,
@@ -351,6 +358,7 @@ def book_appointment(request):
                 start_time=start_time,
                 defaults={'available': True}
             )
+            print(f"Timeslot {'created' if created else 'retrieved'}: ID={timeslot.id}, Date={timeslot.date}, Time={timeslot.start_time}, Available={timeslot.available}")
             
             # Check if timeslot is still available
             if not timeslot.available:
@@ -370,31 +378,52 @@ def book_appointment(request):
                 return redirect('public:appointments')
             
             # Create appointment
-            appointment = Appointment.objects.create(
-                student=request.user,
-                counselor=counselor,
-                timeslot=timeslot,
-                program=program,
-                status='pending'
-            )
-            
-            # Verify appointment was created
-            print(f"Appointment created: ID={appointment.id}, Student={appointment.student.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
+            try:
+                appointment = Appointment.objects.create(
+                    student=request.user,
+                    counselor=counselor,
+                    timeslot=timeslot,
+                    program=program,
+                    status='pending'
+                )
+                print(f"✅ Appointment created successfully: ID={appointment.id}, Student={appointment.student.username}, Counselor={appointment.counselor.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
+                
+                # Verify it exists in database
+                db_check = Appointment.objects.filter(id=appointment.id).exists()
+                print(f"✅ Appointment exists in database: {db_check}")
+                
+            except Exception as create_error:
+                import traceback
+                error_trace = traceback.format_exc()
+                print(f"❌ ERROR creating appointment: {str(create_error)}")
+                print(f"Traceback: {error_trace}")
+                messages.error(request, f'Error creating appointment: {str(create_error)}')
+                return redirect('public:appointments')
             
             # Mark timeslot as unavailable
             timeslot.available = False
             timeslot.save()
+            print(f"✅ Timeslot marked as unavailable")
             
             # Refresh appointment to ensure timeslot is linked
             appointment.refresh_from_db()
-            print(f"Appointment after refresh: Timeslot={appointment.timeslot}, Date={appointment.timeslot.date if appointment.timeslot else 'None'}")
+            print(f"✅ Appointment after refresh: ID={appointment.id}, Timeslot={appointment.timeslot.id if appointment.timeslot else 'None'}, Date={appointment.timeslot.date if appointment.timeslot else 'None'}")
             
             # Send email notification to student
-            from .utils import send_appointment_confirmation_email, create_counselor_notification
-            email_sent = send_appointment_confirmation_email(request.user, appointment)
+            try:
+                from .utils import send_appointment_confirmation_email, create_counselor_notification
+                email_sent = send_appointment_confirmation_email(request.user, appointment)
+                print(f"Email sent: {email_sent}")
+            except Exception as email_error:
+                print(f"Email error (non-fatal): {str(email_error)}")
             
             # Create notification for counselor
-            notification_created = create_counselor_notification(counselor, appointment, 'appointment_booked')
+            try:
+                from .utils import create_counselor_notification
+                notification_created = create_counselor_notification(counselor, appointment, 'appointment_booked')
+                print(f"Notification created: {notification_created is not None}")
+            except Exception as notif_error:
+                print(f"Notification error (non-fatal): {str(notif_error)}")
             
             # Always show success message regardless of email status
             messages.success(request, 'Appointment booked successfully! Check your appointments page.')
@@ -402,6 +431,10 @@ def book_appointment(request):
             return redirect('public:my_appointments')
             
         except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"❌ ERROR in book_appointment: {str(e)}")
+            print(f"Traceback: {error_trace}")
             messages.error(request, f'Error booking appointment: {str(e)}')
             return redirect('public:appointments')
     
