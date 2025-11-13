@@ -374,7 +374,18 @@ def book_appointment(request):
             )
             print(f"Timeslot {'created' if created else 'retrieved'}: ID={timeslot.id}, Date={timeslot.date}, Time={timeslot.start_time}, Available={timeslot.available}")
             
-            # Check if timeslot is still available
+            # Reset timeslot availability if needed (fix data inconsistencies)
+            timeslot_taken = Appointment.objects.filter(
+                timeslot=timeslot,
+                status__in=['pending', 'confirmed']
+            ).exists()
+            
+            if not timeslot_taken and not timeslot.available:
+                print(f"ℹ️ Timeslot {timeslot.id} is marked unavailable but has no appointment - resetting to available")
+                timeslot.available = True
+                timeslot.save()
+            
+            # Check if timeslot is available
             if not timeslot.available:
                 error_msg = 'This time slot is no longer available.'
                 print(f"❌ {error_msg}")
@@ -383,70 +394,48 @@ def book_appointment(request):
                 messages.error(request, error_msg)
                 return redirect('public:appointments')
             
-            # Check if student already has an appointment at this time
-            existing_appointment = Appointment.objects.filter(
-                student=request.user,
-                timeslot__date=timeslot.date,
-                timeslot__start_time=timeslot.start_time,
-                status__in=['pending', 'confirmed']
-            ).exists()
-            
-            if existing_appointment:
-                error_msg = 'You already have an appointment scheduled at this time.'
-                print(f"❌ {error_msg}")
-                if is_ajax:
-                    return JsonResponse({'success': False, 'error': error_msg})
-                messages.error(request, error_msg)
-                return redirect('public:appointments')
-            
-            # Create appointment with explicit transaction handling
-            from django.db import transaction, connection
+            # Create appointment - SIMPLIFIED - just save it directly
+            from django.db import transaction
             appointment = None
             appointment_id = None
             
             try:
                 # Use atomic transaction to ensure data consistency
                 with transaction.atomic():
-                    # Create appointment using ORM
-                    appointment = Appointment(
+                    # Create and save appointment
+                    appointment = Appointment.objects.create(
                         student=request.user,
                         counselor=counselor,
                         timeslot=timeslot,
                         program=program,
                         status='pending'
                     )
-                    appointment.save()  # Explicitly save
                     appointment_id = appointment.id
-                    print(f"✅ Appointment saved via ORM: ID={appointment_id}, Student={appointment.student.username}, Counselor={appointment.counselor.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
+                    print(f"✅ Appointment CREATED in transaction: ID={appointment_id}, Student={appointment.student.username}, Counselor={appointment.counselor.username}, Status={appointment.status}")
                     
-                    # Mark timeslot as unavailable within the same transaction
+                    # Mark timeslot as unavailable
                     timeslot.available = False
-                    timeslot.save()
-                    print(f"✅ Timeslot marked as unavailable")
+                    timeslot.save(update_fields=['available'])
+                    print(f"✅ Timeslot {timeslot.id} marked as unavailable")
                 
-                # Verify immediately after transaction
-                db_check = Appointment.objects.filter(id=appointment_id).first()
-                if not db_check:
-                    print(f"❌ CRITICAL: Appointment NOT found after ORM save! Trying raw SQL...")
-                    # Fallback: Try raw SQL insert
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            INSERT INTO public_appointment (student_id, counselor_id, timeslot_id, program, status, created_at, updated_at)
-                            VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
-                            RETURNING id
-                        """, [request.user.id, counselor.id, timeslot.id, program, 'pending'])
-                        row = cursor.fetchone()
-                        if row:
-                            appointment_id = row[0]
-                            print(f"✅ Appointment saved via raw SQL: ID={appointment_id}")
-                            # Reload appointment object
-                            appointment = Appointment.objects.get(id=appointment_id)
-                        else:
-                            raise Exception("Raw SQL insert also failed - no ID returned")
-                else:
-                    print(f"✅ Appointment verified in database: ID={db_check.id}, Student={db_check.student.username}, Status={db_check.status}")
-                    appointment = db_check
+                # Transaction committed - now verify appointment exists in database
+                verify_appointment = Appointment.objects.filter(id=appointment_id).first()
+                if not verify_appointment:
+                    raise Exception(f"Appointment {appointment_id} not found in database after transaction commit")
                 
+                appointment = verify_appointment
+                print(f"✅ Appointment VERIFIED after commit: ID={appointment.id}, Student={appointment.student.username}, Status={appointment.status}")
+                
+            except Appointment.DoesNotExist:
+                error_msg = 'Appointment was not saved to database.'
+                print(f"❌ CRITICAL: {error_msg} - Appointment ID {appointment_id} not found!")
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Appointment {appointment_id} not found after creation")
+                if is_ajax:
+                    return JsonResponse({'success': False, 'error': error_msg})
+                messages.error(request, error_msg)
+                return redirect('public:appointments')
             except Exception as create_error:
                 import traceback
                 error_trace = traceback.format_exc()
@@ -454,7 +443,6 @@ def book_appointment(request):
                 print(f"❌ {error_msg}")
                 print(f"Error type: {type(create_error).__name__}")
                 print(f"Traceback: {error_trace}")
-                # Also log to Django's logging system for Render
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"Appointment creation failed: {str(create_error)}", exc_info=True)
@@ -463,7 +451,7 @@ def book_appointment(request):
                 messages.error(request, error_msg)
                 return redirect('public:appointments')
             
-            # Ensure we have a valid appointment before proceeding
+            # Final verification
             if not appointment or not appointment.id:
                 error_msg = 'Failed to create appointment. Please try again.'
                 print(f"❌ CRITICAL: {error_msg}")
@@ -472,10 +460,7 @@ def book_appointment(request):
                 messages.error(request, error_msg)
                 return redirect('public:appointments')
             
-            # Timeslot already marked as unavailable in the transaction above
-            # Refresh appointment to ensure timeslot is linked
-            appointment.refresh_from_db()
-            print(f"✅ Appointment after refresh: ID={appointment.id}, Timeslot={appointment.timeslot.id if appointment.timeslot else 'None'}, Date={appointment.timeslot.date if appointment.timeslot else 'None'}")
+            print(f"✅ FINAL CHECK: Appointment ID={appointment.id} exists in database")
             
             # Send email notification to student
             try:
