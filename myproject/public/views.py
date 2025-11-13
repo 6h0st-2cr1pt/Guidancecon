@@ -330,6 +330,14 @@ def book_appointment(request):
         counselor_id = request.POST.get('counselor_id')
         selected_date = request.POST.get('selected_date')
         
+        # Validate required fields
+        if not timeslot_hour or not counselor_id or not selected_date:
+            print(f"❌ Missing required fields: timeslot_hour={timeslot_hour}, counselor_id={counselor_id}, selected_date={selected_date}")
+            messages.error(request, 'Missing required information. Please try again.')
+            return redirect('public:appointments')
+        
+        print(f"📥 Received booking request - Student: {request.user.username}, Timeslot: {timeslot_hour}, Counselor: {counselor_id}, Date: {selected_date}")
+        
         # Get program from user's profile
         try:
             user_profile = UserProfile.objects.get(user=request.user)
@@ -379,18 +387,30 @@ def book_appointment(request):
             
             # Create appointment
             try:
-                appointment = Appointment.objects.create(
+                # Use get_or_create to avoid duplicates, but we've already checked above
+                appointment = Appointment(
                     student=request.user,
                     counselor=counselor,
                     timeslot=timeslot,
                     program=program,
                     status='pending'
                 )
-                print(f"✅ Appointment created successfully: ID={appointment.id}, Student={appointment.student.username}, Counselor={appointment.counselor.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
+                appointment.save()  # Explicitly save
+                appointment_id = appointment.id
+                print(f"✅ Appointment saved: ID={appointment_id}, Student={appointment.student.username}, Counselor={appointment.counselor.username}, Date={timeslot.date}, Time={timeslot.start_time}, Status={appointment.status}")
                 
-                # Verify it exists in database
-                db_check = Appointment.objects.filter(id=appointment.id).exists()
-                print(f"✅ Appointment exists in database: {db_check}")
+                # Force a fresh query from database to verify it was saved
+                from django.db import connection
+                connection.ensure_connection()
+                
+                # Verify it exists in database with a fresh query (not using the cached object)
+                db_check = Appointment.objects.filter(id=appointment_id).first()
+                if db_check:
+                    print(f"✅ Appointment verified in database: ID={db_check.id}, Student={db_check.student.username}, Status={db_check.status}, Timeslot={db_check.timeslot.id if db_check.timeslot else 'None'}")
+                else:
+                    print(f"❌ CRITICAL: Appointment NOT found in database after save! ID was: {appointment_id}")
+                    messages.error(request, 'Failed to save appointment to database. Please try again.')
+                    return redirect('public:appointments')
                 
             except Exception as create_error:
                 import traceback
