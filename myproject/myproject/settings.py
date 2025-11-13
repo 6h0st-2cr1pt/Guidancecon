@@ -142,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Email Configuration for Gmail
 EMAIL_HOST_USER = 'powerpuffgirls6112@gmail.com'
-EMAIL_HOST_PASSWORD = 'huvmrodcuaakbbag'
+EMAIL_HOST_PASSWORD = 'dmxtutksevgraogn'
 DEFAULT_FROM_EMAIL = 'CHMSU Guidance Connect <powerpuffgirls6112@gmail.com>'
 ADMIN_EMAIL = 'powerpuffgirls6112@gmail.com'
 
