@@ -1,12 +1,37 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from sysadmin.models import Notification
+import threading
 
 
-def send_appointment_confirmation_email(user, appointment):
+def _send_email_sync(user, appointment, subject, message, from_email):
+    """Internal function to send email synchronously"""
+    try:
+        result = send_mail(
+            subject,
+            message,
+            from_email,
+            [user.email],
+            fail_silently=True,
+        )
+        if result:
+            print(f"SUCCESS: Email sent successfully to {user.email}")
+            return True
+        else:
+            print(f"WARNING: Email sending returned False for {user.email}")
+            return False
+    except Exception as send_error:
+        print(f"EXCEPTION during send_mail: {str(send_error)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return False
+
+
+def send_appointment_confirmation_email(user, appointment, async_send=True):
     """
     Send a confirmation email to the user about their appointment.
-    Returns True if email was sent successfully, False otherwise.
+    If async_send=True, sends email in background thread (non-blocking).
+    Returns True if email sending was initiated, False if validation fails.
     """
     try:
         # Validate user has email
@@ -80,30 +105,24 @@ CHMSU Guidance Connect""".strip()
             print("Email host not configured")
             return False
         
-        # Try to send email
+        # Send email (asynchronously to avoid blocking the request)
         print(f"Sending email - From: {from_email}, To: {user.email}, Subject: {subject}")
         print(f"Email settings - Host: {getattr(settings, 'EMAIL_HOST', 'Not set')}, Port: {getattr(settings, 'EMAIL_PORT', 'Not set')}, TLS: {getattr(settings, 'EMAIL_USE_TLS', 'Not set')}")
-        try:
-            result = send_mail(
-                subject,
-                message,
-                from_email,
-                [user.email],
-                fail_silently=True,  # Don't raise exception, but we'll check the result
-            )
-        except Exception as send_error:
-            # Even with fail_silently=True, some errors might still be raised
-            print(f"EXCEPTION during send_mail: {str(send_error)}")
-            import traceback
-            print(f"Traceback: {traceback.format_exc()}")
-            return False
         
-        if result:
-            print(f"SUCCESS: Email sent successfully to {user.email}")
-            return True
+        if async_send:
+            # Send email in background thread to avoid blocking
+            print(f"Starting email send in background thread for {user.email}")
+            email_thread = threading.Thread(
+                target=_send_email_sync,
+                args=(user, appointment, subject, message, from_email),
+                daemon=True  # Daemon thread so it doesn't prevent app shutdown
+            )
+            email_thread.start()
+            print(f"Email thread started for {user.email} (non-blocking)")
+            return True  # Return True immediately since we started the thread
         else:
-            print(f"WARNING: Email sending returned False for {user.email}")
-            return False
+            # Send synchronously (for testing)
+            return _send_email_sync(user, appointment, subject, message, from_email)
             
     except Exception as e:
         # Log error but don't break the flow
