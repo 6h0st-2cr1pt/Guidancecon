@@ -752,6 +752,10 @@
             
             // Add event listeners
             setupRescheduleModal(appointmentId);
+          } else {
+            console.error('Modal content not found in response');
+            alert('Error loading reschedule form. Please try again.');
+            closeRescheduleModal();
           }
         })
         .catch(error => {

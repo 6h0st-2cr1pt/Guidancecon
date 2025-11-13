@@ -1,0 +1,14 @@
+<div class="reschedule-modal">
+  <div class="student-details">
+    <h4>{{ appointment.student.get_full_name|default:appointment.student.username }}</h4>
+    <p>{{ appointment.program|default:"No Program Specified" }}</p>
+  </div>
+  {% if appointment.timeslot %}
+    <p class="current-time">
+      {{ appointment.timeslot.date|date:"F d, Y" }} at {{ appointment.timeslot.start_time|time:"g:i A" }}
+    </p>
+  {% else %}
+    <p class="current-time">No timeslot assigned</p>
+  {% endif %}
+</div>
+
