@@ -328,25 +328,45 @@ function submitBooking() {
   formData.append('counselor_id', selectedCounselorId);
   formData.append('selected_date', selectedDate);
   
+  // Log what we're sending
+  console.log('Submitting booking:', {
+    timeslot_id: selectedTimeslotId,
+    counselor_id: selectedCounselorId,
+    selected_date: selectedDate
+  });
+  
   // Submit booking
   fetch('{% url "public:book_appointment" %}', {
     method: 'POST',
     body: formData,
     headers: {
       'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
+    },
+    credentials: 'same-origin'  // Include cookies for CSRF
   })
   .then(response => {
-    if (response.ok) {
-      alert('Appointment booked successfully!');
-      window.location.href = '{% url "public:my_appointments" %}';
+    console.log('Response status:', response.status, response.statusText);
+    // Check if it's a redirect (302) or success (200)
+    if (response.status === 200 || response.status === 302) {
+      // Follow redirect to get the final response
+      return response.text().then(html => {
+        console.log('Response received, redirecting...');
+        // Check if there's an error message in the HTML
+        if (html.includes('error') || html.includes('Error')) {
+          alert('Error booking appointment. Please check the page for details.');
+        } else {
+          alert('Appointment booked successfully!');
+        }
+        window.location.href = '{% url "public:my_appointments" %}';
+      });
     } else {
-      alert('Error booking appointment');
+      console.error('Unexpected response status:', response.status);
+      alert('Error booking appointment. Status: ' + response.status);
     }
   })
   .catch(error => {
-    console.error('Error:', error);
-    alert('Error booking appointment');
+    console.error('Fetch error:', error);
+    alert('Error booking appointment: ' + error.message);
   });
 }
 
