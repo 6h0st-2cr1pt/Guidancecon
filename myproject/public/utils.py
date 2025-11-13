@@ -11,8 +11,11 @@ def send_appointment_confirmation_email(user, appointment):
     try:
         # Validate user has email
         if not user.email:
-            print(f"User {user.username} does not have an email address")
+            print(f"ERROR: User {user.username} (ID: {user.id}) does not have an email address")
+            print(f"       Cannot send appointment confirmation email")
             return False
+        
+        print(f"Attempting to send email to {user.email} for user {user.username}")
         
         # Get appointment details safely
         counselor_name = appointment.counselor.get_full_name() or appointment.counselor.username or 'Counselor'
@@ -78,27 +81,38 @@ CHMSU Guidance Connect""".strip()
             return False
         
         # Try to send email
-        result = send_mail(
-            subject,
-            message,
-            from_email,
-            [user.email],
-            fail_silently=True,  # Don't raise exception, we'll handle errors ourselves
-        )
+        print(f"Sending email - From: {from_email}, To: {user.email}, Subject: {subject}")
+        print(f"Email settings - Host: {getattr(settings, 'EMAIL_HOST', 'Not set')}, Port: {getattr(settings, 'EMAIL_PORT', 'Not set')}, TLS: {getattr(settings, 'EMAIL_USE_TLS', 'Not set')}")
+        try:
+            result = send_mail(
+                subject,
+                message,
+                from_email,
+                [user.email],
+                fail_silently=True,  # Don't raise exception, but we'll check the result
+            )
+        except Exception as send_error:
+            # Even with fail_silently=True, some errors might still be raised
+            print(f"EXCEPTION during send_mail: {str(send_error)}")
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")
+            return False
         
         if result:
-            print(f"Email sent successfully to {user.email}")
+            print(f"SUCCESS: Email sent successfully to {user.email}")
             return True
         else:
-            print(f"Email sending returned False for {user.email}")
+            print(f"WARNING: Email sending returned False for {user.email}")
             return False
             
     except Exception as e:
         # Log error but don't break the flow
         import traceback
         error_details = traceback.format_exc()
-        print(f"Error sending email: {str(e)}")
-        print(f"Traceback: {error_details}")
+        print(f"ERROR sending email to {user.email if hasattr(user, 'email') and user.email else 'unknown'}: {str(e)}")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Full traceback:")
+        print(f"{error_details}")
         return False
 
 

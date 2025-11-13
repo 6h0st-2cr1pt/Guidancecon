@@ -295,50 +295,83 @@ def mark_notification_read(request, notification_id):
 @require_POST
 def confirm_appointment(request, appointment_id):
     """Confirm a pending appointment"""
+    from django.db import transaction
+    from public.utils import send_appointment_confirmation_email, create_counselor_notification
+    
     try:
-        appointment = get_object_or_404(Appointment, id=appointment_id, counselor=request.user)
-        
-        if appointment.status != 'pending':
-            messages.error(request, 'This appointment cannot be confirmed.')
-            return redirect('sysadmin:dashboard')
-        
-        # Update status first
-        appointment.status = 'confirmed'
-        appointment.save()
+        # Use transaction with select_for_update to prevent race conditions
+        with transaction.atomic():
+            # Lock the appointment row to prevent concurrent updates
+            appointment = Appointment.objects.select_for_update().get(
+                id=appointment_id, 
+                counselor=request.user
+            )
+            
+            # Check status BEFORE updating
+            if appointment.status != 'pending':
+                print(f"⚠️ Appointment {appointment_id} is already {appointment.status}, cannot confirm again")
+                messages.error(request, 'This appointment cannot be confirmed.')
+                return redirect('sysadmin:dashboard')
+            
+            # Update status within the same transaction
+            appointment.status = 'confirmed'
+            appointment.save(update_fields=['status', 'updated_at'])
+            print(f"✅ Appointment {appointment_id} status updated to 'confirmed'")
         
         # Refresh from database to ensure we have the latest data
         appointment.refresh_from_db()
+        print(f"✅ Appointment {appointment_id} verified: Status={appointment.status}")
         
-        # Send email to student and create notification (don't fail if these fail)
-        from public.utils import send_appointment_confirmation_email, create_counselor_notification
-        
+        # Send email to student (non-blocking - don't fail if this fails)
+        email_sent = False
         try:
-            send_appointment_confirmation_email(appointment.student, appointment)
+            email_sent = send_appointment_confirmation_email(appointment.student, appointment)
+            if email_sent:
+                print(f"✅ Confirmation email sent to {appointment.student.email}")
+            else:
+                print(f"⚠️ Email sending returned False for {appointment.student.email}")
         except Exception as email_error:
             # Log email error but don't fail the confirmation
             import logging
+            import traceback
             logger = logging.getLogger(__name__)
+            error_trace = traceback.format_exc()
             logger.error(f"Failed to send confirmation email: {str(email_error)}")
-            # Also print for debugging
-            print(f"Email error: {str(email_error)}")
+            print(f"⚠️ Email error (non-fatal): {str(email_error)}")
+            print(f"Traceback: {error_trace}")
         
+        # Create notification for counselor (non-blocking)
         try:
-            create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
+            notification = create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
+            if notification:
+                print(f"✅ Notification created for counselor")
+            else:
+                print(f"⚠️ Notification creation returned None")
         except Exception as notif_error:
             # Log notification error but don't fail the confirmation
             import logging
+            import traceback
             logger = logging.getLogger(__name__)
+            error_trace = traceback.format_exc()
             logger.error(f"Failed to create notification: {str(notif_error)}")
-            # Also print for debugging
-            print(f"Notification error: {str(notif_error)}")
+            print(f"⚠️ Notification error (non-fatal): {str(notif_error)}")
+            print(f"Traceback: {error_trace}")
         
         messages.success(request, 'Appointment confirmed successfully!')
+        print(f"✅ Appointment {appointment_id} confirmed successfully")
             
+    except Appointment.DoesNotExist:
+        print(f"❌ Appointment {appointment_id} not found or not accessible")
+        messages.error(request, 'Appointment not found.')
+        return redirect('sysadmin:dashboard')
     except Exception as e:
         import logging
+        import traceback
         logger = logging.getLogger(__name__)
-        logger.error(f"Error confirming appointment: {str(e)}")
-        print(f"Confirm appointment error: {str(e)}")
+        error_trace = traceback.format_exc()
+        logger.error(f"Error confirming appointment: {str(e)}", exc_info=True)
+        print(f"❌ Confirm appointment error: {str(e)}")
+        print(f"Traceback: {error_trace}")
         messages.error(request, f'Error confirming appointment: {str(e)}')
     
     return redirect('sysadmin:dashboard')
