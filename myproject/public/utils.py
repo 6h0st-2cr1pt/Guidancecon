@@ -9,10 +9,32 @@ def send_appointment_confirmation_email(user, appointment):
     Returns True if email was sent successfully, False otherwise.
     """
     try:
-        # Get appointment details
-        counselor_name = appointment.counselor.get_full_name() or appointment.counselor.username
-        date_str = appointment.timeslot.date.strftime('%B %d, %Y') if appointment.timeslot else 'TBD'
-        time_str = appointment.timeslot.start_time.strftime('%I:%M %p') if appointment.timeslot else 'TBD'
+        # Validate user has email
+        if not user.email:
+            print(f"User {user.username} does not have an email address")
+            return False
+        
+        # Get appointment details safely
+        counselor_name = appointment.counselor.get_full_name() or appointment.counselor.username or 'Counselor'
+        
+        # Safely get timeslot details
+        if appointment.timeslot:
+            try:
+                date_str = appointment.timeslot.date.strftime('%B %d, %Y')
+                time_str = appointment.timeslot.start_time.strftime('%I:%M %p')
+            except Exception as e:
+                print(f"Error formatting timeslot: {str(e)}")
+                date_str = 'TBD'
+                time_str = 'TBD'
+        else:
+            date_str = 'TBD'
+            time_str = 'TBD'
+        
+        # Get status display safely
+        try:
+            status_display = appointment.get_status_display()
+        except Exception:
+            status_display = appointment.status.title()
         
         # Different subject and message based on appointment status
         if appointment.status == 'confirmed':
@@ -22,24 +44,24 @@ def send_appointment_confirmation_email(user, appointment):
             subject = f'Appointment Booking - {counselor_name}'
             status_message = 'Your appointment has been booked successfully!'
         
-        message = f"""
-Hello {user.get_full_name() or user.username},
+        user_name = user.get_full_name() or user.username or 'Student'
+        
+        message = f"""Hello {user_name},
 
 {status_message}
 
 Counselor: {counselor_name}
 Date: {date_str}
 Time: {time_str}
-Status: {appointment.get_status_display()}
+Status: {status_display}
 
 Please check your appointments page for more details.
 
 Thank you,
-CHMSU Guidance Connect
-        """.strip()
+CHMSU Guidance Connect""".strip()
         
         # Extract email address from DEFAULT_FROM_EMAIL if it has display name format
-        from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@guidanceconnect.com')
+        from_email = getattr(settings, 'EMAIL_HOST_USER', 'powerpuffgirls6112@gmail.com')
         if hasattr(settings, 'DEFAULT_FROM_EMAIL'):
             # Extract email from format like "Name <email@example.com>" or just "email@example.com"
             default_from = settings.DEFAULT_FROM_EMAIL
@@ -50,18 +72,33 @@ CHMSU Guidance Connect
                 # It's already just an email address
                 from_email = default_from
         
+        # Ensure we have valid email settings
+        if not hasattr(settings, 'EMAIL_HOST') or not settings.EMAIL_HOST:
+            print("Email host not configured")
+            return False
+        
         # Try to send email
-        send_mail(
+        result = send_mail(
             subject,
             message,
             from_email,
             [user.email],
-            fail_silently=True,  # Don't raise exception if email fails
+            fail_silently=True,  # Don't raise exception, we'll handle errors ourselves
         )
-        return True
+        
+        if result:
+            print(f"Email sent successfully to {user.email}")
+            return True
+        else:
+            print(f"Email sending returned False for {user.email}")
+            return False
+            
     except Exception as e:
         # Log error but don't break the flow
+        import traceback
+        error_details = traceback.format_exc()
         print(f"Error sending email: {str(e)}")
+        print(f"Traceback: {error_details}")
         return False
 
 

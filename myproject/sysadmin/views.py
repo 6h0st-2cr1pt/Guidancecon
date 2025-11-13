@@ -298,34 +298,47 @@ def confirm_appointment(request, appointment_id):
     try:
         appointment = get_object_or_404(Appointment, id=appointment_id, counselor=request.user)
         
-        if appointment.status == 'pending':
-            appointment.status = 'confirmed'
-            appointment.save()
-            
-            # Send email to student and create notification (don't fail if these fail)
-            from public.utils import send_appointment_confirmation_email, create_counselor_notification
-            
-            try:
-                send_appointment_confirmation_email(appointment.student, appointment)
-            except Exception as email_error:
-                # Log email error but don't fail the confirmation
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Failed to send confirmation email: {str(email_error)}")
-            
-            try:
-                create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
-            except Exception as notif_error:
-                # Log notification error but don't fail the confirmation
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Failed to create notification: {str(notif_error)}")
-            
-            messages.success(request, 'Appointment confirmed successfully!')
-        else:
+        if appointment.status != 'pending':
             messages.error(request, 'This appointment cannot be confirmed.')
+            return redirect('sysadmin:dashboard')
+        
+        # Update status first
+        appointment.status = 'confirmed'
+        appointment.save()
+        
+        # Refresh from database to ensure we have the latest data
+        appointment.refresh_from_db()
+        
+        # Send email to student and create notification (don't fail if these fail)
+        from public.utils import send_appointment_confirmation_email, create_counselor_notification
+        
+        try:
+            send_appointment_confirmation_email(appointment.student, appointment)
+        except Exception as email_error:
+            # Log email error but don't fail the confirmation
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send confirmation email: {str(email_error)}")
+            # Also print for debugging
+            print(f"Email error: {str(email_error)}")
+        
+        try:
+            create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
+        except Exception as notif_error:
+            # Log notification error but don't fail the confirmation
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to create notification: {str(notif_error)}")
+            # Also print for debugging
+            print(f"Notification error: {str(notif_error)}")
+        
+        messages.success(request, 'Appointment confirmed successfully!')
             
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error confirming appointment: {str(e)}")
+        print(f"Confirm appointment error: {str(e)}")
         messages.error(request, f'Error confirming appointment: {str(e)}')
     
     return redirect('sysadmin:dashboard')
