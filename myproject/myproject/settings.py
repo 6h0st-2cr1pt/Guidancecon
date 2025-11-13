@@ -140,20 +140,16 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Email Configuration for Gmail (optional - only if env vars are set)
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'powerpuffgirls6112@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'powerpuffgirls6112@gmail.com')
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'powerpuffgirls6112@gmail.com')
+# Email Configuration for Gmail
+EMAIL_HOST_USER = 'powerpuffgirls6112@gmail.com'
+EMAIL_HOST_PASSWORD = 'huvmrodcuaakbbag'
+DEFAULT_FROM_EMAIL = 'CHMSU Guidance Connect <powerpuffgirls6112@gmail.com>'
+ADMIN_EMAIL = 'powerpuffgirls6112@gmail.com'
 
-if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-else:
-    # Use console backend for development if email credentials not provided
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 
 # Internationalization
