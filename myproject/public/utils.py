@@ -38,11 +38,23 @@ Thank you,
 CHMSU Guidance Connect
         """.strip()
         
+        # Extract email address from DEFAULT_FROM_EMAIL if it has display name format
+        from_email = getattr(settings, 'EMAIL_HOST_USER', 'noreply@guidanceconnect.com')
+        if hasattr(settings, 'DEFAULT_FROM_EMAIL'):
+            # Extract email from format like "Name <email@example.com>" or just "email@example.com"
+            default_from = settings.DEFAULT_FROM_EMAIL
+            if '<' in default_from and '>' in default_from:
+                # Extract email from "Name <email@example.com>"
+                from_email = default_from.split('<')[1].split('>')[0].strip()
+            elif '@' in default_from:
+                # It's already just an email address
+                from_email = default_from
+        
         # Try to send email
         send_mail(
             subject,
             message,
-            settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@guidanceconnect.com',
+            from_email,
             [user.email],
             fail_silently=True,  # Don't raise exception if email fails
         )

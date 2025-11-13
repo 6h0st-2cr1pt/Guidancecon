@@ -302,12 +302,24 @@ def confirm_appointment(request, appointment_id):
             appointment.status = 'confirmed'
             appointment.save()
             
-            # Send email to student
+            # Send email to student and create notification (don't fail if these fail)
             from public.utils import send_appointment_confirmation_email, create_counselor_notification
-            send_appointment_confirmation_email(appointment.student, appointment)
             
-            # Create notification for counselor
-            create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
+            try:
+                send_appointment_confirmation_email(appointment.student, appointment)
+            except Exception as email_error:
+                # Log email error but don't fail the confirmation
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to send confirmation email: {str(email_error)}")
+            
+            try:
+                create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
+            except Exception as notif_error:
+                # Log notification error but don't fail the confirmation
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to create notification: {str(notif_error)}")
             
             messages.success(request, 'Appointment confirmed successfully!')
         else:
