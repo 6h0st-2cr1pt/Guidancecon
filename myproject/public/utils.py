@@ -14,11 +14,18 @@ def send_appointment_confirmation_email(user, appointment):
         date_str = appointment.timeslot.date.strftime('%B %d, %Y') if appointment.timeslot else 'TBD'
         time_str = appointment.timeslot.start_time.strftime('%I:%M %p') if appointment.timeslot else 'TBD'
         
-        subject = f'Appointment Confirmation - {counselor_name}'
+        # Different subject and message based on appointment status
+        if appointment.status == 'confirmed':
+            subject = f'Appointment Confirmed - {counselor_name}'
+            status_message = 'Your appointment has been confirmed by your counselor!'
+        else:
+            subject = f'Appointment Booking - {counselor_name}'
+            status_message = 'Your appointment has been booked successfully!'
+        
         message = f"""
 Hello {user.get_full_name() or user.username},
 
-Your appointment has been booked successfully!
+{status_message}
 
 Counselor: {counselor_name}
 Date: {date_str}

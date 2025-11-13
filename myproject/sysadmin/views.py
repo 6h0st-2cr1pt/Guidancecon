@@ -302,8 +302,11 @@ def confirm_appointment(request, appointment_id):
             appointment.status = 'confirmed'
             appointment.save()
             
-            # Create notification for student
-            from public.utils import create_counselor_notification
+            # Send email to student
+            from public.utils import send_appointment_confirmation_email, create_counselor_notification
+            send_appointment_confirmation_email(appointment.student, appointment)
+            
+            # Create notification for counselor
             create_counselor_notification(appointment.counselor, appointment, 'appointment_confirmed')
             
             messages.success(request, 'Appointment confirmed successfully!')

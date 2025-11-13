@@ -160,11 +160,6 @@
     {% if error %}
       <div class="profile-card" style="padding:12px; border-left:4px solid #dc3545; background:#fee; color:#721c24;">{{ error }}</div>
     {% endif %}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="profile-card" style="padding:12px; border-left:4px solid {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %}; background:{% if message.tags == 'success' %}#efe{% else %}#fee{% endif %}; color:{% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %};">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
 
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}

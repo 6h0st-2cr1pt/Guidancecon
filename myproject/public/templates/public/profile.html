@@ -368,14 +368,6 @@
     <div class="form-error">{{ error }}</div>
   {% endif %}
   
-  {% if messages %}
-    {% for message in messages %}
-      <div class="form-error" style="{% if message.tags == 'success' %}background: #efe; color: #060; border-color: #060;{% endif %}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-  
   <form method="post" action="{% url 'public:profile' %}" enctype="multipart/form-data">
     {% csrf_token %}
     
