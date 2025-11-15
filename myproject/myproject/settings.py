@@ -140,17 +140,21 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Email Configuration for Gmail
-EMAIL_HOST_USER = 'powerpuffgirls6112@gmail.com'
-EMAIL_HOST_PASSWORD = 'dmxtutksevgraogn'
+# Email Configuration - Using Mailjet API
+# Get your API keys from https://app.mailjet.com/account/apikeys
+MAILJET_API_KEY = os.environ.get('MAILJET_API_KEY', '')
+MAILJET_API_SECRET = os.environ.get('MAILJET_API_SECRET', '')
 DEFAULT_FROM_EMAIL = 'CHMSU Guidance Connect <powerpuffgirls6112@gmail.com>'
 ADMIN_EMAIL = 'powerpuffgirls6112@gmail.com'
+FROM_EMAIL_ADDRESS = 'powerpuffgirls6112@gmail.com'  # Must be verified in Mailjet
+FROM_EMAIL_NAME = 'CHMSU Guidance Connect'
 
+# Keep SMTP settings for fallback (not used with Mailjet API)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_TIMEOUT = 10  # Timeout in seconds for SMTP connection (prevents hanging)
+EMAIL_TIMEOUT = 10
 
 
 # Internationalization

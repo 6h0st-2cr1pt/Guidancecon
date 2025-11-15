@@ -5,58 +5,111 @@ import threading
 
 
 def _send_email_sync(user, appointment, subject, message, from_email):
-    """Internal function to send email synchronously"""
+    """Internal function to send email synchronously using Mailjet API"""
     try:
-        print(f"[EMAIL THREAD] Attempting to send email to {user.email}")
-        print(f"[EMAIL THREAD] Email settings - Host: {getattr(settings, 'EMAIL_HOST', 'Not set')}, Port: {getattr(settings, 'EMAIL_PORT', 'Not set')}, TLS: {getattr(settings, 'EMAIL_USE_TLS', 'Not set')}, Timeout: {getattr(settings, 'EMAIL_TIMEOUT', 'Not set')}")
-        print(f"[EMAIL THREAD] From: {from_email}, To: {user.email}, Subject: {subject}")
+        print(f"[EMAIL THREAD] Attempting to send email to {user.email} via Mailjet API")
         
-        # Try to get more detailed error information
-        from django.core.mail import get_connection, EmailMessage
-        connection = None
+        # Check if Mailjet is configured
+        mailjet_api_key = getattr(settings, 'MAILJET_API_KEY', '')
+        mailjet_api_secret = getattr(settings, 'MAILJET_API_SECRET', '')
+        
+        if not mailjet_api_key or not mailjet_api_secret:
+            print(f"[EMAIL THREAD] ERROR: Mailjet API credentials not configured")
+            print(f"[EMAIL THREAD] Please set MAILJET_API_KEY and MAILJET_API_SECRET environment variables")
+            return False
+        
+        # Get from email address and name from settings
+        from_email_address = getattr(settings, 'FROM_EMAIL_ADDRESS', 'powerpuffgirls6112@gmail.com')
+        from_email_name = getattr(settings, 'FROM_EMAIL_NAME', 'CHMSU Guidance Connect')
+        
+        # Extract email from from_email if it has display name format
+        if '<' in from_email and '>' in from_email:
+            from_email_address = from_email.split('<')[1].split('>')[0].strip()
+        elif '@' in from_email:
+            from_email_address = from_email
+        
+        print(f"[EMAIL THREAD] From: {from_email_name} <{from_email_address}>, To: {user.email}, Subject: {subject}")
+        
         try:
-            connection = get_connection(
-                fail_silently=False,  # Don't fail silently to catch errors
-            )
-            print(f"[EMAIL THREAD] Connection created: {type(connection)}")
+            from mailjet_rest import Client
             
-            email_message = EmailMessage(
-                subject=subject,
-                body=message,
-                from_email=from_email,
-                to=[user.email],
-            )
+            # Initialize Mailjet client
+            mailjet = Client(auth=(mailjet_api_key, mailjet_api_secret), version='v3.1')
             
-            result = connection.send_messages([email_message])
+            # Prepare email data
+            email_data = {
+                'Messages': [{
+                    'From': {
+                        'Email': from_email_address,
+                        'Name': from_email_name
+                    },
+                    'To': [{
+                        'Email': user.email,
+                        'Name': user.get_full_name() or user.username or 'Student'
+                    }],
+                    'Subject': subject,
+                    'TextPart': message,
+                    'HTMLPart': message.replace('\n', '<br>')  # Simple HTML conversion
+                }]
+            }
             
-            print(f"[EMAIL THREAD] send_messages returned: {result}")
+            print(f"[EMAIL THREAD] Sending email via Mailjet API...")
+            result = mailjet.send.create(data=email_data)
             
-            if result and result > 0:
-                print(f"SUCCESS: Email sent successfully to {user.email} ({result} message(s))")
-                return True
+            # Check response
+            if result.status_code == 200:
+                response_data = result.json()
+                print(f"[EMAIL THREAD] Mailjet API response: {response_data}")
+                
+                # Mailjet v3.1 API returns messages in 'Messages' array
+                if 'Messages' in response_data and len(response_data['Messages']) > 0:
+                    message_status = response_data['Messages'][0]
+                    
+                    # Check if message was sent successfully
+                    # Mailjet returns 'To' array with message details
+                    if 'To' in message_status and len(message_status['To']) > 0:
+                        to_status = message_status['To'][0]
+                        if 'MessageID' in to_status or 'MessageUUID' in to_status:
+                            message_id = to_status.get('MessageID') or to_status.get('MessageUUID', 'N/A')
+                            print(f"SUCCESS: Email sent successfully to {user.email} via Mailjet")
+                            print(f"[EMAIL THREAD] Mailjet MessageID: {message_id}")
+                            return True
+                        else:
+                            # Check for errors in the To array
+                            if 'Errors' in to_status:
+                                print(f"WARNING: Mailjet returned errors: {to_status['Errors']}")
+                                return False
+                    
+                    # Fallback: check for errors at message level
+                    if 'Errors' in message_status and len(message_status['Errors']) > 0:
+                        print(f"WARNING: Mailjet returned errors: {message_status['Errors']}")
+                        return False
+                    
+                    # If we have Messages but no clear success indicator, assume success
+                    print(f"SUCCESS: Email sent successfully to {user.email} via Mailjet (status code 200)")
+                    return True
+                else:
+                    print(f"WARNING: Unexpected Mailjet response format: {response_data}")
+                    return False
             else:
-                print(f"WARNING: Email sending returned {result} for {user.email}")
+                print(f"ERROR: Mailjet API returned status code {result.status_code}")
+                try:
+                    error_data = result.json()
+                    print(f"[EMAIL THREAD] Error response: {error_data}")
+                except:
+                    print(f"[EMAIL THREAD] Response text: {result.text}")
                 return False
                 
-        except Exception as conn_error:
-            error_msg = str(conn_error)
-            print(f"[EMAIL THREAD] EXCEPTION during email connection/send: {error_msg}")
+        except ImportError:
+            print(f"[EMAIL THREAD] ERROR: mailjet-rest package not installed")
+            print(f"[EMAIL THREAD] Please install it: pip install mailjet-rest")
+            return False
+        except Exception as mailjet_error:
+            error_msg = str(mailjet_error)
+            print(f"[EMAIL THREAD] EXCEPTION during Mailjet API call: {error_msg}")
             import traceback
             print(f"[EMAIL THREAD] Traceback: {traceback.format_exc()}")
-            
-            # Check for network unreachable error (common on Render free tier)
-            if "Network is unreachable" in error_msg or "Errno 101" in error_msg:
-                print(f"[EMAIL THREAD] ERROR: Render free tier blocks outbound SMTP connections.")
-                print(f"[EMAIL THREAD] To fix: Use an email API service (SendGrid, Mailgun, AWS SES) or upgrade Render plan.")
-                print(f"[EMAIL THREAD] The appointment was confirmed successfully, but email could not be sent.")
-            
             return False
-        finally:
-            if connection:
-                try:
-                    connection.close()
-                except:
-                    pass
         
     except Exception as send_error:
         print(f"[EMAIL THREAD] EXCEPTION in _send_email_sync: {str(send_error)}")
@@ -138,14 +191,9 @@ CHMSU Guidance Connect""".strip()
                 # It's already just an email address
                 from_email = default_from
         
-        # Ensure we have valid email settings
-        if not hasattr(settings, 'EMAIL_HOST') or not settings.EMAIL_HOST:
-            print("Email host not configured")
-            return False
-        
         # Send email (asynchronously to avoid blocking the request)
         print(f"Sending email - From: {from_email}, To: {user.email}, Subject: {subject}")
-        print(f"Email settings - Host: {getattr(settings, 'EMAIL_HOST', 'Not set')}, Port: {getattr(settings, 'EMAIL_PORT', 'Not set')}, TLS: {getattr(settings, 'EMAIL_USE_TLS', 'Not set')}")
+        print(f"Using Mailjet API for email delivery")
         
         if async_send:
             # Send email in background thread to avoid blocking
