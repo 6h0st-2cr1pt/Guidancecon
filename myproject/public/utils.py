@@ -7,23 +7,53 @@ import threading
 def _send_email_sync(user, appointment, subject, message, from_email):
     """Internal function to send email synchronously"""
     try:
-        result = send_mail(
-            subject,
-            message,
-            from_email,
-            [user.email],
-            fail_silently=True,
-        )
-        if result:
-            print(f"SUCCESS: Email sent successfully to {user.email}")
-            return True
-        else:
-            print(f"WARNING: Email sending returned False for {user.email}")
+        print(f"[EMAIL THREAD] Attempting to send email to {user.email}")
+        print(f"[EMAIL THREAD] Email settings - Host: {getattr(settings, 'EMAIL_HOST', 'Not set')}, Port: {getattr(settings, 'EMAIL_PORT', 'Not set')}, TLS: {getattr(settings, 'EMAIL_USE_TLS', 'Not set')}, Timeout: {getattr(settings, 'EMAIL_TIMEOUT', 'Not set')}")
+        print(f"[EMAIL THREAD] From: {from_email}, To: {user.email}, Subject: {subject}")
+        
+        # Try to get more detailed error information
+        from django.core.mail import get_connection, EmailMessage
+        connection = None
+        try:
+            connection = get_connection(
+                fail_silently=False,  # Don't fail silently to catch errors
+            )
+            print(f"[EMAIL THREAD] Connection created: {type(connection)}")
+            
+            email_message = EmailMessage(
+                subject=subject,
+                body=message,
+                from_email=from_email,
+                to=[user.email],
+            )
+            
+            result = connection.send_messages([email_message])
+            
+            print(f"[EMAIL THREAD] send_messages returned: {result}")
+            
+            if result and result > 0:
+                print(f"SUCCESS: Email sent successfully to {user.email} ({result} message(s))")
+                return True
+            else:
+                print(f"WARNING: Email sending returned {result} for {user.email}")
+                return False
+                
+        except Exception as conn_error:
+            print(f"[EMAIL THREAD] EXCEPTION during email connection/send: {str(conn_error)}")
+            import traceback
+            print(f"[EMAIL THREAD] Traceback: {traceback.format_exc()}")
             return False
+        finally:
+            if connection:
+                try:
+                    connection.close()
+                except:
+                    pass
+        
     except Exception as send_error:
-        print(f"EXCEPTION during send_mail: {str(send_error)}")
+        print(f"[EMAIL THREAD] EXCEPTION in _send_email_sync: {str(send_error)}")
         import traceback
-        print(f"Traceback: {traceback.format_exc()}")
+        print(f"[EMAIL THREAD] Traceback: {traceback.format_exc()}")
         return False
 
 
