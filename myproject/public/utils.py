@@ -39,9 +39,17 @@ def _send_email_sync(user, appointment, subject, message, from_email):
                 return False
                 
         except Exception as conn_error:
-            print(f"[EMAIL THREAD] EXCEPTION during email connection/send: {str(conn_error)}")
+            error_msg = str(conn_error)
+            print(f"[EMAIL THREAD] EXCEPTION during email connection/send: {error_msg}")
             import traceback
             print(f"[EMAIL THREAD] Traceback: {traceback.format_exc()}")
+            
+            # Check for network unreachable error (common on Render free tier)
+            if "Network is unreachable" in error_msg or "Errno 101" in error_msg:
+                print(f"[EMAIL THREAD] ERROR: Render free tier blocks outbound SMTP connections.")
+                print(f"[EMAIL THREAD] To fix: Use an email API service (SendGrid, Mailgun, AWS SES) or upgrade Render plan.")
+                print(f"[EMAIL THREAD] The appointment was confirmed successfully, but email could not be sent.")
+            
             return False
         finally:
             if connection:
