@@ -57,12 +57,24 @@ html, body {
   gap: 16px;
 }
 
+.brand-logo-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.brand-logo-link:hover {
+  transform: scale(1.05);
+}
+
 .brand-logo {
   width: 70px;
   height: 70px;
   border-radius: 12px;
   object-fit: cover;
   padding: 4px;
+  display: block;
 }
 
 .brand-name {
