@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Startup script that runs migrations before starting the server
-set -o errexit
+set -e  # Exit on error
+
+# Change to the project directory
+cd /opt/render/project/src/myproject || cd "$(dirname "$0")"
 
 echo "=== Running database migrations ==="
 bash run_migrations.sh || {
@@ -8,8 +11,11 @@ bash run_migrations.sh || {
 }
 
 echo "=== Creating admin superuser (if not exists) ==="
-python manage.py create_admin || {
-    echo "Admin user creation had issues, but continuing..."
+echo "Current directory: $(pwd)"
+echo "Running: python manage.py create_admin"
+python manage.py create_admin 2>&1 || {
+    echo "ERROR: Admin user creation had issues, but continuing..."
+    echo "This might prevent admin login. Check logs above for details."
 }
 
 echo "=== Starting server ==="
