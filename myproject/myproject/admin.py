@@ -38,7 +38,6 @@ admin_site.register(Group, GroupAdmin)
 
 
 # Admin classes for Public app models
-@admin_site.register(UserProfile)
 class UserProfileAdmin(ModelAdmin):
     list_display = ('user', 'student_id', 'college', 'course', 'year_level', 'gender', 'age', 'created_at')
     list_filter = ('college', 'course', 'year_level', 'gender', 'created_at')
@@ -47,7 +46,6 @@ class UserProfileAdmin(ModelAdmin):
     ordering = ('-created_at',)
 
 
-@admin_site.register(Appointment)
 class AppointmentAdmin(ModelAdmin):
     list_display = ('id', 'student', 'counselor', 'timeslot', 'status', 'program', 'created_at')
     list_filter = ('status', 'created_at', 'counselor', 'student')
@@ -60,7 +58,6 @@ class AppointmentAdmin(ModelAdmin):
 
 
 # Admin classes for Sysadmin app models
-@admin_site.register(Timeslot)
 class TimeslotAdmin(ModelAdmin):
     list_display = ('id', 'user', 'date', 'start_time', 'available', 'created_at')
     list_filter = ('available', 'date', 'created_at', 'user')
@@ -70,7 +67,6 @@ class TimeslotAdmin(ModelAdmin):
     date_hierarchy = 'date'
 
 
-@admin_site.register(Notification)
 class NotificationAdmin(ModelAdmin):
     list_display = ('id', 'counselor', 'title', 'notification_type', 'is_read', 'created_at', 'appointment')
     list_filter = ('notification_type', 'is_read', 'created_at', 'counselor')
@@ -80,4 +76,11 @@ class NotificationAdmin(ModelAdmin):
     ordering = ('-created_at',)
     date_hierarchy = 'created_at'
     list_editable = ('is_read',)  # Allow quick editing of read status
+
+
+# Register all models with the admin site
+admin_site.register(UserProfile, UserProfileAdmin)
+admin_site.register(Appointment, AppointmentAdmin)
+admin_site.register(Timeslot, TimeslotAdmin)
+admin_site.register(Notification, NotificationAdmin)
 
