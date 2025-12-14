@@ -31,21 +31,36 @@ class Command(BaseCommand):
             try:
                 user = User.objects.get(username=username)
                 created = False
+                self.stdout.write(f'Found existing user "{username}"')
             except User.DoesNotExist:
-                user = User.objects.create_user(
+                # Create superuser directly using create_superuser
+                user = User.objects.create_superuser(
                     username=username,
                     email=email,
                     password=password
                 )
                 created = True
+                self.stdout.write(f'Created new superuser "{username}"')
             
-            # Ensure user has all required permissions for Django admin
+            # Always ensure user has all required permissions for Django admin
+            # This handles cases where user exists but isn't a superuser
             user.email = email
             user.is_staff = True
             user.is_superuser = True
             user.is_active = True
-            user.set_password(password)  # Always reset password to ensure it's correct
+            # Always reset password to ensure it's correct
+            user.set_password(password)
+            # Save with all fields to ensure everything is updated
             user.save()
+            
+            # Refresh from database to ensure we have the latest state
+            user.refresh_from_db()
+            
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f'User state: is_staff={user.is_staff}, is_superuser={user.is_superuser}, is_active={user.is_active}'
+                )
+            )
             
             # Remove UserProfile if it exists (admin user shouldn't have one)
             # This prevents conflicts with StudentIDBackend
@@ -82,7 +97,7 @@ class Command(BaseCommand):
                     )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f'✓ User verification: is_staff={user.is_staff}, is_superuser={user.is_superuser}, is_active={user.is_active}'
+                        f'✓ Authentication test passed! User can login with username="{username}" and password="{password}"'
                     )
                 )
             else:
@@ -91,6 +106,16 @@ class Command(BaseCommand):
                         f'✗ User created but authentication verification failed!'
                     )
                 )
+                self.stdout.write(
+                    self.style.ERROR(
+                        f'  test_user={test_user}, is_staff={test_user.is_staff if test_user else None}, is_superuser={test_user.is_superuser if test_user else None}'
+                    )
+                )
+                # Try to verify password directly
+                if user.check_password(password):
+                    self.stdout.write(self.style.SUCCESS('  ✓ Password check passed'))
+                else:
+                    self.stdout.write(self.style.ERROR('  ✗ Password check failed!'))
                 
         except IntegrityError as e:
             self.stdout.write(
