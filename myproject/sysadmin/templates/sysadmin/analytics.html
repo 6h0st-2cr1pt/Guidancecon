@@ -235,14 +235,6 @@
       </div>
     </div>
     
-    <!-- Students Bar Chart -->
-    <div class="chart-card">
-      <h3 class="chart-title">Top Students</h3>
-      <div class="chart-container">
-        <canvas id="studentChart"></canvas>
-      </div>
-    </div>
-    
     <!-- Programs Bar Chart -->
     <div class="chart-card">
       <h3 class="chart-title">Appointments by Program</h3>
@@ -378,40 +370,6 @@
       },
       scales: {
         y: {
-          beginAtZero: true,
-          ticks: {
-            stepSize: 1
-          }
-        }
-      }
-    }
-  });
-  
-  // Students Bar Chart
-  const studentLabels = {{ counselor_labels|safe }};
-  const studentCounts = {{ counselor_counts|safe }};
-  
-  new Chart(document.getElementById('studentChart'), {
-    type: 'bar',
-    data: {
-      labels: studentLabels,
-      datasets: [{
-        label: 'Appointments',
-        data: studentCounts,
-        backgroundColor: '#2d5a47'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        x: {
           beginAtZero: true,
           ticks: {
             stepSize: 1

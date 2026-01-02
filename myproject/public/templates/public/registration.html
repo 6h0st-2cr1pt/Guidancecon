@@ -34,11 +34,11 @@
         <div class="form-row">
           <div class="form-group">
             <label for="fname">First Name</label>
-            <input type="text" id="fname" name="fname" required>
+            <input type="text" id="fname" name="fname" required oninput="this.value = this.value.toUpperCase()">
           </div>
           <div class="form-group">
             <label for="lname">Last Name</label>
-            <input type="text" id="lname" name="lname" required>
+            <input type="text" id="lname" name="lname" required oninput="this.value = this.value.toUpperCase()">
           </div>
         </div>
 
@@ -46,11 +46,17 @@
         <div class="form-row">
           <div class="form-group">
             <label for="studentid">Student ID</label>
-            <input type="text" id="studentid" name="studentid" required>
+            <input type="text" id="studentid" name="studentid" required maxlength="8" pattern="[0-9]{8}" title="Student ID must be exactly 8 digits">
           </div>
           <div class="form-group">
             <label for="yearlevel">Year Level</label>
-            <input type="text" id="yearlevel" name="yearlevel" required placeholder="e.g., 1st Year">
+            <select id="yearlevel" name="yearlevel" required>
+              <option value="">Select Year Level</option>
+              <option value="1st Year" {% if yearlevel == '1st Year' %}selected{% endif %}>1st Year</option>
+              <option value="2nd Year" {% if yearlevel == '2nd Year' %}selected{% endif %}>2nd Year</option>
+              <option value="3rd Year" {% if yearlevel == '3rd Year' %}selected{% endif %}>3rd Year</option>
+              <option value="4th Year" {% if yearlevel == '4th Year' %}selected{% endif %}>4th Year</option>
+            </select>
           </div>
         </div>
 
@@ -101,11 +107,17 @@
         <div class="form-row">
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <div style="position: relative;">
+              <input type="password" id="password" name="password" required style="padding-right: 40px; width: 100%;">
+              <span class="password-toggle" onclick="togglePassword('password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 18px;">👁️</span>
+            </div>
           </div>
           <div class="form-group">
             <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
+            <div style="position: relative;">
+              <input type="password" id="confirm_password" name="confirm_password" required style="padding-right: 40px; width: 100%;">
+              <span class="password-toggle" onclick="togglePassword('confirm_password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; font-size: 18px;">👁️</span>
+            </div>
           </div>
         </div>
 
@@ -135,6 +147,18 @@
   </main>
 
   <script>
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const toggle = input.nextElementSibling;
+      if (input.type === 'password') {
+        input.type = 'text';
+        toggle.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        toggle.textContent = '👁️';
+      }
+    }
+
     const coursesByCollege = {
       "College of Arts & Sciences": [
         "Bachelor of Arts in English Language",

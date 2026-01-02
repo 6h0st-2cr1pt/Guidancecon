@@ -175,8 +175,8 @@ def signup(request):
         confirm_password = request.POST.get('confirm_password', '').strip()
         
         # Counselor information
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
+        first_name = request.POST.get('first_name', '').strip().upper()
+        last_name = request.POST.get('last_name', '').strip().upper()
         middle_initial = request.POST.get('middle_initial', '').strip()
         assigned_college = request.POST.get('assigned_college', '').strip()
         title = request.POST.get('title', '').strip()
@@ -587,14 +587,6 @@ def analytics(request):
     status_labels = [item['status'].title() for item in status_data]
     status_counts = [item['count'] for item in status_data]
     
-    # Student Activity (replacing counselor comparison - for bar chart)
-    # Show top students who have appointments with THIS counselor
-    student_data = all_appointments.values(
-        'student__first_name', 'student__last_name'
-    ).annotate(count=Count('id')).order_by('-count')[:10]
-    counselor_labels = [f"{item['student__first_name']} {item['student__last_name']}" for item in student_data]
-    counselor_counts = [item['count'] for item in student_data]
-    
     # Popular Time Slots (for bar chart)
     timeslot_data = all_appointments.values('timeslot__start_time').annotate(
         count=Count('id')
@@ -688,8 +680,6 @@ def analytics(request):
         # Chart Data (JSON serialized)
         'status_labels': json.dumps(status_labels),
         'status_counts': json.dumps(status_counts),
-        'counselor_labels': json.dumps(counselor_labels),
-        'counselor_counts': json.dumps(counselor_counts),
         'timeslot_labels': json.dumps(timeslot_labels),
         'timeslot_counts': json.dumps(timeslot_counts),
         'program_labels': json.dumps(program_labels),

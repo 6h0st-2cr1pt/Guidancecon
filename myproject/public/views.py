@@ -42,8 +42,8 @@ def about(request):
 def signup(request):
     if request.method == 'POST':
         # Get form data
-        fname = request.POST.get('fname', '').strip()
-        lname = request.POST.get('lname', '').strip()
+        fname = request.POST.get('fname', '').strip().upper()
+        lname = request.POST.get('lname', '').strip().upper()
         studentid = request.POST.get('studentid', '').strip()
         college = request.POST.get('college', '').strip()
         course = request.POST.get('course', '').strip()
@@ -73,6 +73,11 @@ def signup(request):
         # Validate required fields
         if not all([studentid, college, course, email, password, confirm_password, gender, age]):
             context['error'] = 'All fields are required.'
+            return render(request, 'public/registration.html', context)
+
+        # Validate student ID is exactly 8 digits
+        if not studentid.isdigit() or len(studentid) != 8:
+            context['error'] = 'Student ID must be exactly 8 digits.'
             return render(request, 'public/registration.html', context)
 
         # Validate age is a number in range
