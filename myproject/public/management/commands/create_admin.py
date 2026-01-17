@@ -94,15 +94,37 @@ class Command(BaseCommand):
                 except UserProfile.DoesNotExist:
                     pass  # No profile exists, which is correct
             
-            # Verify the user can authenticate with ModelBackend (used by Django admin)
+            # Verify the user can authenticate with all backends
+            from django.conf import settings
+            from django.contrib.auth import authenticate
+            
+            self.stdout.write(f'[INFO] Testing authentication with all backends...')
+            sys.stdout.flush()
+            
+            # Test with ModelBackend (used by Django admin)
             backend = ModelBackend()
-            test_user = backend.authenticate(
+            test_user_model = backend.authenticate(
                 request=None,
                 username=username,
                 password=password
             )
             
-            if test_user and test_user.is_staff and test_user.is_superuser:
+            # Test with Django's authenticate function (uses all backends)
+            test_user_auth = authenticate(
+                request=None,
+                username=username,
+                password=password
+            )
+            
+            # Test password directly
+            password_check = user.check_password(password)
+            
+            self.stdout.write(f'[INFO] ModelBackend test: {"PASSED" if test_user_model else "FAILED"}')
+            self.stdout.write(f'[INFO] authenticate() test: {"PASSED" if test_user_auth else "FAILED"}')
+            self.stdout.write(f'[INFO] Direct password check: {"PASSED" if password_check else "FAILED"}')
+            sys.stdout.flush()
+            
+            if test_user_model and test_user_model.is_staff and test_user_model.is_superuser:
                 if created:
                     self.stdout.write(
                         self.style.SUCCESS(
@@ -117,25 +139,58 @@ class Command(BaseCommand):
                     )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f'✓ Authentication test passed! User can login with username="{username}" and password="{password}"'
+                        f'✓ Authentication test passed!'
                     )
                 )
+                self.stdout.write('')
+                self.stdout.write(self.style.SUCCESS('=' * 60))
+                self.stdout.write(self.style.SUCCESS('LOGIN CREDENTIALS:'))
+                self.stdout.write(self.style.SUCCESS('=' * 60))
+                self.stdout.write(self.style.SUCCESS(f'Username: {username}'))
+                self.stdout.write(self.style.SUCCESS(f'Email: {email}'))
+                self.stdout.write(self.style.SUCCESS(f'Password: {password}'))
+                self.stdout.write('')
+                self.stdout.write(self.style.SUCCESS('You can login with either username or email.'))
+                self.stdout.write(self.style.SUCCESS(f'User details: is_staff={user.is_staff}, is_superuser={user.is_superuser}, is_active={user.is_active}'))
+                self.stdout.write('')
             else:
                 self.stdout.write(
-                    self.style.ERROR(
-                        f'✗ User created but authentication verification failed!'
+                    self.style.WARNING(
+                        f'⚠ Authentication test with ModelBackend failed, but user exists in database'
                     )
                 )
                 self.stdout.write(
-                    self.style.ERROR(
-                        f'  test_user={test_user}, is_staff={test_user.is_staff if test_user else None}, is_superuser={test_user.is_superuser if test_user else None}'
+                    self.style.WARNING(
+                        f'  ModelBackend result: {test_user_model}'
                     )
                 )
+                if test_user_model:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f'  is_staff={test_user_model.is_staff}, is_superuser={test_user_model.is_superuser}'
+                        )
+                    )
+                
                 # Try to verify password directly
-                if user.check_password(password):
-                    self.stdout.write(self.style.SUCCESS('  ✓ Password check passed'))
+                if password_check:
+                    self.stdout.write(self.style.SUCCESS('  ✓ Direct password check passed'))
+                    self.stdout.write(
+                        self.style.WARNING(
+                            '  ⚠ Password is correct, but authentication backends may be interfering'
+                        )
+                    )
+                    self.stdout.write(
+                        self.style.WARNING(
+                            '  Try logging in with email instead: ' + email
+                        )
+                    )
                 else:
                     self.stdout.write(self.style.ERROR('  ✗ Password check failed!'))
+                    self.stdout.write(
+                        self.style.ERROR(
+                            '  This is a critical error - password was not set correctly!'
+                        )
+                    )
                 
         except IntegrityError as e:
             self.stdout.write(
@@ -148,4 +203,5 @@ class Command(BaseCommand):
             import traceback
             self.stdout.write(self.style.ERROR(traceback.format_exc()))
             # Don't raise the exception - allow the server to start even if admin creation fails
+
 
